@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter xml:id="ch-intro" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <title>Introduction</title>
+
+  <p>
+    This book is a PreTeXt version. This is the skeleton to be filled in.
+    Below are examples with an image, a table, R code, and a STACK question.
+  </p>
+
+  <p>
+     <xref ref = "fig-placeholder"/> gives an example image, and <xref ref =
+     "table-placeholder"/> shows an example table.
+  </p>
+  
+  <!-- Example Image -->
+  <figure xml:id="fig-placeholder">
+    <caption>Sample Caption</caption>
+    <image source="images/placeholder.jpeg" width="50%"/>
+    <description>Sample description (in case image does not render)</description>
+  </figure>
+
+  <!-- Example Table -->
+  <table xml:id="table-placeholder">
+    <title>Sample Table</title>
+    <tabular halign="left">
+      <row header="yes">
+        <cell>Column 1</cell>
+        <cell>Column 2</cell>
+        <cell>Column 3</cell>
+      </row>
+      <row>
+        <cell>Value 1</cell>
+        <cell>Value 2</cell>
+        <cell>Value 3</cell>
+      </row>
+    </tabular>
+  </table>
+
+  <!-- Example R Code -->
+  <program language="r">
+    <input>
+      # Sample R code
+      x &lt;- c(1, 2, 3, 4, 5)
+      mean(x)
+    </input>
+  </program>
+
+  <pre>
+    ## [1] 3
+  </pre>
+
+  <!-- Example STACK Question -->
+  <p>The following illustrates embedding a STACK question.</p>
+  <exercise>
+    <title>STACK integration question</title>
+    <introduction>
+      <p>
+        A test question. (2025-08-15: you may need to ask for a <q>new</q> question 
+        to make this render.)
+      </p>
+    </introduction>
+    <!-- A @label is required, becomes a filename in output -->
+    <stack label="stack-integration" source="stack/01_integration_with_feedback.xml"/>
+  </exercise>
+
+</chapter>
