@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<frontmatter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="frontmatter">
+  
+  <titlepage>
+    <author>
+      <personname>Rafael A. Irizarry</personname>
+      <institution>Harvard University</institution>
+    </author>
+    <date><today/></date>
+  </titlepage>
+
+  <preface xml:id="preface">
+    <title>Preface</title>
+    <p>
+      This is the website for the <em>Statistics and Prediction Algorithms Through Case Studies</em>, 
+      the second part of <em>Introduction to Data Science</em>.
+    </p>
+    <p>
+      The website for the first part, <em>Data Wrangling and Visualization with R</em>, is 
+      <url href="http://rafalab.dfci.harvard.edu/dsbook-part-1/">here</url>.
+    </p>
+    <p>
+      This book started out as part of the class notes used in the HarvardX 
+      <url href="https://www.edx.org/professional-certificate/harvardx-data-science">Data Science Series</url>.
+    </p>
+    <p>
+      A hardcopy version of the first edition of the book, which combined both parts, is available from 
+      <url href="https://www.routledge.com/Introduction-to-Data-Science-Data-Wrangling-and-Visualization-with-R/Irizarry/p/book/9781032116556">CRC Press</url>.
+    </p>
+    <p>
+      A free PDF of the October 24, 2019 version of the book, which combined both parts, is available from 
+      <url href="https://leanpub.com/datasciencebook">Leanpub</url>.
+    </p>
+    <p>
+      The Quarto code used to generate the book is available on 
+      <url href="https://github.com/rafalab/dsbook-part-2">GitHub</url>.
+    </p>
+    <p>
+      This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International 
+      <url href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</url>.
+    </p>
+    <p>
+      We make announcements related to the book on X. For updates follow 
+      <url href="https://x.com/rafalab">@rafalab</url>.
+    </p>
+  </preface>
+
+  <introduction xml:id="introduction">
+    <title>Introduction</title>
+    <p>
+      The phrase <em>data science</em> began gaining significant popularity around 2012, thanks in part to 
+      the publication titled <em>"Data Scientist: The Most Alluring Profession of the 21st Century"</em>
+      <fn><url href="https://hbr.org/2012/10/data-scientist-the-sexiest-job-of-the-21st-century">https://hbr.org/2012/10/data-scientist-the-sexiest-job-of-the-21st-century</url></fn>. 
+      This coincided with the rise of a new kind of endeavor in the technology sector and in academic projects 
+      during the 2000s: extracting insights from messy, complex, and large datasets, which had become 
+      increasingly prevalent with the advent of digital data storage.
+    </p>
+    <p>
+      Examples include combining data from multiple political pollsters to improve election predictions, 
+      scraping athletic department websites to evaluate baseball prospects, analyzing movie ratings from 
+      millions of streaming service users to make personalized recommendations, developing software to read 
+      zip codes by digitizing handwritten digits, and using advanced measurement technologies to understand 
+      the molecular causes of diseases. This book is centered around these and other practical examples.
+    </p>
+    <p>
+      Achieving success in these instances requires collaboration among experts with complementary skills. 
+      In this book, our primary focus is on <em>data analysis</em>, specifically, the <em>statistical thinking</em> 
+      that allows us to draw meaningful conclusions from data. To understand how to analyze data effectively 
+      in these examples, we will cover key mathematical concepts. Many of these concepts are not new, some 
+      were originally developed for different purposes, but they have proven adaptable and useful across a 
+      wide range of applications.
+    </p>
+    <p>
+      The mathematical difficulty in this book varies by topic, and we assume you are already familiar with 
+      the required material. However, the recommended readings at the end of each part can help fill in any 
+      gaps. The math is not an end in itself, it is a tool for articulating and deepening our understanding 
+      of statistical ideas and how they are useful for data analysis.
+    </p>
+    <p>
+      The same is true for the code. We alternate between <em>base R</em>, <em>data.table</em>, and the 
+      <em>tidyverse</em>, choosing whichever is most appropriate for the task at hand. Given how capable 
+      large language models (LLMs) have become at writing and explaining code, we do not focus on syntax 
+      or programming best practices. Instead, we include code because it connects statistical ideas to data, 
+      and therefore to real-world applications.
+    </p>
+    <p>
+      For example, running Monte Carlo simulations on your own computer and generating your own data can 
+      make abstract probability concepts tangible. In general, we encourage you to experiment: change 
+      parameters, modify the code, or design your own simulations to test and refine your understanding. 
+      This process of active exploration is central to developing intuition about randomness, uncertainty, 
+      and inference.
+    </p>
+    <p>
+      While LLMs can now produce working code for many specific problems, they are not yet capable of doing 
+      the main thing we teach here: <em>thinking statistically</em> about data-driven questions. This skill 
+      involves formulating questions, visually exploring data, identifying sources of variability, and reasoning 
+      about uncertainty. These are human-centered tasks that remain at the heart of data analysis.
+    </p>
+    <p>
+      The book is divided into six parts: <em>Summary Statistics</em>, <em>Probability</em>, 
+      <em>Statistical Inference</em>, <em>Linear Models</em>, <em>High-Dimensional Data</em>, and 
+      <em>Machine Learning</em>. The first two parts introduce key statistical ideas through illustrative 
+      examples, while the later parts focus on real-world case studies that demonstrate how these ideas come 
+      together in practice. Readers already comfortable with probability and statistical theory who are mainly 
+      interested in the applied perspective may wish to skip ahead to those later sections.
+    </p>
+    <p>
+      Each part is organized into concise chapters designed to fit within a single lecture and paired with 
+      exercises for practice. All datasets used in the book are available in the <em>dslabs</em> package, 
+      and the complete Quarto source files can be found on 
+      <url href="https://github.com/rafalab/dsbook-part-2">GitHub</url>
+      <fn><url href="https://github.com/rafalab/dsbook-part-2">https://github.com/rafalab/dsbook-part-2</url></fn>.
+    </p>
+  </introduction>
+
+  <acknowledgement xml:id="acknowledgement">
+    <title>Acknowledgments</title>
+    <p>
+      A special thanks to Amy Gill, Jorge Cornick, Barry MacLean, and Robert Gentleman for dozens of 
+      comments, edits, and suggestions. Also, many thanks to Stephanie Hicks who twice served as a 
+      co-instructor in my data science classes and Yihui Xie who patiently put up with my many questions 
+      about bookdown. Thanks also to Héctor Corrada-Bravo, for advice on how to best teach machine learning. 
+      Thanks to Alyssa Frazee for helping create the homework problem that became the Recommendation Systems 
+      case study. Also, many thanks to Hadley Wickham, Mine Çetinkaya-Rundel, and Garrett Grolemund for 
+      making the Quarto code for their R for Data Science book open. Finally, thanks to Alex Nones for 
+      proofreading the manuscript during its various stages.
+    </p>
+    <p>
+      This book was conceived during the teaching of several applied statistics courses, starting over 
+      fifteen years ago. The teaching assistants working with me throughout the years made important indirect 
+      contributions to this book. The latest iteration of this course is a HarvardX series coordinated by 
+      Heather Sternshein and Zofia Gajdos. We thank them for their contributions. We are also grateful to 
+      all the students whose questions and comments helped us improve the book. The courses were partially 
+      funded by NIH grant R25GM114818. We are very grateful to the National Institutes of Health for its 
+      support.
+    </p>
+    <p>
+      A special thanks goes to all those who edited the book via GitHub pull requests or made suggestions 
+      by creating an <em>issue</em> or sending an email: <c>jcornickm</c> (Jorge Cornick), 
+      <c>hbmaclean</c> (Barry MacLean), <c>nickyfoto</c> (Huang Qiang), <c>desautm</c> (Marc-André Désautels), 
+      <c>michaschwab</c> (Michail Schwab), <c>alvarolarreategui</c> (Alvaro Larreategui), 
+      <c>jakevc</c> (Jake VanCampen), <c>omerta</c> (Guillermo Lengemann), <c>espinielli</c> (Enrico Spinielli), 
+      <c>asimumba</c> (Aaron Simumba), <c>braunschweig</c> (Maldewar), <c>gwierzchowski</c> (Grzegorz Wierzchowski), 
+      <c>technocrat</c> (Richard Careaga), <c>atzakas</c>, <c>defeit</c> (David Emerson Feit), 
+      <c>shiraamitchell</c> (Shira Mitchell), <c>Nathalie-S</c>, <c>andreashandel</c> (Andreas Handel), 
+      <c>berkowitze</c> (Elias Berkowitz), <c>Dean-Webb</c> (Dean Webber), <c>mohayusuf</c>, 
+      <c>jimrothstein</c>, <c>mPloenzke</c> (Matthew Ploenzke), <c>NicholasDowand</c> (Nicholas Dow), 
+      <c>kant</c> (Darío Hereñú), <c>debbieyuster</c> (Debbie Yuster), <c>tuanchauict</c> (Tuan Chau), 
+      <c>phzeller</c>, <c>BTJ01</c> (BradJ), <c>glsnow</c> (Greg Snow), <c>mberlanda</c> (Mauro Berlanda), 
+      <c>wfan9</c>, <c>larswestvang</c> (Lars Westvang), <c>jj999</c> (Jan Andrejkovic), 
+      <c>Kriegslustig</c> (Luca Nils Schmid), <c>odahhani</c>, <c>aidanhorn</c> (Aidan Horn), 
+      <c>atraxler</c> (Adrienne Traxler), <c>alvegorova</c>, <c>wycheong</c> (Won Young Cheong), 
+      <c>med-hat</c> (Medhat Khalil), <c>biscotty666</c> (Brian Carey), <c>kengustafson</c>, <c>Yowza63</c>, 
+      <c>ryan-heslin</c> (Ryan Heslin), <c>SydneyUni-Jim</c> (Jim Nicholls), <c>raffaem</c>, 
+      <c>BruciiZ</c> (Huiyuan (Bruce) Zhou), <c>tim8west</c>, <c>aosaf-e-c</c> (Aosaf Ershad Chowdhury), 
+      <c>annlia</c>, David D. Kane, El Mustapha El Abbassi, Vadim Zipunnikov, Anna Quaglieri, Chris Dong, 
+      Rick Schoenberg, Isabella Grabski, Doug Snyder, and JT Harton.
+    </p>
+  </acknowledgement>
+
+</frontmatter>

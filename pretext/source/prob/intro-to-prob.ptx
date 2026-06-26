@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="intro-to-prob">
+  <title>Probability</title>
+
+  <introduction>
+    <p>
+      The first part of the book focused on describing data we have already collected. But in most data analysis projects, what we observe is only one possible outcome among many. If we were to collect the same data again, another survey, another experiment, we would not obtain exactly the same results. This variation is not to be ignored as it reflects the fundamental uncertainty that accompanies all real data.
+    </p>
+    <p>
+      Probability is the mathematical language we use to describe that uncertainty. It provides the foundation for reasoning about variation, quantifying how likely different outcomes are, and ultimately, for drawing conclusions from data. Every inferential method we will learn, from confidence intervals to regression and machine learning, rests on these ideas.
+    </p>
+    <p>
+      The study of probability began with <em>games of chance</em>, where uncertainty is both concrete and controlled: tossing coins, drawing cards, or betting on outcomes. Mathematicians such as Cardano, Fermat, and Pascal developed the first formal methods for computing odds in these settings, laying the groundwork for what would become modern probability theory.
+    </p>
+    <p>
+      In this part of the book, we use these games of chance as a pedagogical tool. They provide clear, well-defined examples that make abstract ideas intuitive. By working with them, we can focus on the logic of probability without the complications of real-world data collection. In later parts of the book, we return to data analysis and show how these same principles apply to real-world uncertainty, polls, experiments, and prediction problems.
+    </p>
+    <p>
+      We will introduce the essential concepts of probability through simple, concrete examples: defining events, computing probabilities, and describing random variables and their distributions. Our emphasis is on intuition and computation rather than mathematical derivation.
+    </p>
+    <p>
+      Throughout this part of the book, we also connect probability theory to computer simulations. Using R code and Monte Carlo methods, we will learn how to estimate probabilities, explore random behavior, and develop intuition for uncertainty through simulation. This practical, code-based approach will prepare you to see how probability connects directly to real data in the chapters that follow.
+    </p>
+  </introduction>
+
+</chapter>

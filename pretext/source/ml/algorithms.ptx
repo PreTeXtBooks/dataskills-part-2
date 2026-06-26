@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="sec-example-algorithms">
+  <title>Supervised Learning Methods</title>
+  
+  <introduction>
+    <p>
+      This chapter covers machine learning algorithms.
+    </p>
+  </introduction>
+
+  <section xml:id="sec-trees">
+    <title>Classification and regression trees (CART)</title>
+    
+    <p>
+      Classification and regression trees (CART) provide a flexible, intuitive approach to prediction by repeatedly splitting the predictor space into smaller and more homogeneous regions. This section will be populated with content from the algorithms.qmd file.
+    </p>
+  </section>
+
+  <section xml:id="sec-variable-importance">
+    <title>Variable importance</title>
+    
+    <p>
+      This section covers the concept of variable importance in machine learning models.
+    </p>
+  </section>
+
+</chapter>

@@ -1,0 +1,697 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="linear-model-framework">
+  <title>The Linear Model Framework</title>
+  
+  <introduction>
+    <p>
+      We are now ready to understand the title of this part of the book, and specifically the connection between regression and <em>linear models</em>. In the previous chapter, we showed that if two variables follow a bivariate normal distribution, then the conditional expectation of one given the other lies on a straight line, the <em>regression line</em>. In that setting, the linear relationship was not an assumption, but a mathematical consequence of the probability model.
+    </p>
+
+    <p>
+      In practice, however, we often adopt the linear relationship as a modeling strategy, even when the underlying distributions are not exactly bivariate normal. To work with such models, we need a general mathematical approach for estimating the unknown coefficients. In this chapter, we introduce the <em>least squares estimator</em> (LSE), the standard method used to estimate these parameters. The LSE provides a unified way to fit linear models across a wide range of applications.
+    </p>
+
+    <p>
+      We end the chapter presenting one example in which the linear model was historically motivated: <em>measurement error models</em>. This example is different from the height data we studied earlier, but the same linear model framework, the same least squares mathematics, and even the same R functions can be used to fit it. Later chapters will introduce additional examples in which linear models play a central role.
+    </p>
+  </introduction>
+
+  <section xml:id="the-linear-model-representation">
+    <title>The linear model representation</title>
+
+    <p>
+      We note that <em>linear</em> here does not refer to lines exclusively, but rather to the fact that the conditional expectation is a linear combination of variables. In mathematics, when we multiply each variable by a constant and then add them together, we say we formed a <em>linear combination</em> of the variables. For example, <m>3x - 4y + 5z</m> is a linear combination of <m>x</m>, <m>y</m>, and <m>z</m>. We can also add a constant so <m>2 + 3x - 4y + 5z</m> is also a linear combination of <m>x</m>, <m>y</m>, and <m>z</m>.
+    </p>
+
+    <p>
+      We previously described how if <m>X</m> and <m>Y</m> are bivariate normal, then if we look at only the pairs with <m>X=x</m>, then <m>Y \mid X=x</m> follows a normal distribution with expected value <m>\mu_Y +  \rho \frac{x-\mu_X}{\sigma_X}\sigma_Y</m>, which is a linear function of <m>x</m>. Note also that the standard deviation <m>\sigma_Y \sqrt{1-\rho^2}</m> does not depend on <m>x</m>. This implies that we can write:
+    </p>
+
+    <me>
+      Y = \beta_0 + \beta_1 x + \varepsilon
+    </me>
+
+    <p>
+      and assume <m>\varepsilon</m> follows a normal distribution with expected value 0 and fixed standard deviation, then <m>Y</m> has the same properties as the regression setup gave us: <m>Y</m> follows a normal distribution, the expected value is a linear function of <m>x</m>, and the standard deviation does not depend on <m>x</m>. 
+    </p>
+
+    <note>
+      <p>
+        In statistical textbooks, the <m>\varepsilon</m> terms are referred to as <em>errors</em>. Historically, this reflected the idea that deviations from the model were due to measurement inaccuracies. Today, the term is used more broadly: the <m>\varepsilon</m>s represent all variation in the outcome that is not explained by the predictors in the model. This variation may have nothing to do with mistakes. For example, if someone is two inches taller than what we would predict based on their parents' heights, those two inches are not an error; they are simply natural variation. Although the term <em>error</em> is not ideal in this sense, it remains standard terminology, and we will use it to denote the unexplained variability in the model.
+      </p>
+    </note>
+
+    <p>
+      If we were to specify a linear model for Galton's data, we would denote the <m>N</m> observed father heights with <m>x_1, \dots, x_n</m>, then we model the <m>N</m> son heights we are trying to predict with:
+    </p>
+
+    <me>
+      Y_i = \beta_0 + \beta_1 x_i + \varepsilon_i, \, i=1,\dots,N.
+    </me>
+
+    <p>
+      Here <m>x_i</m> is the father's height, which is fixed (not random) due to the conditioning, and <m>Y_i</m> is the random son's height that we want to predict. We can further assume that the <m>\varepsilon_i</m> are independent from each other and all have the same standard deviation.
+    </p>
+
+    <p>
+      In the linear model framework the <m>x_i</m> are referred to as the <em>explanatory variables</em>, <em>covariates</em>, or <em>predictors</em>. 
+    </p>
+
+    <p>
+      In the above model we know the <m>x_i</m>, but to have a useful model for prediction, we need <m>\beta_0</m> and <m>\beta_1</m>. We estimate these from the data. Once we do this, we can predict son's heights for any father's height <m>x</m>. We show how to do this in the next section.
+    </p>
+
+    <p>
+      Although this model is exactly the same one we derived earlier by assuming bivariate normal data, a somewhat nuanced difference is that, in the first approach, we assumed the data was bivariate normal and the linear model was derived, not assumed. In practice, linear models are just assumed without necessarily assuming normality: the distribution of the <m>\varepsilon</m>s is not necessarily specified. Nevertheless, if your data is bivariate normal, the above linear model holds. If your data is not bivariate normal, then you will need to have other ways of justifying the model.
+    </p>
+
+    <p>
+      One reason linear models are popular is that they are easily <em>interpretable</em>. In the case of Galton's data, we can interpret the data like this: due to inherited genes, the son's height prediction grows by <m>\beta_1</m> for each inch we increase the father's height <m>x</m>. Because not all sons with fathers of height <m>x</m> are of equal height, we need the term <m>\varepsilon</m>, which explains the remaining variability. This remaining variability includes the mother's genetic effect, environmental factors, and other biological randomness.
+    </p>
+
+    <p>
+      Given how we wrote the model above, the intercept <m>\beta_0</m> is not very interpretable, as it is the predicted height of a son of a father with no height. To make the slope parameter more interpretable, we can rewrite the model slightly as:
+    </p>
+
+    <me>
+      Y_i = \beta_0 + \beta_1 (x_i - \bar{x}) + \varepsilon_i, \, i=1,\dots,N
+    </me>
+
+    <p>
+      with <m>\bar{x} = 1/N \sum_{i=1}^N x_i</m> the average of the <m>x</m>. In this case, <m>\beta_0</m> represents the height when <m>x_i = \bar{x}</m>, which is the height of the son of an average father.
+    </p>
+
+    <p>
+      Later, specifically in the chapters on treatment effect models and multivariable regression, we will see how the linear model representation permits us to use the same mathematical frameworks in other contexts and to achieve more complicated goals than predicting one variable from another.
+    </p>
+  </section>
+
+  <section xml:id="sec-lse">
+    <title>Least Squares Estimates</title>
+
+    <p>
+      For linear models to be useful, we have to estimate the unknown <m>\beta</m>s. The standard approach is to find the values that minimize the distance of the fitted model to the data. Specifically, we find the <m>\beta</m>s that minimize the least squares (LS) equation shown below. For Galton's data, the LS equation looks like this:
+    </p>
+
+    <me>
+      RSS = \sum_{i=1}^n \left\{  y_i - \left(\beta_0 + \beta_1 x_i \right)\right\}^2
+    </me>
+
+    <p>
+      The quantity we try to minimize is called the residual sum of squares (RSS). 
+    </p>
+
+    <p>
+      Once we find the values that minimize the RSS, we will call the values the least squares estimates (LSE) and denote them by placing a <em>hat</em> over the parameters. In our example we use <m>\hat{\beta}_0</m> and <m>\hat{\beta}_1</m>.
+    </p>
+
+    <p>
+      We will demonstrate how we find these values using the previously defined <c>galton</c> dataset:
+    </p>
+
+    <program language="r">
+      <input>
+library(data.table)
+library(HistData)
+
+set.seed(1983)
+galton &lt;- as.data.table(GaltonFamilies)[gender == "male", .SD[sample(.N, 1)], by = family]
+galton &lt;- galton[, .(father, son = childHeight)]
+      </input>
+    </program>
+
+    <p>
+      Let's start by writing a function that computes the RSS for any pair of values <m>\beta_0</m> and <m>\beta_1</m>.
+    </p>
+
+    <program language="r">
+      <input>
+rss &lt;- function(beta0, beta1, data){
+  resid &lt;- galton$son - (beta0 + beta1*galton$father)
+  return(sum(resid^2))
+}
+      </input>
+    </program>
+
+    <p>
+      So for any pair of values, we get an RSS. Here is a plot of the RSS as a function of <m>\beta_1</m>, when we keep the <m>\beta_0</m> fixed at 25.
+    </p>
+
+    <program language="r">
+      <input>
+beta1 &lt;- seq(0, 1, length = nrow(galton))
+results &lt;- data.frame(beta1 = beta1, rss = sapply(beta1, rss, beta0 = 25))
+results |&gt; ggplot(aes(beta1, rss)) + geom_line() + 
+  geom_line(aes(beta1, rss))
+      </input>
+    </program>
+
+    <figure xml:id="fig-linear-model-framework-rss-versus-estimate">
+      <caption>Residual sum of squares as a function of <m>\beta_1</m> when <m>\beta_0=25</m></caption>
+      <image source="images/linear-model-framework-rss-versus-estimate.png" width="70%">
+        <description>A line plot of RSS versus beta_1 showing a clear minimum around 0.65 when beta_0 is fixed at 25.</description>
+      </image>
+    </figure>
+
+    <p>
+      We can see a clear minimum for <m>\beta_1</m> at around 0.65. However, this minimum for <m>\beta_1</m> is for when <m>\beta_0 = 25</m>, a value we arbitrarily picked. We don't know if (25, 0.65) is the pair that minimizes the equation across all possible pairs.
+    </p>
+
+    <p>
+      Trial and error is not going to work in this case. We could search for a minimum within a fine grid of <m>\beta_0</m> and <m>\beta_1</m> values, but this is unnecessarily time-consuming since we can use calculus. Specifically, we take the partial derivatives, set them to 0, and solve for <m>\beta_0</m> and <m>\beta_1</m>. Of course, if we have many parameters, these equations can get rather complex. But there are functions in R that do these calculations for us. We will study these next. To learn the mathematics behind this, you can consult one of the books on linear models in the Recommended Reading section.
+    </p>
+  </section>
+
+  <section xml:id="sec-lm-function">
+    <title>The <c>lm</c> function</title>
+
+    <p>
+      In R, we can obtain the least squares estimates for a linear model using the <c>lm</c> function. To fit the model:
+    </p>
+
+    <me>
+      Y_i = \beta_0 + \beta_1 x_i + \varepsilon_i
+    </me>
+
+    <p>
+      with <m>Y_i</m> being the son's height and <m>x_i</m> being the father's height, we can use this code:
+    </p>
+
+    <program language="r">
+      <input>
+fit &lt;- lm(son ~ father, data = galton)
+      </input>
+    </program>
+
+    <p>
+      The most common way we use <c>lm</c> is by using the character <c>~</c> to let <c>lm</c> know which is the variable we are predicting (left of <c>~</c>) and which we are using to predict (right of <c>~</c>). The intercept is added automatically to the model that will be fit.
+    </p>
+
+    <p>
+      The object <c>fit</c> includes information about the fit. We can use the function <c>summary</c> to extract a summary of this information:
+    </p>
+
+    <console>
+      <input>
+summary(fit)
+      </input>
+      <output>
+Call:
+lm(formula = son ~ father, data = galton)
+
+Residuals:
+   Min     1Q Median     3Q    Max
+ -9.38  -1.59   0.00   1.83   9.39
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)
+(Intercept)  37.4658     5.0052    7.49  3.2e-12 ***
+father        0.4592     0.0724    6.34  1.8e-09 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 2.46 on 177 degrees of freedom
+Multiple R-squared:  0.185,  Adjusted R-squared:  0.181
+F-statistic: 40.2 on 1 and 177 DF,  p-value: 1.82e-09
+      </output>
+    </console>
+
+    <p>
+      To understand some of the terms included in this summary, we need to remember that the LSE are random variables. Mathematical statistics gives us some ideas of the distribution of these random variables.
+    </p>
+
+    <p>
+      In the chapter on multivariable regression, after describing a more complex case study, we gain further insights into the application of regression in R.
+    </p>
+
+    <subsection xml:id="lse-are-random-variables">
+      <title>LSE are random variables</title>
+
+      <p>
+        The LSE is derived from the data <m>y_1,\dots,y_N</m>, which are a realization of random variables <m>Y_1, \dots, Y_N</m>. This implies that our estimates are random variables. To see this, we can run a Monte Carlo simulation in which we assume the son and father height data defines a population, take a random sample of size <m>N=50</m>, and compute the regression slope coefficient for each one:
+      </p>
+
+      <program language="r">
+        <input>
+N &lt;- 25
+lse &lt;- replicate(10000, {
+  smpl &lt;-  galton[sample(.N, N, replace = TRUE)]
+  coef(lm(son ~ father, data = smpl))
+})
+        </input>
+      </program>
+
+      <p>
+        We can see the variability of the estimates by plotting their distributions:
+      </p>
+
+      <program language="r">
+        <input>
+library(gridExtra)
+lse &lt;- data.frame(beta_0 = lse[1,], beta_1 = lse[2,]) 
+p1 &lt;- lse |&gt; ggplot(aes(beta_0)) + 
+  geom_histogram(binwidth = 5, color = "black") 
+p2 &lt;- lse |&gt; ggplot(aes(beta_1)) + 
+  geom_histogram(binwidth = 0.1, color = "black") 
+grid.arrange(p1, p2, ncol = 2)
+        </input>
+      </program>
+
+      <figure xml:id="fig-linear-model-framework-lse-distributions">
+        <caption>Monte Carlo distributions of the least squares estimates</caption>
+        <image source="images/linear-model-framework-lse-distributions.png" width="100%">
+          <description>Two histograms showing the simulated sampling distributions of the intercept and slope estimates from repeated bootstrap samples of the Galton data.</description>
+        </image>
+      </figure>
+
+      <p>
+        The reason these look normal is because the central limit theorem applies here as well: for large enough <m>N</m>, the least squares estimates will be approximately normal with expected value <m>\beta_0</m> and <m>\beta_1</m>, respectively. 
+      </p>
+
+      <p>
+        The standard errors are a bit complicated to compute, but mathematical theory does allow us to compute them and they are included in the summary provided by the <c>lm</c> function. The function <c>summary</c> shows us the standard error estimates:
+      </p>
+
+      <console>
+        <input>
+fit &lt;- lm(son ~ father, data = galton[sample(.N, N, replace = TRUE)])
+summary(fit)$coef
+        </input>
+        <output>
+            Estimate Std. Error t value Pr(&gt;|t|)
+(Intercept)   26.574     17.383    1.53   0.1400
+father         0.627      0.249    2.52   0.0193
+        </output>
+      </console>
+
+      <p>
+        You can see that the standard errors estimates reported above are close to the standard errors from the simulation:
+      </p>
+
+      <console>
+        <input>
+with(lse, c(se_0 = sd(beta_0), se_1 = sd(beta_1)))
+        </input>
+        <output>
+  se_0   se_1
+13.012  0.188
+        </output>
+      </console>
+
+      <p>
+        The <c>summary</c> function also reports t-statistics (<c>t value</c>) and p-values (<c>Pr(&gt;|t|)</c>). The t-statistic is not actually based on the central limit theorem, but rather on the assumption that the <m>\varepsilon</m>s follow a normal distribution. Under this assumption, mathematical theory tells us that the LSE divided by their standard error, <m>\hat{\beta}_0 / \widehat{\mathrm{SE}}[\hat{\beta}_0]</m> and <m>\hat{\beta}_1 / \widehat{\mathrm{SE}}[\hat{\beta}_1]</m>, follow a t-distribution with <m>N-p</m> degrees of freedom, with <m>p</m> the number of parameters in our model. In our example  <m>p=2</m>, and the two p-values are obtained from testing the null hypothesis that <m>\beta_0 = 0</m> and <m>\beta_1=0</m>, respectively.
+      </p>
+
+      <p>
+        Remember that, as we described in the section on t-distribution, for large enough <m>N</m>, the CLT works and the t-distribution becomes almost the same as the normal distribution. Also, notice that we can construct confidence intervals using the <c>confint</c> function:
+      </p>
+
+      <console>
+        <input>
+confint(fit, "father", level = 0.95)
+        </input>
+        <output>
+       2.5 % 97.5 %
+father 0.112   1.14
+        </output>
+      </console>
+
+      <p>
+        Although we do not show examples in this book, hypothesis testing with regression models is commonly used in epidemiology and economics to make statements such as "the effect of A on B was statistically significant after adjusting for X, Y, and Z". However, several assumptions have to hold for these statements to be true.
+      </p>
+    </subsection>
+
+    <subsection xml:id="predicted-values-are-random-variables">
+      <title>Predicted values are random variables</title>
+
+      <p>
+        Once we fit our model, we can obtain a prediction of <m>Y</m> by plugging the estimates into the regression model. For example, if the father's height is <m>x</m>, then our prediction <m>\hat{y}</m> for the son's height will be:
+      </p>
+
+      <me>
+        \hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x
+      </me>
+
+      <p>
+        When we plot <m>\hat{y}</m> versus <m>x</m>, we see the regression line.
+      </p>
+
+      <p>
+        Keep in mind that the prediction <m>\hat{y}</m> is also a random variable and mathematical theory tells us what the standard errors are. If we assume the errors are normal, or have a large enough sample size, we can use theory to construct confidence intervals as well. In fact, the <c>ggplot2</c> layer <c>geom_smooth(method = "lm")</c> surrounds the regession line using these confidence intervals:
+      </p>
+
+      <program language="r">
+        <input>
+galton |&gt; ggplot(aes(son, father)) + geom_point() + geom_smooth(method = "lm")
+        </input>
+      </program>
+
+      <figure xml:id="fig-linear-model-framework-father-son-regression">
+        <caption>Regression line and confidence band for father and son heights</caption>
+        <image source="images/linear-model-framework-father-son-regression.png" width="70%">
+          <description>A scatterplot of son height versus father height with a fitted linear regression line and a shaded confidence band.</description>
+        </image>
+      </figure>
+
+      <p>
+        The R function <c>predict</c> takes an <c>lm</c> object as input and returns the prediction. If requested, the standard errors and other information from which we can construct confidence intervals is provided:
+      </p>
+
+      <console>
+        <input>
+fit &lt;- lm(son ~ father, data = galton) 
+y_hat &lt;- predict(fit, se.fit = TRUE)
+names(y_hat)
+        </input>
+        <output>
+[1] "fit"            "se.fit"         "df"             "residual.scale"
+        </output>
+      </console>
+    </subsection>
+  </section>
+
+  <section xml:id="sec-diagnostic-plots">
+    <title>Model diagnostics</title>
+
+    <p>
+      When we assume a linear model, rather than derive it from theory, all interpretations depend on how well the model represents the data. The <c>lm</c> function will fit the model and produce coefficient estimates, standard errors, and p-values even if the model is misspecified. Interpreting such results without verifying assumptions can lead to misleading conclusions.
+    </p>
+
+    <p>
+      For this reason, checking model assumptions is a <em>critical requirement</em> in statistical modeling. Diagnostic plots provide visual tools to assess whether the model captures the main structure in the data, whether residuals behave as expected, and whether potential outliers or influential points are distorting the fit. These checks are especially important when there is no strong theoretical justification for the assumed model—such as when the data-generating process is unknown or complex. In these cases, diagnostics are our main defense against drawing incorrect or overconfident conclusions.
+    </p>
+
+    <p>
+      Visually inspecting residuals, defined as the difference between observed values and predicted values:
+    </p>
+
+    <me>
+      r = y - \hat{y} = y- \left(\hat{\beta}_0 + \hat{\beta}_1 x_i\right),
+    </me>
+
+    <p>
+      and summaries of the residuals, is a powerful way to diagnose if the model is useful. Note that the residuals can be thought of estimates of the errors since:
+    </p>
+
+    <me>
+      \varepsilon = Y - \left(\beta_0 + \beta_1 x_i \right).
+    </me>
+
+    <p>
+      In fact residuals are often denoted as <m>\hat{\varepsilon}</m>. This motivates several <em>diagnostic</em> plots. Because we observe <m>r</m>, but don't observe <m>\varepsilon</m>, we based the plots on the residuals. 
+    </p>
+
+    <p>
+      <ol>
+        <li>
+          <p>
+            Because the errors are assumed not to depend on the expected value of <m>Y</m>, a plot of <m>r</m> versus the fitted values <m>\hat{y}</m> should show no relationship.
+          </p>
+        </li>
+
+        <li>
+          <p>
+            In cases in which we assume the errors follow a normal distribution, a qqplot of standardized <m>r</m> should fall on a line when plotted against theoretical quantiles.
+          </p>
+        </li>
+
+        <li>
+          <p>
+            Because we assume the standard deviation of the errors is constant, if we plot the absolute value of the residuals, it should appear constant.
+          </p>
+        </li>
+      </ol>
+    </p>
+
+    <p>
+      We prefer plots rather than summaries based on, for example, correlation because, as noted in the section on Anscombe's quartet, correlation is not always the best summary of association. The function <c>plot</c> applied to an <c>lm</c> object automatically plots these.
+    </p>
+
+    <program language="r">
+      <input>
+rafalib::mypar(1,3)
+plot(fit, which = 1:3)
+      </input>
+    </program>
+
+    <figure xml:id="fig-linear-model-framework-diagnostic-plots">
+      <caption>Diagnostic plots for the simple linear model fit</caption>
+      <image source="images/linear-model-framework-diagnostic-plots.png" width="100%">
+        <description>Three model diagnostic plots showing residuals versus fitted values, a normal Q-Q plot, and a scale-location plot for the father-son height regression.</description>
+      </image>
+    </figure>
+
+    <p>
+      This function can produce six different plots, and the argument <c>which</c> let's you specify which you want to see. You can learn more by reading the <c>plot.lm</c> help file. However, some of the plots are based on more advanced concepts beyond the scope of this book. To learn more, we recommend an advanced book on regression analysis included in the Recommended Reading section.
+    </p>
+
+    <p>
+      In the chapters on treatment effect models and multivariable regression, we introduce data analysis challenges in which we may decide to not include certain variables in the model. In these cases, an important diagnostic test is to checks if the residuals are related to variables not included in the model.
+    </p>
+  </section>
+
+  <section xml:id="measurement-error-models">
+    <title>Measurement error models</title>
+
+    <p>
+      Historically, writing linear models in the form <m>Y = \beta_0 + \beta_1 x + \varepsilon</m> originated in contexts where the <m>\varepsilon</m> term represented <em>measurement error</em>. Early scientists used least squares to estimate physical constants from repeated measurements affected by instrument noise. Later, Galton and Pearson extended this framework to study relationships between variables, such as the height example we examined earlier.
+    </p>
+
+    <p>
+      In this section, we briefly present a setting where the measurement-error interpretation is appropriate and show that we can fit the corresponding model using the same mathematics and the same R function. This illustrates one of the key advantages of the linear model framework: a single set of tools applies across many seemingly different situations.
+    </p>
+
+    <subsection xml:id="example-modeling-a-falling-object">
+      <title>Example: modeling a falling object</title>
+
+      <p>
+        To understand these models, imagine you are Galileo in the 16th century trying to describe the velocity of a falling object. An assistant climbs the Tower of Pisa and drops a ball, while several other assistants record the position at different times. Let's simulate some data using the equations we currently know and adding some measurement error. The <c>dslabs</c> function <c>rfalling_object</c> generates these simulations:
+      </p>
+
+      <program language="r">
+        <input>
+library(tidyverse)
+library(dslabs)
+falling_object &lt;- rfalling_object()
+        </input>
+      </program>
+
+      <p>
+        The assistants hand the data to Galileo, and this is what he sees:
+      </p>
+
+      <program language="r">
+        <input>
+falling_object |&gt; 
+  ggplot(aes(time, observed_distance)) + 
+  geom_point() +
+  ylab("Distance in meters") + 
+  xlab("Time in seconds")
+        </input>
+      </program>
+
+      <figure xml:id="fig-linear-model-framework-gravity">
+        <caption>Simulated observations for a falling object</caption>
+        <image source="images/linear-model-framework-gravity.png" width="70%">
+          <description>A scatterplot of observed distance versus time for a falling object, showing points that follow a noisy parabolic trajectory.</description>
+        </image>
+      </figure>
+
+      <p>
+        Galileo does not know the exact equation, but by looking at the plot above, he deduces that the position should follow a parabola, which we can write like this:
+      </p>
+
+      <me>
+        f(x) = \beta_0 + \beta_1 x + \beta_2 x^2
+      </me>
+
+      <p>
+        The data does not fall exactly on a parabola. Galileo knows this is due to measurement error. His helpers make mistakes when measuring the distance. To account for this, he models the data with:
+      </p>
+
+      <me>
+        Y_i = \beta_0 + \beta_1 x_i + \beta_2 x_i^2 + \varepsilon_i, i=1,\dots,n
+      </me>
+
+      <p>
+        with <m>Y_i</m> representing distance in meters, <m>x_i</m> representing time in seconds, and <m>\varepsilon_i</m> accounting for measurement error. The measurement error is assumed to be random, independent from each other, and having the same distribution for each <m>i</m>. We also assume that there is no bias, which means the expected value of the error terms is 0: <m>\mathrm{E}[\varepsilon] = 0</m>.
+      </p>
+
+      <p>
+        Note that this is a linear model because it is a linear combination of known quantities (<m>x</m> and <m>x^2</m> are known) and unknown parameters (the <m>\beta</m>s are unknown parameters to Galileo). Unlike our previous examples, here <m>x</m> is a fixed quantity; we are not conditioning.
+      </p>
+
+      <note>
+        <p>
+          Small discrepancies between a model's predictions and observations are often attributed to measurement error, as in our example. In many cases, this is a useful and practical approximation. However, such differences can also reveal limitations in the model itself. Galileo's experiments on gravity showed slight deviations from his predicted uniform acceleration, largely due to air resistance rather than flawed measurements. Similarly, Newton's laws of gravity accurately described planetary motion, but small discrepancies in Mercury's orbit, once considered observational errors, ultimately led to Einstein's general theory of relativity. While assuming measurement error is often reasonable, it is crucial to recognize when discrepancies signal model limitations. The diagnostic plots discussed in the section on model diagnostics can help assess such limitations.
+        </p>
+      </note>
+    </subsection>
+
+    <subsection xml:id="estimating-parameters-with-least-squares">
+      <title>Estimating parameters with least squares</title>
+
+      <p>
+        To pose a new physical theory and start making predictions about other falling objects, Galileo needs actual numbers, rather than unknown parameters. Using LSE seems like a reasonable approach. How do we find the LSE?
+      </p>
+
+      <p>
+        LSE calculations do not require the errors to be approximately normal. The <c>lm</c> function will find the <m>\beta</m>s that will minimize the residual sum of squares:
+      </p>
+
+      <console>
+        <input>
+fit &lt;- falling_object |&gt; 
+  mutate(time_sq = time^2) |&gt; 
+  lm(observed_distance~time+time_sq, data = _)
+summary(fit)$coefficients
+        </input>
+        <output>
+            Estimate Std. Error t value Pr(&gt;|t|)
+(Intercept)   54.753      0.625  87.589 5.36e-17
+time           0.575      0.893   0.644 5.33e-01
+time_sq       -4.929      0.265 -18.603 1.16e-09
+        </output>
+      </console>
+
+      <p>
+        Let's check if the estimated parabola fits the data. The <c>broom</c> function <c>augment</c> allows us to do this easily:
+      </p>
+
+      <program language="r">
+        <input>
+broom::augment(fit) |&gt; 
+  ggplot() +
+  geom_point(aes(time, observed_distance)) + 
+  geom_line(aes(time, .fitted), col = "blue")
+        </input>
+      </program>
+
+      <figure xml:id="fig-linear-model-framework-falling-object-fit">
+        <caption>Quadratic least squares fit for the falling-object data</caption>
+        <image source="images/linear-model-framework-falling-object-fit.png" width="70%">
+          <description>A scatterplot of the falling-object observations with a smooth blue fitted quadratic curve overlaying the points.</description>
+        </image>
+      </figure>
+
+      <p>
+        The residuals confirm that the normal approximation for the errors is reasonable:
+      </p>
+
+      <program language="r">
+        <input>
+rafalib::mypar(1,2)
+plot(fit, which=1:2)
+        </input>
+      </program>
+
+      <figure xml:id="fig-linear-model-framework-falling-object-resids">
+        <caption>Residual diagnostics for the falling-object model</caption>
+        <image source="images/linear-model-framework-falling-object-resids.png" width="70%">
+          <description>Two diagnostic plots for the quadratic falling-object fit showing residuals versus fitted values and a normal Q-Q plot.</description>
+        </image>
+      </figure>
+
+      <p>
+        Thanks to my high school physics teacher, I know that the equation for the trajectory of a falling object is:
+      </p>
+
+      <me>
+        d(t) = h_0 + v_0 t -  0.5 \times 9.8 \, t^2
+      </me>
+
+      <p>
+        with <m>h_0</m> and <m>v_0</m> the starting height and velocity, respectively. The data we simulated above followed this equation, adding measurement error to simulate <m>n</m> observations for dropping the ball (<m>v_0=0</m>) from the tower of Pisa (<m>h_0=55.86</m>).
+      </p>
+
+      <p>
+        These are consistent with the parameter estimates:
+      </p>
+
+      <console>
+        <input>
+confint(fit)
+        </input>
+        <output>
+            2.5 % 97.5 %
+(Intercept) 53.38  56.13
+time        -1.39   2.54
+time_sq     -5.51  -4.35
+        </output>
+      </console>
+
+      <p>
+        The Tower of Pisa height is within the confidence interval for <m>\beta_0</m>, the initial velocity 0 is in the confidence interval for <m>\beta_1</m> (note the p-value is larger than 0.05), and the acceleration constant is in a confidence interval for <m>-2 \times \beta_2</m>.
+      </p>
+    </subsection>
+  </section>
+
+  <section xml:id="exercises">
+    <title>Exercises</title>
+
+    <exercise>
+      <statement>
+        <p>
+          The <c>co2</c> dataset is a time series object of 468 CO2 observations, monthly from 1959 to 1997.  Plot CO2 levels for the first 12 months and notice it seems to follow a sine wave with a frequency of 1 cycle per year. This means that a measurement error model that might work is 
+        </p>
+
+        <me>
+          y_i = \mu + A \sin(2\pi \,t_i / 12 + \phi) + \varepsilon_i
+        </me>
+
+        <p>
+          with <m>t_i</m> the month number for observation <m>i</m>. Is this a linear model for the parameters <m>\mu</m>, <m>A</m> and <m>\phi</m>?
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Using trigonometry, we can show that we can rewrite this model as:
+        </p>
+
+        <me>
+          y_i = \beta_0 + \beta_1 \sin(2\pi t_i/12) + \beta_2 \cos(2\pi t_i/12) + \varepsilon_i
+        </me>
+
+        <p>
+          Is this a linear model? 
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Find least square estimates for the <m>\beta</m>s using <c>lm</c>. Show a plot of <m>y_i</m> versus <m>t_i</m> with a curve on the same plot showing <m>\hat{y}_i</m> versus <m>t_i</m>.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Now fit a measurement error model to the entire <c>co2</c> dataset that includes a trend term that is a parabola as well as the sine wave model.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Run diagnostic plots for the fitted model and describe the results.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Fit a regression model to each of the datasets in the Anscombe quartet and examine the diagnostic plots.
+        </p>
+      </statement>
+    </exercise>
+  </section>
+
+</chapter>

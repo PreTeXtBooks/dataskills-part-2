@@ -1,0 +1,571 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="sampling-models-and-clt">
+  <title>Sampling Models and the Central Limit Theorem</title>
+  
+  <introduction>
+    <p>
+      In the previous chapter, we introduced random variables and saw how their distributions, expected values, and standard errors describe uncertainty. In this chapter, we build on those ideas by introducing <em>sampling models</em>, which are mathematical abstractions of how data are generated. We then use the Central Limit Theorem (CLT) to approximate the distribution of sums and averages of independent draws. Through a concrete example based on playing roulette in a casino, we show how the CLT can be used to answer practical questions such as "What is the chance of losing money?"
+    </p>
+  </introduction>
+
+  <section xml:id="sec-sampling-models">
+    <title>Sampling models</title>
+    
+    <p>
+      Many data-generating processes can be effectively modeled as <em>draws from an urn</em>. For example, polling likely voters can be viewed as drawing 0s (Republicans) and 1s (Democrats) from an urn containing the preferences of the entire population. In epidemiology, we often assume that individuals in a study are random draws from a larger population, where each draw corresponds to an individual's outcome. Similarly, in experimental research, we treat subjects (worms, flies, mice, or humans, for example) as random draws from a broader population. Randomized experiments follow the same logic: each participant's assignment to treatment or control can be seen as a random draw from an urn.
+    </p>
+    
+    <p>
+      Because random sampling and random assignment are fundamental to data analysis, <em>sampling models</em> appear everywhere in statistics. To build intuition, we start with <em>games of chance</em>, where randomness is explicit and the link between probability and real outcomes is perfectly clear. We now define a specific example.
+    </p>
+    
+    <subsection xml:id="roulette-example">
+      <title>Roulette example</title>
+      
+      <p>
+        Suppose a small casino hires you to decide whether it should install roulette wheels. To keep things simple, imagine 1,000 people each place a single bet on black. The casino wants you to estimate how much money it can expect to make, or lose, and, most importantly, the probability of losing money. If that probability is too high, they'll skip installing the wheels.
+      </p>
+      
+      <p>
+        We define a random variable <m>S_n</m> to represent the casino's total winnings after <m>n</m> games. A roulette wheel has 18 red pockets, 18 black pockets, and 2 green ones. The outcome is equivalent to drawing a ball from this urn:
+      </p>
+      
+      <program language="r">
+        <input>
+color &lt;- rep(c("Black", "Red", "Green"), times = c(18, 18, 2))
+        </input>
+      </program>
+      
+      <p>
+        Each of the 1,000 outcomes is an independent draw from this urn. If black comes up, the gambler wins and the casino loses $1 (recorded as −1). Otherwise, the casino wins $1.
+      </p>
+      
+      <program language="r">
+        <input>
+n &lt;- 1000
+x &lt;- sample(ifelse(color == "Black", -1, 1), n, replace = TRUE)
+        </input>
+      </program>
+      
+      <p>
+        Since we already know the proportions of 1s and −1s, we can simplify:
+      </p>
+      
+      <program language="r">
+        <input>
+x &lt;- sample(c(-1, 1), n, replace = TRUE, prob = c(9/19, 10/19))
+        </input>
+      </program>
+      
+      <p>
+        We call this a <em>sampling model</em> because it represents random behavior through repeated sampling from an urn. The casino's total winnings, define it as <m>S_n</m>, are simply the sum of these independent draws:
+      </p>
+      
+      <program language="r">
+        <input>
+s &lt;- sum(x)
+        </input>
+      </program>
+      
+      <p>
+        Before deriving the distribution of total winnings <m>S_n</m>, it's worth pausing to ask <em>why</em> we study problems like roulette in the first place.
+      </p>
+    </subsection>
+    
+    <subsection xml:id="connecting-sampling-models-to-real-data">
+      <title>Connecting sampling models to real data</title>
+      
+      <p>
+        Thinking in terms of a sampling model is central to data analysis under uncertainty. It connects the random variables we study in probability to the datasets we analyze in practice. By imagining data as random draws, from an urn, a population, or a randomization procedure, we clarify what our models represent and what assumptions they rely on.
+      </p>
+      
+      <p>
+        This perspective also underpins much of modern statistics. Tools like confidence intervals, hypothesis tests, and regression all depend on assumptions derived from sampling models. Understanding these assumptions helps us apply these methods thoughtfully and recognize their limits.
+      </p>
+      
+      <p>
+        Casino games make these ideas tangible because their sampling models are fully known. The probabilities, such as the number of red, black, and green pockets, are explicit and easy to simulate. In contrast, real-world data come from more complex "urns", such as populations of individuals with varying heights, incomes, or health outcomes. When we collect data, we are effectively drawing a random sample from such a population.
+      </p>
+      
+      <p>
+        This way of thinking builds statistical intuition: every dataset represents a sample from some underlying process, and the validity of our conclusions depends on how well our assumptions about that process hold.
+      </p>
+    </subsection>
+  </section>
+
+  <section xml:id="a-monte-carlo-simulation">
+    <title>A Monte Carlo Simulation</title>
+    
+    <p>
+      To find the probability that the casino loses money, we need to estimate the distribution of <m>S_n</m>. In the language of probability, this is <m>\mathrm{Pr}(S_n &lt; 0)</m>. If we define the distribution function <m>F(a) = \mathrm{Pr}(S_n \leq a)</m>, we can answer any question about probabilities involving <m>S_n</m>.
+    </p>
+    
+    <p>
+      We can estimate <m>F(a)</m> with a Monte Carlo simulation, generating many realizations of <m>S_n</m>. The following code simulates 1,000 people playing roulette and repeats the process 100,000 times:
+    </p>
+    
+    <program language="r">
+      <input>
+n &lt;- 1000
+roulette_winnings &lt;- function(n){
+  x &lt;- sample(c(-1, 1), n, replace = TRUE, prob = c(9/19, 10/19))
+  sum(x)
+}
+s &lt;- replicate(100000, roulette_winnings(n))
+      </input>
+    </program>
+    
+    <p>
+      The fraction of simulations in which <m>S_n \leq a</m> approximates <m>F(a)</m>:
+    </p>
+    
+    <program language="r">
+      <input>
+mean(s &lt;= a)
+      </input>
+    </program>
+    
+    <p>
+      For instance, the probability of losing money is:
+    </p>
+    
+    <console>
+      <input>
+mean(s &lt; 0)
+      </input>
+      <output>
+[1] 0.04432
+      </output>
+    </console>
+    
+    <p>
+      A histogram and qqplot of <m>S_n</m> shows that the distribution is approximately normal, an observation that the <term>Central Limit Theorem</term> will soon explain.
+    </p>
+    
+    <program language="r">
+      <input>
+library(tidyverse)
+normal_density &lt;- data.frame(x = seq(min(s), max(s), length = 100)) |&gt; 
+  mutate(f = dnorm(x, mean(s), sd(s)))
+p1 &lt;- data.frame(S_n = s) |&gt; ggplot(aes(S_n, after_stat(density))) +
+  geom_histogram(color = "black", binwidth = 10) +
+  ylab("Probability") +
+  geom_line(data = normal_density, mapping = aes(x, f), color = "blue") +
+  labs(y = "Probability ", title = "Histogram of S_n") 
+
+
+qq_sample &lt;- sample(s, 1000)  # take a subset of 1,000 values
+
+p2 &lt;- data.frame(S_n = qq_sample) |&gt;
+  ggplot(aes(sample = S_n)) +
+  stat_qq(distribution = qnorm) +
+  stat_qq_line(distribution = qnorm, color = "blue") +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
+  ggtitle("QQ Plot of S_n")
+gridExtra::grid.arrange(p1, p2, ncol = 2)
+      </input>
+    </program>
+
+    <figure xml:id="fig-sampling-models-clt-hist-qq">
+      <caption>Histogram and QQ plot of simulated roulette winnings</caption>
+      <image source="images/sampling-models-clt-hist-qq.png" width="100%">
+        <description>A two-panel figure showing the simulated distribution of roulette winnings after 1,000 bets. The left panel is a histogram of S_n with a blue normal density curve overlaid. The right panel is a QQ plot comparing sampled S_n values to theoretical normal quantiles, with points lying close to a straight blue line.</description>
+      </image>
+    </figure>
+  </section>
+
+  <section xml:id="sec-clt-prob">
+    <title>The Central Limit Theorem</title>
+    
+    <p>
+      The Central Limit Theorem (CLT) states that when the number of draws (the <em>sample size</em>) is large, the distribution of the sum of independent draws is approximately normal. Because sampling models describe so many data-generating processes, the CLT is one of the most important results in statistics.
+    </p>
+    
+    <p>
+      In the roulette example, the urn contains 20 $1 gains and 18 $1 losses, giving an expected value of:
+    </p>
+    
+    <me>
+      \mathrm{E}[X] = (20 -18)/38 = 1/19 \approx 0.05.
+    </me>
+    
+    <p>
+      In general, for two possible outcomes <m>a</m> and <m>b</m> with probabilities <m>p</m> and <m>(1-p)</m>,
+    </p>
+    
+    <me>
+      \mathrm{E}[X] = ap + b(1-p).
+    </me>
+    
+    <p>
+      By the properties introduced in <xref ref="sec-key-properties"/>, the expected total winnings are:
+    </p>
+    
+    <me>
+      \mathrm{E}[S_n] = n\,\mathrm{E}[X].
+    </me>
+    
+    <p>
+      So if 1,000 people play, the casino expects to win about $50 on average.
+    </p>
+    
+    <p>
+      To quantify uncertainty, we compute the standard error, which measures how much <m>S_n</m> varies around its expected value. For an urn with two outcomes <m>a</m> and <m>b</m>, the standard deviation can be shown to be:
+    </p>
+    
+    <me>
+      \mathrm{SE}[X] = |b - a|\sqrt{p(1-p)}.
+    </me>
+    
+    <p>
+      In the roulette example we obtain:
+    </p>
+    
+    <console>
+      <input>
+2*sqrt(90)/19
+      </input>
+      <output>
+[1] 0.998614
+      </output>
+    </console>
+    
+    <p>
+      Thus, the standard error of the sum is:
+    </p>
+    
+    <me>
+      \mathrm{SE}[S_n] = \sqrt{n}\,\mathrm{SD}[X],
+    </me>
+    
+    <p>
+      which in this case is:
+    </p>
+    
+    <console>
+      <input>
+sqrt(n)*2*sqrt(90)/19
+      </input>
+      <output>
+[1] 31.57895
+      </output>
+    </console>
+    
+    <p>
+      These theoretical values agree closely with the Monte Carlo results:
+    </p>
+    
+    <console>
+      <input>
+mean(s)
+sd(s)
+      </input>
+      <output>
+[1] 52.6455
+[1] 31.53624
+      </output>
+    </console>
+    
+    <p>
+      Using the CLT, we can now compute the probability that the casino loses money without simulation:
+    </p>
+    
+    <console>
+      <input>
+pnorm(0, n*(20 - 18)/38, sqrt(n)*2*sqrt(90)/19)
+      </input>
+      <output>
+[1] 0.04779035
+      </output>
+    </console>
+    
+    <p>
+      which matches our earlier estimate:
+    </p>
+    
+    <console>
+      <input>
+mean(s &lt; 0)
+      </input>
+      <output>
+[1] 0.04432
+      </output>
+    </console>
+    
+    <note>
+      <p>
+        The quantity <m>(S_n + n)/2</m> represents the number of wins for the casino and follows a <em>binomial distribution</em>. Thus, the probability <m>\mathrm{Pr}(S_n &lt; 0)</m> can also be computed directly:
+      </p>
+      
+      <console>
+        <input>
+pbinom(n/2 - 1, size = n, prob = 10/19)
+        </input>
+        <output>
+[1] 0.04479591
+        </output>
+      </console>
+      
+      <p>
+        However, the binomial result applies only to Bernoulli trials. In many real-world settings, data are not binomial, yet we still want to approximate the distribution of sums or averages. For those cases, the CLT provides a general framework that extends far beyond Bernoulli trials.
+      </p>
+    </note>
+  </section>
+
+  <section xml:id="how-large-is-large">
+    <title>How large is large?</title>
+    
+    <p>
+      The CLT applies when the number of draws is "large", but <em>large</em> depends on context. In many cases, 30 draws are enough for a good approximation, sometimes even fewer. In the roulette example, when the probabilities of success are very small, much larger samples may be required.
+    </p>
+    
+    <p>
+      For example, in a lottery where the chance of winning is less than one in a million, even millions of tickets result in only a few winners. In such highly skewed cases, the <em>Poisson distribution</em> offers a better approximation than the normal. While we do not cover its theory here, it is discussed in most probability textbooks and on <url href="https://en.wikipedia.org/wiki/Poisson_distribution">Wikipedia</url>. You can explore the Poisson distribution in R with <c>dpois</c>, <c>ppois</c>, and <c>rpois</c>.
+    </p>
+    
+    <p>
+      In summary, the CLT explains why the normal distribution appears so often in statistics and why many methods work well in practice. But it has limits: when probabilities are extremely small or distributions are highly skewed, other models, such as the Poisson or binomial, are more appropriate. Developing intuition for when the CLT applies is essential for principled, thoughtful data analysis.
+    </p>
+  </section>
+
+  <exercises xml:id="exercises-sampling-models-and-clt">
+    <title>Exercises</title>
+    
+    <exercise>
+      <statement>
+        <p>
+          In American Roulette, you can also bet on green. There are 18 reds, 18 blacks, and 2 greens (0 and 00). Create a random variable <m>S_n</m> that is the sum of your winnings after betting on green 1,000 times.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Compute the expected value of <m>S_n</m>?
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Compute the standard error of <m>S_n</m>?
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Use the CLT to estimate the probability that you end up winning money? Hint: Use the CLT.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Create a Monte Carlo simulation that generates 10,000 outcomes of <m>S_n</m>. Compute the average and standard deviation of the resulting list to confirm the results of 2 and 3. Start your code by setting the seed to 1 with <c>set.seed(1)</c>.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Now check your answer to 4 using the Monte Carlo result.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          The Monte Carlo result and the CLT approximation are close, but not that close. What could account for this?
+        </p>
+        <p>
+          <ol marker="a">
+            <li>10,000 simulations is not enough. If we do more, they match.</li>
+            <li>The CLT does not work as well when the probability of success is small. In this case, it was 1/19. If we make the number of roulette plays bigger, they will match better.</li>
+            <li>The difference is within rounding error.</li>
+            <li>The CLT only works for averages.</li>
+          </ol>
+        </p>
+        <p>
+          Now create a random variable <m>\bar{X}_n</m> that is your average winnings per bet defined as <m>\bar{X}_n = S_n/n</m>. Keep <m>n</m> = 1,000.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          What is the expected value of <m>\bar{X}_n</m>?
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          What is the standard error of <m>\bar{X}_n</m>?
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          What is the probability that you end up with winnings per game that are positive? Hint: Use the CLT.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Create a Monte Carlo simulation that generates 25,000 outcomes of <m>\bar{X}_n</m>, instead of 1,000. Compute the average and standard deviation of the resulting list to confirm the results of 13 and 14. Start your code by setting the seed to 1 with <c>set.seed(1)</c>.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Now compare your answer to 14 using the Monte Carlo result. What can you say about the CLT approximation for <m>\mathrm{Pr}(\bar{X}_n&gt;0)</m> compared for <m>\mathrm{Pr}(S_n&gt;0)</m>.
+        </p>
+        <p>
+          <ol marker="a">
+            <li>We are now computing averages instead of sums so they are very different.</li>
+            <li>25,000 Monte Carlo simulations is not better than 10,000 and provides a much closer estimate.</li>
+            <li>The CLT works better when the sample size is larger. We increased from 10,000 to 25,000.</li>
+            <li>The difference is within rounding error.</li>
+          </ol>
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          The following exercises are inspired by the events surrounding the financial crisis of 2007-2008<fn>https://en.wikipedia.org/w/index.php?title=Financial_crisis_of_2007%E2%80%932008</fn>. This financial crisis was in part caused by underestimating the risk of certain securities<fn>https://en.wikipedia.org/w/index.php?title=Security_(finance)</fn> sold by financial institutions. Specifically, the risks of mortgage-backed securities (MBS) and collateralized debt obligations (CDO) were grossly underestimated. These assets were sold at prices that assumed most homeowners would make their monthly payments, and the probability of this not occurring was calculated as being low. A combination of factors resulted in many more defaults than were expected, which led to a price crash of these securities. As a consequence, banks lost so much money that they required government bailouts to avoid complete closure.
+        </p>
+        <p>
+          More complex versions of the sampling models we have discussed are also used by banks to determine interest rates and insurance companies to determine premiums. To understand this, suppose you run a small bank that has a history of identifying potential homeowners that can be trusted to make payments. In fact, historically, only 2% of your customers default in a given year, meaning that they don't pay back the money that you lent them. Suppose your bank will give out <m>n</m> = 1,000 loans for $180,000 this year. Also, after adding up all costs, suppose your bank loses <m>l</m>= $200,000 per foreclosure. For simplicity, we assume this includes all operational costs. What is the expected profit <m>S_n</m> for you bank under this scenario?
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Note that the total loss defined by the final sum in the previous exercise is a random variable. Every time you run the sampling model code, you obtain a different number of people defaulting which results in a different loss. Code a sampling model for the random variable representing your banks profit <m>S_n</m> under scenario described in 13.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          The previous exercise demonstrates that if you simply loan money to everybody without interest, you will end up losing money due to the 2% that defaults. Although you know 2% of your clients will probably default, you don't know which ones, so you can't remove them. Yet by charging everybody just a bit extra in interest, you can make up the losses incurred due to that 2%, and also cover your operating costs. What quantity <m>x</m> would you have to charge each borrower so that your bank's expected profit is 0? Assume that you don't get <m>x</m> from the borrowers that default. Also, note <m>x</m> is not the interest rate, but the total you add meaning <m>x/180000</m> is the <em>interest rate</em>.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Rewrite the sample model from exercise 14 to account for the interest you are charging and run a Monte Carlo simulation to get an idea of the distribution of your profit when you charge interest rates.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          We don't actually need a Monte Carlo simulation. Based on what we have learned, the CLT informs us that, since our losses are a sum of independent draws, its distribution is approximately normal. What are the expected value and standard errors of the profit <m>S_n</m>? Write these as functions of the probability of foreclosure <m>p</m>, the number of loans <m>n</m>, the loss per foreclosure <m>l</m>, and the quantity you charge each borrower <m>x</m>.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          If you set <m>x</m> to assure your bank breaks even (expected profit is 0), what is the probability that your bank loses money?
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Suppose that if your bank has negative profit, it has to close. Therefore, you need to increase <m>x</m> to minimize this risk. However, setting the interest rates too high may lead your clients to choose another bank. So, let's say that we want our chances of losing money to be 1 in 100. What does the <m>x</m> quantity need to be now? Hint: We want <m>\mathrm{Pr}(S_n&lt;0) = 0.01</m>. Note that you can add subtract constants to both side of an inequality, and the probability does not change: <m>\mathrm{Pr}(S_n&lt;0) = \mathrm{Pr}(S_n+k&lt;0+k)</m>, Similarly, with division of positive constants: <m>\mathrm{Pr}(S_n+k&lt;0+k) = \mathrm{Pr}((S_n+k)/m &lt;k/m)</m>. Use this fact and the CLT to transform the left side of the inequality in <m>\mathrm{Pr}(S_n&lt;0)</m> into a standard normal.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Our interest rate now increases. But it is still a very competitive interest rate. For the <m>x</m> you obtained in exercise 20, what is expected profit per loan and the expected total profit?
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Run run a Monte Carlo simulation to double check the theoretical approximation used in 19 and 20.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          One of your employees points out that, since the bank is making a profit per loan, the bank should give out more loans! Why limit it to just <m>n</m>? You explain that finding those <m>n</m> clients was work. You need a group that is predictable and that keeps the chances of defaults low. The employee then points out that even if the probability of default is higher, as long as our expected value is positive, you can minimize your chances of losses by increasing <m>n</m> and relying on the law of large numbers. Suppose the default probability is twice as high, or 4%, and you set the interest rate to 5%, or <m>x</m> = $9,000, what is your expected profit per loan?
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          How much do we have to increase <m>n</m> by to assure the probability of losing money is still less than 0.01?
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Confirm the result in exercise 23 with a Monte Carlo simulation.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          According to this equation, giving out more loans increases your expected profit and lowers the chances of losing money! Giving out more loans seems like a no-brainier. As a result, your colleague decides to leave your bank and start his own high-risk mortgage company. A few months later, your colleague's bank has gone bankrupt. A book is written, and eventually, the movies "The Big Short" and "Margin Call" are made, recounting the mistake your friend, and many others, made. What happened?
+        </p>
+        <p>
+          Your colleague's scheme was mainly based on this mathematical formula <m>\mathrm{SE}[\bar{X}]= \sigma_X / \sqrt{n}</m>. By making <m>n</m> large, we minimize the standard error of our per-loan profit. However, for this rule to hold, the <m>X</m>s must be independent draws: one person defaulting must be independent of others defaulting.
+        </p>
+        <p>
+          To construct a more realistic simulation than the original one your colleague ran, let's assume there is a global event affecting everybody with high-risk mortgages and altering their probability simultaneously. We will assume that with a 50-50 chance all the default probabilities slightly increase or decrease to somewhere between 0.03 and 0.05. However, this change occurs universally, impacting everybody at once, not just one person. As these draws are no longer independent, our equation for the standard error of the sum of random variables does not apply. Write a Monte Carlo simulation for your total profit with this model.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Use the simulation results of exercise 25 to report the expected profit, the probability of losing money, and the probability of losing more than $10,000,000. Study the distribution of profit and discuss how making the wrong assumption lead to a catastrophic result.
+        </p>
+      </statement>
+    </exercise>
+  </exercises>
+
+</chapter>

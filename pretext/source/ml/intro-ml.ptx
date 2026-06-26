@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="intro-ml">
+  <title>Introduction to Machine Learning</title>
+  
+  <introduction>
+    <p>
+      This chapter introduces machine learning.
+    </p>
+  </introduction>
+
+</chapter>

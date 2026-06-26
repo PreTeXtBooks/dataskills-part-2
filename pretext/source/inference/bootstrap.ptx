@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="sec-bootstrap">
+  <title>Bootstrap</title>
+  
+  <introduction>
+    <p>
+      CLT provides a useful approach to building confidence intervals and performing hypothesis testing. However, it does not always apply. Here we provide a short introduction to an alternative approach to estimating the distribution of an estimate that does not rely on CLT.
+    </p>
+  </introduction>
+
+  <section xml:id="sec-example-median-income">
+    <title>Example: median income</title>
+    
+    <p>
+      Suppose the income distribution of your population is as follows:
+    </p>
+    
+    <program language="r">
+      <input>
+set.seed(1995)
+n &lt;- 10^6
+income &lt;- 10^(rnorm(n, log10(45000), log10(3)))
+hist(income/10^3, nclass = 1000)
+      </input>
+    </program>
+    
+    <figure xml:id="fig-bootstrap-income-population-histogram">
+      <caption>Histogram of the simulated population income distribution</caption>
+      <image source="images/bootstrap-income-population-histogram.png" width="70%">
+        <description>A histogram of the simulated population income values in thousands of dollars. Most observations are concentrated below 100 thousand dollars, with a long right tail extending to much larger incomes.</description>
+      </image>
+    </figure>
+    
+    <p>
+      The population median is:
+    </p>
+    
+    <console>
+      <input>
+median(income)
+      </input>
+      <output>
+[1] 44938.54
+      </output>
+    </console>
+    
+    <p>
+      Suppose we don't have access to the entire population but want to estimate the population median, denoted by <m>m</m>. We take a random sample of 100 observations and use the sample median, <m>M</m>, as our estimate of <m>m</m>:
+    </p>
+    
+    <console>
+      <input>
+N &lt;- 100
+x &lt;- sample(income, N)
+median(x)
+      </input>
+      <output>
+[1] 38461.33
+      </output>
+    </console>
+    
+    <p>
+      The question now becomes: how can we assess the uncertainty in this estimate? In other words, how do we compute a standard error and construct a confidence interval for <m>m</m> based on our sample?
+    </p>
+    
+    <p>
+      In the following sections, we introduce the <em>bootstrap</em>, a powerful resampling method that allows us to estimate variability and construct confidence intervals without relying on strong distributional assumptions.
+    </p>
+  </section>
+
+  <section xml:id="sec-confidence-intervals-for-median">
+    <title>Confidence intervals for the median</title>
+    
+    <p>
+      Can we construct a confidence interval? What is the distribution of <m>M</m>?
+    </p>
+    
+    <p>
+      Because we are simulating the data, we can use a Monte Carlo simulation to learn the actual distribution of <m>M</m>.
+    </p>
+    
+    <program language="r">
+      <input>
+m &lt;- replicate(10^4, {
+  x &lt;- sample(income, N)
+  median(x)
+})
+par(mfrow = c(1, 2))
+hist(m, nclass = 30)
+qqnorm(scale(m)); abline(0,1)
+      </input>
+    </program>
+    
+    <figure xml:id="fig-bootstrap-median-sampling-distribution">
+      <caption>Monte Carlo approximation to the sampling distribution of the sample median</caption>
+      <image source="images/bootstrap-median-sampling-distribution.png" width="100%">
+        <description>Two side-by-side plots for the sample median based on repeated samples of size 100 from the simulated income population. The left panel is a histogram of the simulated medians, and the right panel is a normal Q-Q plot showing departures from normality.</description>
+      </image>
+    </figure>
+    
+    <p>
+      If we know this distribution, we can construct a confidence interval. The problem here is that, as we have already described, in practice we do not have access to the distribution. In previous sections we have used CLT, but what we learned applies to averages and here we are interested in the median. We can see that the 95% confidence interval based on CLT
+    </p>
+    
+    <console>
+      <input>
+median(x) + 1.96*sd(x)/sqrt(N)*c(-1, 1)
+      </input>
+      <output>
+[1] 21017.93 55904.72
+      </output>
+    </console>
+    
+    <p>
+      is quite different from the confidence interval we would generate if we knew the actual distribution of <m>M</m>:
+    </p>
+    
+    <console>
+      <input>
+quantile(m, c(0.025, 0.975))
+      </input>
+      <output>
+    2.5%    97.5% 
+34437.72 59049.59
+      </output>
+    </console>
+    
+    <p>
+      The bootstrap allows us to approximate a Monte Carlo simulation even when we do not have access to the full population distribution. The idea is straightforward: we treat the observed sample as if it were the population. From this sample, we draw new datasets of the same size, with replacement, and compute the statistic of interest, in this case, the median, for each resampled dataset. These resampled datasets are called bootstrap samples.
+    </p>
+    
+    <p>
+      In many practical situations, the distribution of the statistics computed from bootstrap samples provides a good approximation to the sampling distribution of the original statistic. This approximation allows us to estimate variability, compute standard errors, and construct confidence intervals without knowing the true underlying distribution.
+    </p>
+    
+    <p>
+      The following code demonstrates how to generate bootstrap samples and approximate the sampling distribution of the median:
+    </p>
+    
+    <program language="r">
+      <input>
+m_star &lt;- replicate(10^4, {
+  x_star &lt;- sample(x, N, replace = TRUE)
+  median(x_star)
+})
+      </input>
+    </program>
+    
+    <p>
+      Note a confidence interval constructed with the bootstrap is much closer to one constructed with the theoretical distribution:
+    </p>
+    
+    <console>
+      <input>
+quantile(m_star, c(0.025, 0.975))
+      </input>
+      <output>
+    2.5%    97.5% 
+30252.82 56908.62
+      </output>
+    </console>
+  </section>
+
+  <exercises xml:id="exercises-bootstrap">
+    <title>Exercises</title>
+    
+    <exercise>
+      <statement>
+        <p>
+          Generate a random dataset like this:
+        </p>
+        
+        <program language="r">
+          <input>
+set.seed(1)
+y &lt;- rnorm(100, 0, 1)
+          </input>
+        </program>
+        
+        <p>
+          Estimate the 75th quantile, which we know is:
+        </p>
+        
+        <console>
+          <input>
+qnorm(0.75)
+          </input>
+          <output>
+[1] 0.6744898
+          </output>
+        </console>
+        
+        <p>
+          with the sample quantile:
+        </p>
+        
+        <console>
+          <input>
+quantile(y, 0.75)
+          </input>
+          <output>
+      75% 
+0.6915454
+          </output>
+        </console>
+        
+        <p>
+          Run a Monte Carlo simulation to learn the expected value and standard error of this random variable.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          In practice, we can't run a Monte Carlo simulation because we don't know if <c>rnorm</c> is being used to simulate the data. Use the bootstrap to estimate the standard error using just the initial sample <c>y</c>. Use 10 bootstrap samples.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Redo exercise 2, but with 10,000 bootstrap samples.
+        </p>
+      </statement>
+    </exercise>
+  </exercises>
+
+</chapter>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="reading-summaries">
+  <title>Recommended Reading</title>
+
+  <ul>
+    <li>
+      <p>
+        <em>Freedman, D., Pisani, R., &amp; Purves, R. (2007). Statistics (4th ed.).</em>
+        A clear, concept-first introduction to distributions, variability, and summaries, excellent for intuition and statistical thinking.
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>Tukey, J. W. (1977). Exploratory Data Analysis.</em>
+        The classic source for boxplots, robust summaries, and EDA philosophy, foundational for this chapter's emphasis on describing data.
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>Cleveland, W. S. (1993). Visualizing Data.</em>
+        A practical, graphics-first treatment of distributions and patterns; pairs well with histograms, density plots, and eCDFs.
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>Hoaglin, D. C., Mosteller, F., &amp; Tukey, J. W. (1983). Understanding Robust and Exploratory Data Analysis. Wiley.</em>
+        A classic edited volume aimed at explaining robust methods in an accessible style; many chapters are practical.
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>Wilcox, R. R. (2017). Introduction to Robust Estimation and Hypothesis Testing (4th ed.). Academic Press.</em>
+        A practical, applied text with many worked examples. It goes well beyond what we covered in this chapter but starts with chapters on medians, trimmed means, MAD, and robust alternatives to SD. The later chapters require knowledge of hypothesis testing which we cover in the statistical inference part of the book.
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>Huber, P. J., &amp; Ronchetti, E. M. (2009). Robust Statistics (2nd ed.). Wiley.</em>
+        More advanced, but the opening chapters give a rigorous yet readable account of why robustness matters. Useful for readers that want to go a deeper. Requires knowledge of topics we cover in the statistical inference and linear model parts of the book.
+      </p>
+    </li>
+  </ul>
+
+</chapter>

@@ -1,0 +1,1256 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="sec-latent-factor-models">
+  <title>Latent Factor Models</title>
+
+  <introduction>
+    <program language="r">
+      <input>
+library(data.table)
+library(dslabs)
+movielens &lt;- as.data.table(movielens)
+movielens &lt;- movielens[, if (.N &gt;= 100) .SD, by = userId]
+
+set.seed(2006)
+indexes &lt;- split(1:nrow(movielens), movielens$userId)
+
+test_ind &lt;- sapply(indexes, function(i) sample(i, ceiling(length(i)*.2)))
+test_ind &lt;- sort(unlist(test_ind))
+
+movielens[, `:=`(userId = as.character(userId), movieId = as.character(movieId))]
+cols &lt;- c("userId", "movieId", "title", "rating")
+test_set &lt;- movielens[test_ind, ..cols]
+train_set &lt;- movielens[-test_ind, ..cols]
+test_set &lt;- test_set[movieId %in% train_set$movieId]
+
+rmse &lt;- function(r) sqrt(mean(r^2))
+clamp &lt;- function(x, lower = 0.5, upper = 5) pmax(pmin(x, upper), lower)
+fit_als &lt;- function(lambda, tol = 1e-6, max_iter = 100) {
+  fit &lt;- copy(train_set)
+  N &lt;- nrow(fit)
+  mu &lt;- mean(fit$rating)
+  fit[, `:=`(a = 0, b = 0)]  # starting values
+
+  for (iter in 1:max_iter) {
+    a_old &lt;- copy(fit$a)
+    b_old &lt;- copy(fit$b)
+
+    fit[, a := sum(rating - mu - b)/(.N + N*lambda) , by = userId]
+    fit[, b := sum(rating - mu - a)/(.N + N*lambda), by = movieId]
+
+    delta &lt;- max(c(abs(fit$a - a_old), abs(fit$b - b_old)))
+    if (delta &lt; tol) break
+  }
+  return(with(fit, list(mu = mu, a = setNames(a, userId), b = setNames(b, movieId))))
+}
+movie_map &lt;- unique(train_set[,.(movieId, title)])
+      </input>
+    </program>
+
+    <p>
+      Many data problems involve large matrices with structure we cannot see directly. Latent factor models provide a powerful way to uncover this hidden structure. The key idea is that observed data often reflect the influence of a smaller number of unobserved (latent) features. These latent factors capture patterns such as groups of similar individuals, groups of similar items, or shared underlying attributes that drive the observed values.
+    </p>
+
+    <p>
+      In the previous chapter, we introduced the model
+    </p>
+
+    <me>
+      Y_{ij} = \mu + \alpha_i + \beta_j + \varepsilon_{ij}
+    </me>
+
+    <p>
+      to describe movie ratings. This model accounts for differences between users through <m>\alpha_i</m> and differences between movies through <m>\beta_j</m>. However, it treats all movies and all users as unrelated beyond these simple averages. In practice, we know that groups of movies tend to be liked by the same kinds of users, and groups of users tend to give similar ratings to the same kinds of movies. This shared structure is not captured by user and movie effects alone.
+    </p>
+
+    <p>
+      To see this, we compute residuals
+    </p>
+
+    <me>
+      r_{ij} = y_{ij} - (\hat{\mu} + \hat{\alpha}_i + \hat{\beta}_j)
+    </me>
+
+    <p>
+      by fitting the model to the <c>train_set</c> dataset using the <c>fit_als</c> function, both defined in the previous chapter,
+    </p>
+
+    <program language="r">
+      <input>
+fit &lt;- fit_als(lambda = 3.636364e-05)
+train_set[, resid := rating - clamp(fit$mu + fit$a[userId] + fit$b[movieId])]
+      </input>
+    </program>
+
+    <p>
+      and comparing the residuals for <em>The Godfather</em> with three other films:
+    </p>
+
+    <figure xml:id="fig-movie-cor">
+      <caption>Residual comparisons for <em>The Godfather</em> and related films</caption>
+      <image source="images/latent-factor-models-movie-cor.png" width="100%">
+        <description>Three scatterplots compare residual ratings for The Godfather against The Godfather Part II, Goodfellas, and Sleepless in Seattle. The first two show strong positive association, while the last shows a weaker negative association.</description>
+      </image>
+    </figure>
+
+    <p>
+      These correlations range from strongly positive to negative. Specifically the correlations between <em>The Godfather</em> and <em>The Godfather part II</em>, <em>Goodfellas</em>, and <em>Sleepless in Seattle</em> are approximately 0.82, 0.69, and -0.15, respectively. Users who love <em>The Godfather</em> also tend to like <em>The Godfather Part II</em> and <em>Goodfellas</em>, but often dislike <em>Sleepless in Seattle</em>. These kinds of relationships are because movies share latent characteristics: genre, tone, style, era, or audience appeal. Similarly, users have latent traits that make them prefer some types of movies over others.
+    </p>
+
+    <p>
+      Latent factor models are designed to capture exactly this type of structure. Instead of estimating thousands of separate parameters, they represent users and movies in a lower-dimensional space defined by a small number of latent features. The winning team of the Netflix Prize competition relied heavily on this idea, using latent factor models to achieve an improvement in predictive accuracy.
+    </p>
+
+    <p>
+      Although recommendation systems are one of the most famous applications, latent factor models are widely used in other fields, such as genomics (to model hidden biological structure), text analysis (topics in documents), marketing (customer segmentation), and finance (risk factors underlying asset returns).
+    </p>
+
+    <p>
+      In this chapter, we introduce latent factor models in the context of recommendation systems, connect them to principal component analysis (PCA), and show how the singular value decomposition (SVD) provides a unifying mathematical foundation. We will build models that capture hidden structure in rating data and show how these models further improve prediction accuracy.
+    </p>
+  </introduction>
+
+  <section xml:id="sec-factor-analysis">
+    <title>Factor analysis</title>
+
+    <program language="r">
+      <input>
+set.seed(1987)
+short_names &lt;- c("Godfather", "Godfather 2", "Goodfellas",
+                 "Scent of a Woman", "You've Got Mail", "Sleepless in Seattle")
+q &lt;- cbind(c(1 , 1, 1, -1, -1, -1),
+           c(1 , 1, -1, 1, -1, -1))
+p &lt;- cbind(sqrt(2)*rep(c(-1,0,1), c(3,6,3)*10),
+           1/sqrt(2)*rep(c(-1,1,0,1,0,-1), c(1,2,3,2,1,3)*10))
+
+rownames(p) &lt;- 1:nrow(p)
+rownames(q) &lt;- c(short_names)
+
+y &lt;- p %*% t(q) + matrix(rnorm(nrow(p)*nrow(q), 0, 0.5), nrow(p), nrow(q))
+      </input>
+    </program>
+
+    <p>
+      We start with a simple simulated example. Specifically, we simulate ratings <m>Y_{ij}</m> for six movies and 120 users. For simplicity we assume that these ratings have been adjusted for the movie and user effects, as described in the regularization chapter. We stored the results for 120 user and 6 movie effects in the object <c>y</c>:
+    </p>
+
+    <console>
+      <input>
+dim(y)
+      </input>
+      <output>
+[1] 120   6
+      </output>
+    </console>
+
+    <p>
+      If we examine the correlation between movies based on user ratings, we notice a pattern:
+    </p>
+
+    <console>
+      <input>
+cor(y)
+      </input>
+      <output>
+                     Godfather Godfather 2 Goodfellas Scent of a Woman You've Got Mail Sleepless in Seattle
+Godfather                1.000       0.671      0.558           -0.527          -0.734               -0.721
+Godfather 2              0.671       1.000      0.471           -0.450          -0.649               -0.739
+Goodfellas               0.558       0.471      1.000           -0.888          -0.487               -0.505
+Scent of a Woman        -0.527      -0.450     -0.888            1.000           0.451                0.475
+You've Got Mail         -0.734      -0.649     -0.487            0.451           1.000                0.756
+Sleepless in Seattle    -0.721      -0.739     -0.505            0.475           0.756                1.000
+      </output>
+    </console>
+
+    <p>
+      It appears that ratings are positively correlated within genres, for example, among mob movies or among romance movies, and negatively correlated across the two genres. In statistics, such patterns are often explained by factors: unobserved, or latent, variables that account for the correlations or associations among the observed variables. Under certain assumptions, which we will describe below, these latent factors can be estimated from the data and used to capture the underlying structure driving the correlations.
+    </p>
+
+    <p>
+      One approach is to use our knowledge of movies genres to define a factor that distinguishes between mob and romance movies:
+    </p>
+
+    <program language="r">
+      <input>
+q &lt;- c(1, 1, 1, -1, -1, -1)
+      </input>
+    </program>
+
+    <p>
+      We code mob movies with <c>-1</c> and romance movies with <c>1</c>.
+    </p>
+
+    <p>
+      To quantify each user's genre preferences, we fit a separate linear model for every user <m>i</m> (rows of <c>y</c>) by using <c>apply</c>:
+    </p>
+
+    <program language="r">
+      <input>
+p &lt;- apply(y, 1, function(y_i) lm(y_i ~ q - 1)$coef)
+      </input>
+    </program>
+
+    <p>
+      We include <c>-1</c> in the formula because the residuals were constructed to have mean 0, so no intercept is needed.
+    </p>
+
+    <p>
+      Each call to <c>lm</c> returns an estimated coefficients representing the difference in average ratings between mob and romance movies. A positive value indicates a preference for mob movies, a negative value indicates a preference for romance movies, and values near 0 suggest no strong preference.
+    </p>
+
+    <p>
+      Collecting these across users gives us <c>p</c>, a vector with one entry per user. The histogram below shows users cluster into these three type:
+    </p>
+
+    <figure xml:id="fig-factor-histogram-example">
+      <caption>Estimated user preference for mob versus romance films</caption>
+      <image source="images/latent-factor-models-factor-histogram-example.png" width="70%">
+        <description>A histogram of the estimated user factor values shows three clusters, corresponding to users who prefer mob movies, users who prefer romance movies, and users with little genre preference.</description>
+      </image>
+    </figure>
+
+    <p>
+      We now show that we can approximate each rating <m>Y_{ij}</m> using just the product of two vectors: one describing user preferences (<c>p</c>) and one describing movie characteristics (<c>q</c>). To work with matrix algebra, we convert the vectors into matrices and multiply them:
+    </p>
+
+    <figure xml:id="fig-e-vs-pq">
+      <caption>Observed ratings versus a one-factor approximation</caption>
+      <image source="images/latent-factor-models-e-vs-pq.png" width="70%">
+        <description>A scatterplot compares observed simulated ratings with their one-factor approximation. The points follow an increasing trend but still show substantial scatter around the diagonal.</description>
+      </image>
+    </figure>
+
+    <p>
+      The points fall roughly along the diagonal, which means the model captures a good amount of structure in the data. However, there is still substantial unexplained variation. Even after removing the "mob vs. romance" effect, we still see correlation patterns:
+    </p>
+
+    <console>
+      <input>
+cor(y - p %*% t(q))
+      </input>
+      <output>
+                     Godfather Godfather 2 Goodfellas Scent of a Woman You've Got Mail Sleepless in Seattle
+Godfather                1.000       0.185     -0.545            0.557          -0.280               -0.198
+Godfather 2              0.185       1.000     -0.618            0.594          -0.186               -0.364
+Goodfellas              -0.545      -0.618      1.000           -0.671           0.619                0.650
+Scent of a Woman         0.557       0.594     -0.671            1.000          -0.641               -0.656
+You've Got Mail         -0.280      -0.186      0.619           -0.641           1.000                0.353
+Sleepless in Seattle    -0.198      -0.364      0.650           -0.656           0.353                1.000
+      </output>
+    </console>
+
+    <p>
+      Looking more closely, this structure appears to come from whether or not Al Pacino is in the movie. This suggests we can improve the model by adding a second latent factor, one that distinguishes Pacino films from non-Pacino films. We do this by adding a second column to <c>q</c>:
+    </p>
+
+    <program language="r">
+      <input>
+q &lt;- cbind(c(1, 1, 1, -1, -1, -1),
+           c(1, 1, -1, 1, -1, -1))
+      </input>
+    </program>
+
+    <p>
+      Now each movie is described by <em>two latent factors</em>:
+    </p>
+
+    <ol>
+      <li>Mob vs. romance</li>
+      <li>Al Pacino vs. not Al Pacino</li>
+    </ol>
+
+    <p>
+      We then fit a model for each user to estimate their preference for each factor:
+    </p>
+
+    <program language="r">
+      <input>
+p &lt;- t(apply(y, 1, function(y_i) lm(y_i ~ q-1)$coef))
+      </input>
+    </program>
+
+    <p>
+      Because <c>q</c> now has two columns, <c>lm</c> returns two coefficients per user. The first captures mob/romance preference, and the second captures whether the user tends to like Al Pacino films.
+    </p>
+
+    <p>
+      We use <c>t</c> (transpose) because <c>apply</c> stacks results as columns, but we want one user per row.
+    </p>
+
+    <p>
+      With two factors, our predictions improve:
+    </p>
+
+    <figure xml:id="fig-e-vs-pq-2">
+      <caption>Observed ratings versus a two-factor approximation</caption>
+      <image source="images/latent-factor-models-e-vs-pq-2.png" width="70%">
+        <description>A scatterplot compares observed simulated ratings with their two-factor approximation. The points lie much closer to the diagonal than in the one-factor case, indicating a better fit.</description>
+      </image>
+    </figure>
+
+    <p>
+      And now, if we look at the residual correlation
+    </p>
+
+    <console>
+      <input>
+cor(y - p %*% t(q))
+      </input>
+      <output>
+                     Godfather Godfather 2 Goodfellas Scent of a Woman You've Got Mail Sleepless in Seattle
+Godfather              1.00000     -0.3597    0.00716          0.00716          0.2412              0.41857
+Godfather 2           -0.35970      1.0000   -0.04429         -0.04429          0.4955              0.20741
+Goodfellas             0.00716     -0.0443    1.00000          1.00000         -0.0339             -0.00554
+Scent of a Woman       0.00716     -0.0443    1.00000          1.00000         -0.0339             -0.00554
+You've Got Mail        0.24118      0.4955   -0.03395         -0.03395          1.0000             -0.27145
+Sleepless in Seattle   0.41857      0.2074   -0.00554         -0.00554         -0.2714              1.00000
+      </output>
+    </console>
+
+    <p>
+      there is no clear pattern left. The two latent factors now explain the main structure in the data.
+    </p>
+
+    <p>
+      This approximation with two factors can be written as:
+    </p>
+
+    <me>
+      Y_{ij} \approx p_{i1}q_{j1} + p_{i2}q_{j2}, i = 1 \dots, I \mbox{ and } j = 1, \dots, J
+    </me>
+
+    <p>
+      with <m>I</m> the number of users and <m>J</m> the number of movies.
+    </p>
+
+    <p>
+      Using matrix representation we can rewrite the above question like this:
+    </p>
+
+    <me>
+      \mathbf{Y} \approx \mathbf{P}\mathbf{Q}^\top
+    </me>
+
+    <p>
+      with <m>\mathbf{Y}</m> an <m>I\times J</m> matrix with entries <m>Y_{ij}</m>, <m>\mathbf{P}</m> a <m>I\times K</m> matrix with entries <m>p_{ik}</m>, and <m>\mathbf{Q}</m> a <m>J\times K</m> matrix with entries <m>q_{jk}</m>.
+    </p>
+
+    <p>
+      This analysis provides insights into the process generating our data since <m>\mathbf{P}</m> contains user-specific parameters and <m>\mathbf{Q}</m> contains movie-specific parameters. The approach is often referred to as <em>matrix factorization</em> because the rating matrix has been <em>factorized</em> into two lower-dimensional, interpretable matrices.
+    </p>
+
+    <p>
+      Note that the apporach also provides compression since the <m>120 \times 6 = 720</m> observations can be well approximated by a matrix multiplication of a <m>120 \times 2</m> matrix <m>\mathbf{P}</m> and a <m>6 \times 2</m> matrix <m>\mathbf{Q}</m>, a total of <m>252</m> parameters.
+    </p>
+
+    <p>
+      In our example with simulated data, we deduced the factors <m>\mathbf{q}_1</m> and <m>\mathbf{q}_2</m> from the sample correlation and our knowledge of movies. These ended up working well. However, in general deducing factors is not this easy. Furthermore, factors that provide good approximation might be more complicated than containing just two values. For example, <em>The Godfather III</em> has a romantic subplot so we might not know what value to assign it in <c>q_1</c>.
+    </p>
+
+    <p>
+      So, can we estimate the factors? A challenge is that if <m>\mathbf{P}</m> is unknown, our model is no longer linear: we can't use <c>lm</c> to estimate both <m>\mathbf{P}</m> and <m>\mathbf{Q}</m>. In the next sections, we describe how PCA can be used to estimate <m>\mathbf{P}</m> and <m>\mathbf{Q}</m>.
+    </p>
+
+    <note>
+      <p>
+        We used <c>apply</c> and <c>lm</c> to estimate <c>p</c>. But there is a faster way to compute these estimates using linear algebra.
+      </p>
+
+      <p>
+        The <c>lm</c> function works by minimizing the sum of squared residuals. In matrix form, this leads to the normal equations:
+      </p>
+
+      <me>
+        (\mathbf{q}^\top\mathbf{q}) \, \hat{\mathbf{p}}_i = \mathbf{q}^\top \mathbf{y}_i
+      </me>
+
+      <p>
+        where <m>\mathbf{y}_i</m> is the column vector representing the <m>i</m>-th row of <c>y</c> passed to the <c>apply</c> call.
+      </p>
+
+      <p>
+        The key observation is that <m>\mathbf{q}</m> is the same for every user, so running <c>lm</c> repeatedly is wasteful: it recomputes the same matrix operations each time. Instead, we can solve the system once and apply it efficiently to all users by using matrix operations:
+      </p>
+
+      <program language="r">
+        <input>
+p &lt;- t(qr.solve(crossprod(q)) %*% t(q) %*% t(y))
+        </input>
+      </program>
+
+      <p>
+        This computes all <m>\hat{\mathbf{p}}_i</m> values at once, avoiding thousands of separate model fits.
+      </p>
+    </note>
+  </section>
+
+  <section xml:id="connection-to-pca">
+    <title>Connection to PCA</title>
+
+    <p>
+      Notice that in the PCA chapter we learned that if we perform PCA on a matrix <m>\mathbf{Y}</m>, we obtain a transformation <m>\mathbf{V}</m> that permits us to rewrite:
+    </p>
+
+    <me>
+      \mathbf{Y} = \mathbf{Z} \mathbf{V}^\top
+    </me>
+
+    <p>
+      with <m>\mathbf{Z}</m> the matrix of principal components.
+    </p>
+
+    <p>
+      Let's perform PCA on the <m>\mathbf{Y}</m> constructed in the previous section and examine the results:
+    </p>
+
+    <program language="r">
+      <input>
+pca &lt;- prcomp(y, center = FALSE)
+      </input>
+    </program>
+
+    <p>
+      First, notice that the first two PCs explain over 85% of the variability:
+    </p>
+
+    <console>
+      <input>
+pca$sdev^2/sum(pca$sdev^2)
+      </input>
+      <output>
+[1] 0.6939 0.1790 0.0402 0.0313 0.0303 0.0253
+      </output>
+    </console>
+
+    <p>
+      Next, notice that the first column of <m>\mathbf{V}</m>:
+    </p>
+
+    <console>
+      <input>
+pca$rotation[,1]
+      </input>
+      <output>
+           Godfather          Godfather 2           Goodfellas
+               0.306                0.261                0.581
+    Scent of a Woman      You've Got Mail Sleepless in Seattle
+              -0.570               -0.294               -0.300
+      </output>
+    </console>
+
+    <p>
+      is assigning positive values to the mob movies and negative values to the romance movies.
+    </p>
+
+    <p>
+      The second column:
+    </p>
+
+    <console>
+      <input>
+pca$rotation[,2]
+      </input>
+      <output>
+           Godfather          Godfather 2           Goodfellas
+               0.354                0.377               -0.382
+    Scent of a Woman      You've Got Mail Sleepless in Seattle
+               0.437               -0.448               -0.442
+      </output>
+    </console>
+
+    <p>
+      is coding for Al Pacino movies.
+    </p>
+
+    <p>
+      PCA is automatically discovering the structure we inferred using our knowledge of the movies. This is not a coincidence, there is a mathematical connection that explains why PCA aligns with these latent patterns.
+    </p>
+
+    <p>
+      To see this assume that the data <m>\mathbf{Y}</m> follows the model:
+    </p>
+
+    <md>
+      <mrow>Y_{ij} = \sum_{k=1}^K p_{ik}q_{jk} + \varepsilon_{ij}, \amp i=1,\dots,I, \, j = 1,\dots J \mbox{ or }</mrow>
+      <mrow>\mathbf{Y} \amp =  \mathbf{P}\mathbf{Q} ^\top + \boldsymbol{\varepsilon}</mrow>
+    </md>
+
+    <p>
+      with the constraint
+    </p>
+
+    <me>
+      \mathbf{Q}^\top\mathbf{Q} = \mathbf{I}
+    </me>
+
+    <note>
+      <p>
+        To understand why we need this constraint, notice that without it the model is not uniquely defined, it is <em>unidentifiable</em>. For example, we can multiply any column of <m>\mathbf{P}</m> by a constant <m>c > 0</m> and divide the corresponding column of <m>\mathbf{Q}</m> by the same constant, and the product <m>\mathbf{P}\mathbf{Q}^\top</m> remains unchanged. This constraint removes the scaling ambiguity and ensures that the factorization has a well-defined form.
+      </p>
+    </note>
+
+    <p>
+      The first <m>K</m> columns of the principal components and the associated rotation matrix provide estimates of <m>\mathbf{P}</m> and <m>\mathbf{Q}</m>, respectively. In other words, PCA can be viewed as a special case of latent factor modeling where the latent factors are chosen to be orthogonal and ordered by the variance they explain. This explains why PCA naturally recovers interpretable patterns, such as genre preferences or actor-specific effects, without us explicitly coding them into the model.
+    </p>
+
+    <p>
+      Another way to see this connection is through optimization. PCA can be formulated as the solution to a least squares problem: among all possible <m>K</m>-dimensional projections of the data, PCA finds the one that minimizes the reconstruction error, that is, the sum of squared differences between the original data <m>\mathbf{Y}</m> and its approximation <m>\mathbf{P}\mathbf{Q}^\top</m>. In this sense, PCA provides the best rank-<m>K</m> approximation of <m>\mathbf{Y}</m> in the least squares sense.
+    </p>
+
+    <p>
+      This dual interpretation, both as a factor model and as a least squares optimizer, highlights why PCA is such a powerful tool for uncovering hidden structure in high-dimensional data: it compresses the data efficiently while also providing factors that capture the dominant sources of variation.
+    </p>
+
+    <note>
+      <p>
+        Even with the orthogonality constraint, the PCA solution is not completely unique. There remains a <em>sign indeterminacy</em>: we can flip the sign of any column in <m>\mathbf{P}</m> and the corresponding column in <m>\mathbf{Q}</m> (multiply one by <m>-1</m> and the other by <m>-1</m>) without changing the product <m>\mathbf{P}\mathbf{Q}^\top</m>. Thus, the factorization is identifiable only up to these sign changes.
+      </p>
+    </note>
+  </section>
+
+  <section xml:id="case-study-recommendation-systems">
+    <title>Case study: recommendation systems</title>
+
+    <p>
+      We now move back from the small simulated example to the real Movielens dataset. In the previous section, we used a toy setting to illustrate how latent factors can capture patterns such as "mob vs. romance" or "Al Pacino vs. not Al Pacino". Here, we show that similar latent structure is present in the real movie ratings and that we can exploit it to further improve predictions.
+    </p>
+
+    <p>
+      Starting from the residuals of our regularized user + movie model (introduced in the regularization chapter), we can examine how movie ratings correlate after accounting for overall averages and user and movie effects. Focusing on a small set of well-known titles, we compute the correlation matrix of these residuals:
+    </p>
+
+    <console>
+      <input>
+ow &lt;- options(width = 200)
+ms &lt;- c("Godfather, The", "Godfather: Part II, The", "Goodfellas",
+            "Scent of a Woman",  "You've Got Mail", "Sleepless in Seattle")
+ids &lt;- movie_map[match(ms, title), movieId]
+r &lt;- dcast(train_set[movieId %in% ids, ], userId ~ movieId, value.var = "resid")[,-1] |&gt;
+  as.matrix()
+r &lt;- r[,ids]
+colnames(r) &lt;- with(movie_map, title[match(colnames(r), movieId)]) |&gt;
+  stringr::str_remove(", The") |&gt; stringr::str_remove(": Part")
+
+round(cor(r, use = "pairwise.complete.obs"), 2)
+options(ow)
+      </input>
+      <output>
+                     Godfather Godfather II Goodfellas Scent of a Woman You've Got Mail Sleepless in Seattle
+Godfather                 1.00         0.84       0.49             0.46           -0.36                -0.42
+Godfather II              0.84         1.00       0.47             0.21           -0.25                -0.43
+Goodfellas                0.49         0.47       1.00             0.04           -0.27                -0.45
+Scent of a Woman          0.46         0.21       0.04             1.00           -0.37                -0.50
+You've Got Mail          -0.36        -0.25      -0.27            -0.37            1.00                 0.43
+Sleepless in Seattle     -0.42        -0.43      -0.45            -0.50            0.43                 1.00
+      </output>
+    </console>
+
+    <p>
+      As in the simulated example, we see clear correlation patterns. For instance, <em>The Godfather</em>, <em>The Godfather Part II</em>, and <em>Goodfellas</em> share similar residuals, while romantic comedies show different behavior. This suggests that ratings are influenced by <em>latent characteristics</em> that group movies and users in meaningful ways.
+    </p>
+
+    <subsection xml:id="latent-factor-model-for-movie-ratings">
+      <title>A latent factor model for movie ratings</title>
+
+      <p>
+        This motivates extending our earlier model. We now incorporate latent factors that capture similarities between movies and users. This leads us to a simplified version of the approach used by the winning Netflix Prize team, which combined latent factor models with the regularization methods developed in the regularization chapter.
+      </p>
+
+      <p>
+        To account for interactions such as these, we use a latent factor model. Specifically, we extend the model from the regularization chapter to include factors that capture similarities between movies:
+      </p>
+
+      <me>
+        Y_{ij} = \mu + \alpha_i + \beta_j + \sum_{k=1}^K p_{ik}q_{jk} + \varepsilon_{ij}
+      </me>
+
+      <p>
+        Recall that, as explained in the previous chapter, we do not observe all <m>(i,j)</m> combinations. Writing the data as an <m>I \times J</m> matrix <m>\mathbf{Y}</m>, with <m>I</m> users and <m>J</m> movies, would produce many missing values.
+      </p>
+
+      <p>
+        However, the sum <m>\sum_{k=1}^K p_{ik}q_{jk}</m> can be expressed as the <m>I \times J</m> matrix product <m>\mathbf{P}\mathbf{Q}^\top</m>, where <m>\mathbf{P}</m> is an <m>I \times K</m> matrix and <m>\mathbf{Q}</m> is a <m>J \times K</m> matrix. Estimating all parameters effectively fills in every cell of the <m>I \times J</m> matrix, giving predictions for all <m>(i,j)</m> pairs.
+      </p>
+
+      <p>
+        So if this latent factor model is a good approximation, we don't actually need to observe every user-movie rating to make predictions. Instead, we just need enough observed ratings to estimate the latent factor matrices <m>\mathbf{P}</m> (for users) and <m>\mathbf{Q}</m> (for movies). Once we have these matrices, we can predict any user-movie combination, even those not seen in the training data, simply by computing:
+      </p>
+
+      <me>
+        \hat{y}_{ij} \approx \hat{\mu} + \hat{\alpha}_i + \hat{\beta}_j + \hat{p}_i^\top \hat{q}_j
+      </me>
+    </subsection>
+
+    <subsection xml:id="latent-factor-regularization">
+      <title>Regularization</title>
+
+      <p>
+        Given the large number of parameters and the sparsity of the data, especially for movies with few ratings, it is appropriate to use penalized least squares. We therefore minimize:
+      </p>
+
+      <me>
+        \frac{1}{N}
+        \sum_{i,j} \left[Y_{ij} - \left(\mu + \alpha_i + \beta_j + \sum_{k=1}^K p_{ik}q_{jk}\right)\right]^2 +
+        \lambda_1 \left(
+        \|\boldsymbol{\alpha}\|^2 +
+        \|\boldsymbol{\beta}\|^2
+        \right) +
+        \lambda_2
+        \sum_{k=1}^K \left( \|\mathbf{p}_k\|^2+
+         \|\mathbf{q}_k\|^2
+        \right)
+      </me>
+
+      <p>
+        Here, <m>N</m> is the number of observed ratings, <m>I</m> the number of users, and <m>J</m> the number of movies. The vectors <m>\boldsymbol{\alpha}</m> and <m>\boldsymbol{\beta}</m> are the user and movie effects, <m>\boldsymbol{\alpha} = (\alpha_1,\dots,\alpha_I)^\top</m> and <m>\boldsymbol{\beta} = (\beta_1,\dots,\beta_J)^\top</m>. The vectors <m>\mathbf{p}_k = (p_{1k}, \dots, p_{Ik})^\top</m> and <m>\mathbf{q}_k = (q_{1k}, \dots, q_{Jk})^\top</m> are the <m>k</m>-th latent factor components. Recall that <m>|\boldsymbol{\alpha}|^2</m> denotes the sum of squares, <m>\sum_{i=1}^I \alpha_i^2</m>.
+      </p>
+
+      <p>
+        We use two penalties: <m>\lambda_1</m> for the linear effects (the <m>\alpha</m>s and <m>\beta</m>s), and <m>\lambda_2</m> for the latent factors. This lets us regularize the two components differently, reflecting their distinct roles in the model.
+      </p>
+
+      <p>
+        How do we estimate the parameters in this model? The challenge comes from the fact that both the <m>p</m>s and <m>q</m>s are unknown and appear multiplied together, making the model nonlinear in its parameters. In earlier sections, we highlighted the connection between factor analysis and principal component analysis (PCA), and showed that in settings with complete data, PCA can be used to estimate the latent factors of a factor analysis model.
+      </p>
+
+      <p>
+        However, recommendation systems present a critical complication: the rating matrix is extremely sparse. Most users only rate a small subset of movies, so the data matrix has many missing entries. PCA and related approaches require a fully observed matrix, so they cannot be applied directly in this context. In addition, while PCA provides least squares estimates, here we want to use <em>penalized least squares</em>, which allows us to regularize the parameters and avoid overfitting when the data for some users or movies are limited.
+      </p>
+
+      <p>
+        To address these challenges, we again turn to the <em>Alternating Least Squares (ALS)</em> algorithm described in the movie effects chapter. The key idea is to alternately estimate each column of <m>\mathbf{P}</m> and <m>\mathbf{Q}</m>: fix all columns except one, and solve for that one column using penalized least squares, then switch across all columns. This alternating approach also extends naturally to penalized versions of the model, where user and movie effects and latent factors are regularized separately. For these reasons, ALS has become one of the standard approaches for fitting latent factor models in recommendation systems, where sparsity makes direct application of PCA infeasible.
+      </p>
+
+      <p>
+        The <alert>dslabs</alert> package provides the <c>fit_recommender_model</c> function, which implements a latent factor model with regularization:
+      </p>
+
+      <program language="r">
+        <input>
+fit &lt;- with(train_set, fit_recommender_model(rating, userId, movieId, reltol=1e-6))
+        </input>
+      </program>
+
+      <p>
+        You can learn more about the function, including default parameter choices, by running <c>?fit_recommender_model</c> and examining the source code.
+      </p>
+
+      <p>
+        Once we have a fitted model, we can build predictions for the test set and compute the RMSE:
+      </p>
+
+      <console>
+        <input>
+i &lt;- test_set$userId
+j &lt;- test_set$movieId
+resid &lt;- test_set$rating - with(fit, mu + a[i] + b[j] + rowSums(p[i,]*q[j,]))
+rmse(resid)
+        </input>
+        <output>
+[1] 0.859
+        </output>
+      </console>
+
+      <p>
+        This improves accuracy beyond the regularized user + movie effects model from the regularization chapter. It illustrates, in simplified form, how the Netflix Prize winners improved prediction: by combining regularization with a latent factor model that learns hidden structure in user–movie interactions.
+      </p>
+
+      <p>
+        Importantly, this improvement is achieved without tuning the penalty terms <m>\lambda_1</m> and <m>\lambda_2</m>, the number of latent factors <m>K</m>, or other model settings discussed next.
+      </p>
+    </subsection>
+
+    <subsection xml:id="visualizing-factors">
+      <title>Visualizing factors</title>
+
+      <p>
+        Examining the estimated movie factors <m>\mathbf{q}_k</m> reveals that they are interpretable.
+      </p>
+
+      <p>
+        The estimates for these factors are contained in <c>fit$q</c>. Because some movies do not have enough ratings to stably estimate latent factors, the <c>fit_recommender_model</c> function excludes these movies from the estimation. We therefore obtain the estimated movie factors <m>\mathbf{q}_k</m> using:
+      </p>
+
+      <program language="r">
+        <input>
+factors &lt;- fit$q[fit$n_item &gt;= fit$min_ratings,]
+        </input>
+      </program>
+
+      <p>
+        To make interpretation easier, we replace the row names (which are movie IDs) with movie titles:
+      </p>
+
+      <program language="r">
+        <input>
+rownames(factors) &lt;- movielens[match(rownames(factors), movieId)]$title
+        </input>
+      </program>
+
+      <p>
+        Plotting the first two factors reveals several insights. First note that the six movies of our earlier example are highlighted in blue: we can see that these two factors start to explain the correlations we saw earlier, with mob films clustering together, romance films far from these, and the Al Pacino being somewhere in between:
+      </p>
+
+      <figure xml:id="fig-movies-pca">
+        <caption>Estimated movie factors from the recommender model</caption>
+        <image source="images/latent-factor-models-movies-pca.png" width="95%">
+          <description>A scatterplot of the first two estimated movie factors shows labeled movie titles. The six example films are highlighted in blue, while movies with extreme factor values are labeled in red.</description>
+        </image>
+      </figure>
+
+      <p>
+        Looking at the movies with the most extreme factor values (red) provides a clear interpreation for the factors.
+      </p>
+
+      <p>
+        The first factor separates iconic dark classics
+      </p>
+
+      <console>
+        <input>
+names(sort(factors[,1], decreasing = TRUE)[1:5])
+        </input>
+        <output>
+[1] "2001: A Space Odyssey"
+[2] "Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb"
+[3] "Clockwork Orange, A"
+[4] "Taxi Driver"
+[5] "Silence of the Lambs, The"
+        </output>
+      </console>
+
+      <p>
+        from Hollywood blockbusters
+      </p>
+
+      <console>
+        <input>
+names(sort(factors[,1])[1:5])
+        </input>
+        <output>
+[1] "Armageddon"
+[2] "Pearl Harbor"
+[3] "Con Air"
+[4] "Star Wars: Episode I - The Phantom Menace"
+[5] "Mission: Impossible II"
+        </output>
+      </console>
+
+      <p>
+        The second factor separates weird cult movies
+      </p>
+
+      <console>
+        <input>
+names(sort(factors[,2], decreasing = TRUE)[1:5])
+        </input>
+        <output>
+[1] "Showgirls"         "Scary Movie"       "Leaving Las Vegas"
+[4] "Dogma"             "Rosemary's Baby"
+        </output>
+      </console>
+
+      <p>
+        from big-budget epic historical and fantasy sagas
+      </p>
+
+      <console>
+        <input>
+names(sort(factors[,2])[1:5])
+        </input>
+        <output>
+[1] "Lord of the Rings: The Two Towers, The"
+[2] "Lord of the Rings: The Return of the King, The"
+[3] "Lord of the Rings: The Fellowship of the Ring, The"
+[4] "Dances with Wolves"
+[5] "Matrix, The"
+        </output>
+      </console>
+
+      <p>
+        These results demonstrate that the latent factors capture meaningful distinctions in film genres and styles, showing how latent factor models can uncover interpretable structure from sparse rating data.
+      </p>
+    </subsection>
+
+    <subsection xml:id="practical-considerations">
+      <title>Practical considerations</title>
+
+      <p>
+        The <c>fit_recommender_model</c> function includes several adjustable parameters:
+      </p>
+
+      <ul>
+        <li>
+          <p>
+            Penalty terms: by default, <m>\lambda_1 = 0.00005</m> and <m>\lambda_2 = 0.0001</m>. A grid search, as in the selecting penalty term section, can identify better choices.
+          </p>
+        </li>
+        <li>
+          <p>
+            Number of latent factors: the default is <m>K = 8</m>, but this may not be optimal. If <m>K</m> is too small, the model may miss structure. If <m>K</m> is too large, the model risks overfitting and instability.
+          </p>
+        </li>
+        <li>
+          <p>
+            Minimum ratings per movie: the function only estimates latent factors for movies with at least 20 ratings. This helps avoid unstable estimates of the <m>q</m> vectors. However, 20 may be too high, or too low, depending on the dataset.
+          </p>
+        </li>
+        <li>
+          <p>
+            Convergence tolerance: the default stopping rule requires model improvement below <c>reltol</c>. Decreasing the tolerance will make results better, but increasing the tolerance often speeds up computation with little loss in accuracy.
+          </p>
+        </li>
+      </ul>
+
+      <p>
+        Further improvements can be made by adding more predictors, such as rating timestamps or movie genres.
+      </p>
+
+      <p>
+        Finally, the winning team's breakthrough came from recognizing that missing ratings are informative. Users tend to avoid movies they expect to dislike, meaning that the absence of a rating is not random. By modeling this structure, they achieved state-of-the-art performance that ultimately led to victory.
+      </p>
+    </subsection>
+  </section>
+
+  <section xml:id="singular-value-decomposition">
+    <title>Singular Value Decomposition</title>
+
+    <p>
+      A related technique often used in latent factor analysis is the Singular Value Decomposition (SVD). It states any <m>N \times p</m> matrix can be written:
+    </p>
+
+    <me>
+      \mathbf{Y} = \mathbf{U}\mathbf{D}\mathbf{V}^\top
+    </me>
+
+    <p>
+      where <m>\mathbf{U}</m> is an orthogonal <m>N \times p</m> matrix, <m>\mathbf{V}</m> an orthogonal <m>p \times p</m> matrix, and <m>\mathbf{D}</m> diagonal with <m>d_{1,1} \geq d_{2,2} \geq \dots \geq d_{p,p}</m>. SVD is connected to PCA because <m>\mathbf{V}</m> provides the rotations for the principal components, while <m>\mathbf{U}\mathbf{D}</m> are the principal components themselves. Squaring the diagonal entries of <m>\mathbf{D}</m> gives the sums of squares:
+    </p>
+
+    <me>
+      \mathbf{U}^\top \mathbf{D} \mathbf{U} = \mathbf{D}^2
+    </me>
+
+    <p>
+      In R, we can compute the SVD with <c>svd</c> and confirm its relationship to PCA:
+    </p>
+
+    <console>
+      <input>
+x &lt;- matrix(rnorm(1000), 100, 10)
+pca &lt;- prcomp(x, center = FALSE)
+s &lt;- svd(x)
+
+all.equal(pca$rotation, s$v, check.attributes = FALSE)
+all.equal(pca$sdev^2, s$d^2/(nrow(x) - 1))
+all.equal(pca$x, s$u %*% diag(s$d), check.attributes = FALSE)
+      </input>
+      <output>
+[1] TRUE
+[1] TRUE
+[1] TRUE
+      </output>
+    </console>
+
+    <p>
+      As an optimization, note that <c>s$u %*% diag(s$d)</c> can be written more efficiently as:
+    </p>
+
+    <program language="r">
+      <input>
+sweep(s$u, 2, s$d, "*")
+      </input>
+    </program>
+
+    <p>
+      The Singular Value Decomposition is one of the most widely used tools in modern data analysis, appearing in fields as diverse as signal processing, genomics, image compression, natural language processing, collaborative filtering, and numerical optimization. Any time we want to reduce dimensionality, uncover hidden structure, or work with large, noisy matrices, the SVD provides a principled foundation. In fact, many of the most successful machine learning algorithms, including the latent factor methods used in the Netflix Prize, are built directly on top of it.
+    </p>
+  </section>
+
+  <exercises xml:id="latent-factor-models-exercises">
+    <title>Exercises</title>
+
+    <exercise>
+      <statement>
+        <p>
+          Examine the movie names in the extreme values of factors 3, 4, 5, 6, 7, and 8. Describe any interesting patterns you observe.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Fit the recommender model with several values of
+        </p>
+
+        <program language="r">
+          <input>
+lambdas &lt;- expand.grid(lambda_1 = 10^-(3:6), lambda_2 = 10^-c(2:5))
+          </input>
+        </program>
+
+        <p>
+          Which pair gives the lowest RMSE on a validation set? Briefly explain why too little or too much penalization can hurt performance.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Fit the model with <m>K = 2, 4, 8, 16, 32</m>. Plot validation RMSE versus <m>K</m>. At what point do gains level off? Based on the plot, what value of <m>K</m> would you recommend?
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Using your results from Exercises 2 and 3, perform a grid search over three values of each parameter, <m>\lambda_1</m>, <m>\lambda_2</m>, and <m>K</m>, for a total of <m>3 \times 3 \times 3 = 27</m> combinations. Report the lowest RMSE.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          The default model estimates movie factors only for movies with at least 20 ratings. Try thresholds of 5, 10, 20, and 50. How does the RMSE change? Which threshold seems to balance stability and coverage best?
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Run the ALS algorithm with stopping rules <c>reltol = 10^-seq(1, 8, 0.5)</c>. Record the number of iterations taken and the final RMSE. Is the improvement from tighter convergence worth the additional computation?
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <introduction>
+        <p>
+          In next exercises we use the singular value decomposition (SVD) to estimate latent factors in a school-performance example.
+        </p>
+
+        <p>
+          We simulate grades for 100 students in 24 different courses, grouped into three subject areas: Math, Science, and Arts. The columns are individual courses (for example, Calculus, Linear Algebra, Physics, Chemistry, Music Theory, Painting), labeled <c>Math_1</c>, <ellipsis />, <c>Math_k</c>, <c>Science_1</c>, <ellipsis />, <c>Science_k</c>, and <c>Arts_1</c>, <ellipsis />, <c>Arts_k</c>.
+        </p>
+
+        <p>
+          Each entry represents points above/below the overall average for that test:
+        </p>
+
+        <ul>
+          <li>0 = average (C),</li>
+          <li>25 = very high (A+),</li>
+          <li>−25 = very low (F).</li>
+        </ul>
+
+        <p>
+          We assume the following model holds:
+        </p>
+
+        <me>
+          Y_{ij} = \mu_{ij} + \varepsilon_{ij}
+        </me>
+
+        <p>
+          with <m>\mu_{ij}</m> the expected grade for student <m>i</m> in class <m>j</m> and <m>\varepsilon_{ij}</m> random variation due to random chance in answering exam questions (guessing or dumb mistakes, for example). We assume the <m>\varepsilon_{ij}</m> are independent from each other. We will simulated data with:
+        </p>
+
+        <program language="r">
+          <input>
+set.seed(1987)
+n &lt;- 100; k &lt;- 8
+s &lt;- 64*matrix(c(1, .85, .5,
+                 .85, 1, .5,
+                 .5, .5, 1), 3, 3)
+m &lt;- MASS::mvrnorm(n, rep(0, 3), s)
+m &lt;- m[order(rowMeans(m), decreasing = TRUE), ] %x% matrix(rep(1, k), nrow = 1)
+y &lt;- m + matrix(rnorm(n * k * 3, 0, 3), n, k * 3)
+colnames(y) &lt;- paste(rep(c("Math", "Science", "Arts"), each = k), 1:k, sep = "_")
+          </input>
+        </program>
+
+        <p>
+          We want to summarize these 24 test scores per student as simply as possible. Are students equally good in all subjects, or do we see patterns? Does being strong in one subject predict being strong in another? How can SVD help us see this structure?
+        </p>
+
+        <p>
+          We will show that just three pairs of vectors can explain much of the variation in this <m>100 \times 24</m> matrix.
+        </p>
+
+        <p>
+          First define a helper function to visualize matrices:
+        </p>
+
+        <program language="r">
+          <input>
+nice_image &lt;- function(x, zlim = range(x), cex.axis = 0.5, ...) {
+  cols &lt;- seq_len(ncol(x))
+  rows &lt;- seq_len(nrow(x))
+
+  image(cols, rows, t(x[rev(rows), , drop = FALSE]),
+        col  = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdBu"))(500)),
+        xaxt = "n", yaxt = "n", xlab = "", ylab = "",
+        zlim = zlim, ...)
+
+  abline(h = rows + 0.5, v = cols + 0.5)
+  axis(1, at = cols, labels = colnames(x), las = 2, cex.axis = cex.axis)
+}
+          </input>
+        </program>
+      </introduction>
+
+      <statement>
+        <p>
+          Use <c>nice_image(y)</c> to visualize the 24 test scores for the 100 students. Which of the following best describes what you see?
+        </p>
+
+        <ol marker="a.">
+          <li>The test scores are all independent of each other.</li>
+          <li>The strongest students appear at the top of the image, and the 24 tests seem to group into three subject blocks.</li>
+          <li>Students who are good at math are clearly bad at science.</li>
+          <li>Students who are good at math are clearly bad at the arts.</li>
+        </ol>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Now look at the correlation matrix of the 24 tests:
+        </p>
+
+        <program language="r">
+          <input>
+nice_image(cor(y), zlim = c(-1, 1))
+axis(side = 2, at = 1:ncol(y), labels = rev(colnames(y)), las = 2, cex.axis = 0.5)
+          </input>
+        </program>
+
+        <p>
+          Which option best describes the correlation pattern?
+        </p>
+
+        <ol marker="a.">
+          <li>The test scores are independent.</li>
+          <li>Math and Science are highly correlated, but Arts is not correlated with anything.</li>
+          <li>Tests within the same subject are correlated, but there is no correlation between subjects.</li>
+          <li>There is correlation among all tests, with stronger correlation within each subject and stronger correlation between Math and Science than between either and Arts.</li>
+        </ol>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          First compute the total sum of squares in <c>y</c>:
+        </p>
+
+        <program language="r">
+          <input>
+tss_y &lt;- sum(colSums(y^2))
+          </input>
+        </program>
+
+        <p>
+          Now compute the SVD
+        </p>
+
+        <me>
+          \mathbf{Y} = \mathbf{U}\mathbf{D}\mathbf{V}^\top.
+        </me>
+
+        <p>
+          Use the SVD to verify in R that:
+        </p>
+
+        <ul>
+          <li>
+            The total sum of squares of all entries in <m>\mathbf{Y}\mathbf{V} = \mathbf{U}\mathbf{D}</m> is the same as in <m>\mathbf{Y}</m>.
+          </li>
+          <li>
+            The sum of the squared singular values (the diagonal entries of <m>\mathbf{D}</m>) is also equal to <c>tss_y</c>.
+          </li>
+        </ul>
+
+        <p>
+          Check these equalities in R and make sure you understand <em>why</em> they must hold (hint: <m>\mathbf{V}</m> is orthogonal and SVD preserves total sum of squares).
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Let <m>\mathbf{Z} = \mathbf{Y}\mathbf{V} = \mathbf{U}\mathbf{D}</m>.
+        </p>
+
+        <ul>
+          <li>
+            Plot the square root of the sum of squares of each column of <m>\mathbf{Y}</m> versus the column index.
+          </li>
+          <li>
+            On the same scale, plot the square root of the sum of squares of each column of the columns of <m>\mathbf{Z}</m>.
+          </li>
+        </ul>
+
+        <p>
+          Comment on what you see. Does the variation across columns become more concentrated in the first few columns of <m>\mathbf{Z}</m>?
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          In exercise 10 you computed the column sums of squares of <m>\mathbf{Z} = \mathbf{Y}\mathbf{V} = \mathbf{U}\mathbf{D}</m> using <c>colSums</c>. However, we actually already know these numbers from the SVD:
+        </p>
+
+        <ul>
+          <li>
+            Show in R that the squared singular values <m>(d_{kk}^2)</m> are equal to the column sums of squares of <m>\mathbf{Z}</m>.
+          </li>
+          <li>
+            Confirm this numerically by plotting the square root of the column sums of squares of <m>\mathbf{Z}</m> versus the diagonal entries of <m>\mathbf{D}</m>.
+          </li>
+        </ul>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          The columns of <m>\mathbf{Z} = \mathbf{Y}\mathbf{V} = \mathbf{U}\mathbf{D}</m> are the principal components (PCs) of <m>\mathbf{Y}</m>. The diagonal of <m>\mathbf{D}</m> tells us how much variability each PC explains.
+        </p>
+
+        <p>
+          Compute the SVD and plot the percentage of variance explained by each PC:
+        </p>
+
+        <program language="r">
+          <input>
+s &lt;- svd(y)
+plot(1:ncol(y), s$d^2/sum(s$d^2)*100, xlab = "PC", ylab = "Variance explained (%)")
+          </input>
+        </program>
+
+        <p>
+          You should see that the first PC explains over 60% of the variability. Compare the first PC to each student's average grade:
+        </p>
+
+        <program language="r">
+          <input>
+pc1 &lt;- s$u[, 1]*s$d[1]
+plot(rowMeans(y), pc1)
+          </input>
+        </program>
+
+        <p>
+          How would you interpret the first PC in plain language? (Remember the sign is arbitrary, so high PC1 can correspond to strong student or weak student, depending on sign.)
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          The SVD can be written as
+        </p>
+
+        <me>
+          \mathbf{Y} = \mathbf{u}_1 d_{1,1} \mathbf{v}_1^\top
+             + \mathbf{u}_2 d_{2,2} \mathbf{v}_2^\top
+             + \dots
+             + \mathbf{u}_p d_{p,p} \mathbf{v}_p^\top,
+        </me>
+
+        <p>
+          where <m>\mathbf{u}_k</m> is the <m>k</m>-th column of <m>\mathbf{U}</m>, <m>d_{k,k}</m> is the <m>k</m>-th diagonal entry of <m>\mathbf{D}</m>, and <m>\mathbf{v}_k</m> is the <m>k</m>-th column of <m>\mathbf{V}</m>.
+        </p>
+
+        <p>
+          Approximate all student grades <m>\mu_{ij}</m> using only the first term:
+        </p>
+
+        <me>
+          \hat{\mu}_{ij} = \mathbf{u}_1 d_{1,1} \mathbf{v}_1^\top.
+        </me>
+
+        <p>
+          Compute the residual matrix <m>\mathbf{r} = \mathbf{y} - \mathbf{u}_1 d_{1,1} \mathbf{v}_1^\top</m>, and visualize the residuals and their correlations with <c>nice_image</c>. Do you still see subject-level correlation structure in the residuals?
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Now approximate grades using the first two components:
+        </p>
+
+        <me>
+          \hat{\mu}_{ij} = \sum_{k=1}^2 \mathbf{u}_k d_{k,k} \mathbf{v}_k^\top.
+        </me>
+
+        <p>
+          and repeat exploratory plots generated in exercise 13. Has most of the correlation structure disappeared, or is there still visible within-subject pattern?
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Now repeat exercise 14 but using the first three components:
+        </p>
+
+        <me>
+          \hat{\mu}_{ij} = \sum_{k=1}^3 \mathbf{u}_k d_{k,k} \mathbf{v}_k^\top.
+        </me>
+
+        <p>
+          Is the correlation now essentially gone? How many factors does it seem we need to capture the main structure <m>\mu_{ij}</m> for these 24 courses?
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Finally, inspect the first three right singular vectors (the columns of <m>\mathbf{V}</m>):
+        </p>
+
+        <program language="r">
+          <input>
+v &lt;- s$v
+rownames(v) &lt;- colnames(y)
+nice_image(t(v[, 1:3]))
+          </input>
+        </program>
+
+        <p>
+          Each row corresponds to a course (for example, <c>Math_1</c>, <c>Science_3</c>, <c>Arts_5</c>), and each column corresponds to one factor (PC1, PC2, PC3). How would you interpret the first three columns of <m>\mathbf{V}</m>? Write a short interpretation for each of the three factors in plain language.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Based on the patterns see in exercise 16, how would you interpret the values <m>u_{i1}, \dots, u_{ip}</m> for student <m>i</m>:
+        </p>
+
+        <ul>
+          <li>Is one roughly quantifying <em>overall academic strength</em>?</li>
+          <li>Is one quantifying how much better the student is at <em>STEM vs. Arts</em>?</li>
+          <li>Is another quantifying how much better at <em>Math vs. Science</em>?</li>
+          <li>Are some of them just random noise?</li>
+        </ul>
+      </statement>
+    </exercise>
+  </exercises>
+
+</chapter>

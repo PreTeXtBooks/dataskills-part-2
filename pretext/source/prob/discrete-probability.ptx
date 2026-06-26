@@ -1,0 +1,581 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="discrete-probability">
+  <title>Discrete Probability</title>
+  
+  <introduction>
+    <p>
+      We begin by covering some basic principles related to categorical data. The specific area of probability which deals with categorical data is referred to as <em>discrete probability</em>. Understanding this topic, will help us comprehend the probability theory we will later introduce for numeric and continuous data, which is much more common in data analysis. Since discrete probability is invaluable in card games, we will use these as illustrative examples.
+    </p>
+  </introduction>
+
+  <section xml:id="relative-frequency">
+    <title>Relative frequency</title>
+    <p>
+      The term <em>probability</em> is used in everyday language. Yet answering questions about probability is often hard, if not impossible. In this section, we discuss a mathematical definition of <em>probability</em> that allows us to give precise answers to certain questions.
+    </p>
+    <p>
+      For example, if I have 2 red beads and 3 blue beads inside an urn<fn>https://en.wikipedia.org/wiki/Urn_problem</fn> (most probability books use this archaic term, so we do too) and I pick one at random, what is the probability of picking a red one? Our intuition tells us that the answer is 2/5 or 40%. A precise definition can be given by noting that there are five possible outcomes, of which two satisfy the condition necessary for the event "pick a red bead". Since each of the five outcomes has an equal chance of occurring, we conclude that the probability is .4 for red and .6 for blue.
+    </p>
+    <p>
+      A more intuitive way to think about the probability of an event is as the long-run proportion of times the event occurs when an experiment is repeated independently and under identical conditions, an infinite number of times. This interpretation naturally leads to one of the most powerful techniques in data science, Monte Carlo simulations, which we will explore later in this chapter.
+    </p>
+  </section>
+
+  <section xml:id="probability-distributions">
+    <title>Probability distributions</title>
+    <p>
+      Probability distributions are the foundation of most statistical models. They describe how likely different outcomes are, providing a mathematical summary of uncertainty. Every model we use in data analysis, from simple polling examples to complex multivariate models, is built on assumptions about underlying probability distributions. As we move to continuous and multidimensional settings, these distributions become more complex and abstract. For discrete cases, however, the idea is quite intuitive: each possible outcome, or category, is assigned a probability based on its relative frequency.
+    </p>
+    <p>
+      If we know the relative frequency of the different categories, defining a distribution for categorical outcomes is relatively straightforward. We simply assign a probability to each category. In cases analogous to beads in an urn, for each bead type, their proportion defines the distribution.
+    </p>
+    <p>
+      For example, if we are randomly calling likely voters from a population that is 44% Democrat, 44% Republican, 10% Undecided, and 2% Green Party, these proportions define the probability for each group in any given call. The probability distribution for each call is defined by four numbers: Pr(calling a Republican) =  0.44, Pr(calling a Democrat) = 0.44, Pr(calling an Undecided) = 10%, and  Pr(calling a Green) = 0.02.
+    </p>
+  </section>
+
+  <section xml:id="sec-monte-carlo">
+    <title>Monte Carlo</title>
+    <p>
+      Computers provide a way to actually perform the simple random long-run experiment described above: pick a bead at random from a bag that contains three blue beads and two red ones. Random number generators permit us to mimic the process of picking at random.
+    </p>
+    <p>
+      An example is the <c>sample</c> function in R. We demonstrate its use in the code below. First, we use the function <c>rep</c> to generate the urn:
+    </p>
+    <program language="r">
+      <input>
+beads &lt;- rep(c("red", "blue"), times = c(2,3))
+      </input>
+    </program>
+    <p>
+      and then use <c>sample</c> to pick a bead at random:
+    </p>
+    <console>
+      <input>
+sample(beads, 1)
+      </input>
+      <output>
+[1] "red"
+      </output>
+    </console>
+    <p>
+      This line of code produces a single random outcome. We want to repeat this experiment an infinite number of times, but it is impossible to repeat indefinitely. Instead, we repeat the experiment a large enough number of times to make the results <em>practically equivalent</em> to repeating indefinitely. This is an example of a <em>Monte Carlo</em> simulation.
+    </p>
+    <p>
+      Much of what mathematical and theoretical statisticians study, topics that we do not cover in this book, relates to providing rigorous definitions of "practically equivalent". Additionally, they explore how close a large number of experiments brings us to what happens in the limit. Later in this chapter, we provide a practical approach to determining what is "large enough".
+    </p>
+    <p>
+      To perform our first Monte Carlo simulation, we use the <c>replicate</c> function, which allows us to repeat the same task any number of times. Here, we repeat the random event 10,000 times:
+    </p>
+    <program language="r">
+      <input>
+set.seed(1986) 
+events &lt;- replicate(10000, sample(beads, 1))
+      </input>
+    </program>
+    <note>
+      <p>
+        Here we use the <c>replicate</c> function for educational purposes, but there is a faster way to generate this simulation using:
+      </p>
+      <program language="r">
+        <input>
+sample(beads, 10000, replace = TRUE)
+        </input>
+      </program>
+      <p>
+        which we explain in the following section.
+      </p>
+    </note>
+    <p>
+      We can now verify if our definition actually is in agreement with this Monte Carlo simulation approximation. We use <c>table</c> to count the outcomes and and <c>prop.table</c> gives us the proportions:
+    </p>
+    <console>
+      <input>
+prop.table(table(events))
+      </input>
+      <output>
+events
+  blue    red 
+0.6014 0.3986 
+      </output>
+    </console>
+    <p>
+      The numbers above represent the estimated probabilities obtained by this Monte Carlo simulation. Statistical theory tells us that as <m>B</m> gets larger, the estimates get closer to 3/5=.6 and 2/5=.4.
+    </p>
+    <p>
+      This is a simple and not very useful example, since we can easily compute the probabilities mathematically. Monte Carlo simulations are useful when it is hard, or impossible, to compute the exact probabilities mathematically. Before delving into more complex examples, we use simple ones to demonstrate the computing tools available in R.
+    </p>
+
+    <subsection xml:id="setting-the-random-seed">
+      <title>Setting the random seed</title>
+      <p>
+        Before we continue, we will briefly explain the following important line of code:
+      </p>
+      <program language="r">
+        <input>
+set.seed(1986)
+        </input>
+      </program>
+      <p>
+        Throughout this book, we use random number generators. This implies that many of the results presented can potentially change by chance, indicating that a static version of the book may show a different result than what you obtain when following the code as presented. This is actually fine, given that the results are random and change by chance. However, if you want to ensure that results are consistent with each run, you can set R's random number generation seed to a specific number. Above we set it to 1986. We want to avoid using the same seed every time and we used a popular way to pick the seed which is year - month - day. For example, we chose 1986 on December 20, 2018: <m>2018 - 12 - 20 = 1986</m>.
+      </p>
+      <p>
+        You can learn more about setting the seed by looking at the documentation:
+      </p>
+      <program language="r">
+        <input>
+?set.seed
+        </input>
+      </program>
+      <p>
+        In the exercises, we may ask you to set the seed to assure that the results you obtain are exactly what we expect them to be.
+      </p>
+    </subsection>
+
+    <subsection xml:id="with-and-without-replacement">
+      <title>With and without replacement</title>
+      <p>
+        The function <c>sample</c> has an argument that allows us to pick more than one element from the urn. However, by default, this selection occurs <em>without replacement</em>: after a bead is selected, it is not returned to the bag. Notice what happens when we ask to randomly select five beads:
+      </p>
+      <console>
+        <input>
+sample(beads, 5)
+sample(beads, 5)
+        </input>
+        <output>
+[1] "red"  "blue" "blue" "blue" "red" 
+[1] "red"  "red"  "blue" "blue" "blue"
+        </output>
+      </console>
+      <p>
+        This results in rearrangements that consistently comprise three blue and two red beads. If we ask that six beads be selected, we get an error.
+      </p>
+      <p>
+        However, the <c>sample</c> function can be used directly, without the use of <c>replicate</c>, to repeat the same experiment of picking 1 out of the 5 beads, continually, under the same conditions. To do this, we sample <em>with replacement</em>: return the bead back to the urn after selecting it. We can tell <c>sample</c> to do this by changing the <c>replace</c> argument, which defaults to <c>FALSE</c>, to <c>replace = TRUE</c>:
+      </p>
+      <program language="r">
+        <input>
+events &lt;- sample(beads, 10000, replace = TRUE)
+        </input>
+      </program>
+    </subsection>
+  </section>
+
+  <section xml:id="combinations-and-permutations">
+    <title>Combinations and permutations</title>
+    <p>
+      Most university-level statistics courses begin with combinatorics, which provides the foundation for many probability calculations. These techniques let us count the number of outcomes that satisfy a condition, typically by computing the number of <em>permutations</em> (when order matters) or <em>combinations</em> (when order does not matter).
+    </p>
+    <p>
+      To make these ideas concrete, let's consider a familiar setting: card games. Suppose we want to understand the probability of drawing specific hands from a deck. This example helps demonstrate how combinatorics works and how we can use R to perform these calculations.
+    </p>
+    <p>
+      First, let's build a deck of cards:
+    </p>
+    <program language="r">
+      <input>
+numbers &lt;- c("Ace", "Deuce", "Three", "Four", "Five", "Six", "Seven",
+             "Eight", "Nine", "Ten", "Jack", "Queen", "King")
+suits &lt;- c("Diamonds", "Clubs", "Hearts", "Spades")
+deck &lt;- expand.grid(number = numbers, suit = suits)
+deck &lt;- paste(deck$number, deck$suit)
+      </input>
+    </program>
+    <p>
+      If we draw one card at random, the probability of getting a King is 1/13:
+    </p>
+    <console>
+      <input>
+mean(deck %in% paste("King", suits))
+      </input>
+      <output>
+[1] 0.07692308
+      </output>
+    </console>
+    <p>
+      Because the deck includes all possible outcomes, this calculation gives the exact probability. Since <c>mean</c> converts logical values to 0s and 1s, the result represents the fraction of Kings in the deck, four out of fifty-two cards, which corresponds exactly to the theoretical probability of <m>1/13</m>.
+    </p>
+    <p>
+      Now let's introduce two key functions: <c>permutations()</c> and <c>combinations()</c> from the <c>gtools</c> package. These functions let us enumerate all possible ways to select items from a list, depending on whether order matters (<c>permutations</c>) or not (<c>combinations</c>). Such calculations are fundamental in probability because they allow us to count the number of possible outcomes in complex settings, like determining the odds of drawing a particular poker hand or arranging cards in a specific order. Card games, lotteries, and many other probability problems rely on these principles to compute exact probabilities. For readers interested in the mathematical foundations, the Recommended Reading section lists probability textbooks that explore permutations and combinations in greater detail.
+    </p>
+    <p>
+      Here is a simple example enumerating all the permutations of three items taken two at a time:
+    </p>
+    <console>
+      <input>
+library(gtools)
+permutations(3, 2)
+      </input>
+      <output>
+     [,1] [,2]
+[1,]    1    2
+[2,]    1    3
+[3,]    2    1
+[4,]    2    3
+[5,]    3    1
+[6,]    3    2
+      </output>
+    </console>
+    <p>
+      This lists all ordered pairs from the numbers 1, 2, and 3. Notice that (1,2) and (2,1) are treated as distinct. If order does not matter, we use <c>combinations()</c>:
+    </p>
+    <console>
+      <input>
+combinations(3, 2)
+      </input>
+      <output>
+     [,1] [,2]
+[1,]    1    2
+[2,]    1    3
+[3,]    2    3
+      </output>
+    </console>
+    <p>
+      Now (1,2) and (2,1) are treated as the same outcome.
+    </p>
+    <p>
+      Let's use these tools to compute the probability of a <em>Natural 21</em> in Blackjack, which occurs when a player's first two cards are an Ace and a face card (Jack, Queen, King, or Ten). Since order does not matter, we use <c>combinations()</c>:
+    </p>
+    <console>
+      <input>
+aces &lt;- paste("Ace", suits)
+facecard &lt;- expand.grid(number = c("King", "Queen", "Jack", "Ten"), suit = suits)
+facecard &lt;- paste(facecard$number, facecard$suit)
+hands &lt;- combinations(52, 2, v = deck)
+mean((hands[,1] %in% aces &amp; hands[,2] %in% facecard) |
+       (hands[,2] %in% aces &amp; hands[,1] %in% facecard))
+      </input>
+      <output>
+[1] 0.04826546
+      </output>
+    </console>
+
+    <subsection xml:id="monte-carlo-approach">
+      <title>Monte Carlo approach</title>
+      <p>
+        We can obtain the same result through simulation. Instead of enumerating all combinations, we repeatedly draw two cards from the deck and check whether we have a Natural 21. This is a Monte Carlo approximation to the same probability.
+      </p>
+      <console>
+        <input>
+blackjack &lt;- function(){
+   x &lt;- sample(deck, 2)
+   (x[1] %in% aces &amp; x[2] %in% facecard) | (x[2] %in% aces &amp; x[1] %in% facecard)
+}
+
+results &lt;- replicate(10000, blackjack())
+mean(results)
+        </input>
+        <output>
+[1] 0.0468
+        </output>
+      </console>
+      <p>
+        Both approaches yield nearly the same result. The combinatoric functions give the exact probability, while the Monte Carlo simulation provides an approximation that converges to the same value as the number of repetitions increases.
+      </p>
+    </subsection>
+  </section>
+
+  <section xml:id="examples">
+    <title>Examples</title>
+    <p>
+      In this section, we describe two discrete probability popular examples: the Monty Hall problem and the birthday problem. We use R to help illustrate the mathematical concepts.
+    </p>
+
+    <subsection xml:id="monty-hall-problem">
+      <title>Monty Hall problem</title>
+      <p>
+        In the 1970s, there was a game show called "Let's Make a Deal," with Monty Hall as the host. At some point in the game, contestants were asked to pick one of three doors. Behind one door, there was a prize, while the other doors had a goat behind them to show the contestant had lost. After the contestant picked a door, before revealing whether the chosen door contained a prize, Monty Hall would open one of the two remaining doors and reveal to the contestant that there was no prize behind that door. Then, he would ask, "Do you want to switch doors?" What would you do?
+      </p>
+      <p>
+        We can use probability to demonstrate that if you stick with the original door choice, your chances of winning a prize remain 1 in 3. However, if you switch to the other door, your chances of winning double to 2 in 3! This might seem counterintuitive. Many people incorrectly think both chances are 1 in 2 since you are choosing between 2 options. You can watch a detailed mathematical explanation on Khan Academy<fn>https://www.khanacademy.org/math/precalculus/prob-comb/dependent-events-precalc/v/monty-hall-problem</fn> or read one on Wikipedia<fn>https://en.wikipedia.org/wiki/Monty_Hall_problem</fn>. Below, we use a Monte Carlo simulation to see which strategy is better. Note that this code is written longer than it should be for pedagogical purposes.
+      </p>
+      <console>
+        <input>
+monty_hall &lt;- function(strategy = c("stick", "switch")) {
+  strategy &lt;- match.arg(strategy)
+  doors &lt;- c("1", "2", "3")
+  prize_door &lt;- sample(doors, 1)
+  my_pick &lt;- sample(doors, 1)
+  show &lt;- sample(setdiff(doors, c(my_pick, prize_door)), 1)
+  final &lt;- if (strategy == "stick") my_pick else setdiff(doors, c(my_pick, show))
+  final == prize_door
+}
+B &lt;- 10000
+mean(replicate(B, monty_hall("stick")))
+mean(replicate(B, monty_hall("switch")))
+        </input>
+        <output>
+[1] 0.3274
+[1] 0.6646
+        </output>
+      </console>
+      <p>
+        As we examine the code, we notice that the lines starting with <c>my_pick</c> and <c>show</c> do not affect the final outcome when we stick with our original choice. This confirms that our winning probability in that case is 1 in 3, as expected. When we switch, the Monte Carlo simulation verifies the 2/3 probability. This illustrates why switching improves our odds: the <c>show</c> line removes a door that is guaranteed not to be the winner, effectively transferring its probability to the remaining unopened door. Thus, unless our initial choice was correct, which happens only one-third of the time, we win by switching, which occurs two-thirds of the time.
+      </p>
+    </subsection>
+
+    <subsection xml:id="birthday-problem">
+      <title>Birthday problem</title>
+      <p>
+        Suppose you are in a classroom with 50 people. If we assume this is a randomly selected group, what is the chance that at least two people have the same birthday? Although it is somewhat advanced, we can deduce this mathematically. We will do that later. Here, we use a Monte Carlo simulation. For simplicity, we assume nobody was born on February 29, which doesn't significantly change the answer.
+      </p>
+      <p>
+        First, note that birthdays can be represented as numbers between 1 and 365, so a sample of 50 birthdays can be obtained as follows:
+      </p>
+      <program language="r">
+        <input>
+n &lt;- 50
+bdays &lt;- sample(1:365, n, replace = TRUE)
+        </input>
+      </program>
+      <p>
+        To check if there are at least two people with the same birthday in this particular set of 50 people, we can use the <c>duplicated</c> function, which returns <c>TRUE</c> whenever an element of a vector is a duplicate:
+      </p>
+      <console>
+        <input>
+any(duplicated(bdays))
+        </input>
+        <output>
+[1] TRUE
+        </output>
+      </console>
+      <p>
+        In this case, we see that it did happen; there were at least two people who had the same birthday.
+      </p>
+      <p>
+        To estimate the probability of a shared birthday in the group, we repeat this experiment by repeatedly sampling sets of 50 birthdays:
+      </p>
+      <console xml:id="birthday-problem-simulation">
+        <input>
+same_birthday &lt;- function(n) any(duplicated(sample(1:365, n, replace = TRUE)))
+results &lt;- replicate(10000, same_birthday(50))
+mean(results)
+        </input>
+        <output>
+[1] 0.9682
+        </output>
+      </console>
+      <p>
+        People tend to underestimate these probabilities so let's say we want to use this knowledge to make bet with friends about the likelihood of two people sharing the same birthday in a group. At what group size do the chances become greater than 50%? Greater than 75%?
+      </p>
+      <p>
+        Let's create a look-up table. We can quickly create a function to compute this for any group size:
+      </p>
+      <program language="r">
+        <input>
+compute_prob &lt;- function(n, B = 10000) mean(replicate(B, same_birthday(n)))
+n &lt;- seq(1,60)
+prob &lt;- sapply(n, compute_prob)
+        </input>
+      </program>
+      <p>
+        We can now make a plot of the estimated probabilities of two people having the same birthday in a group of size <m>n</m>:
+      </p>
+      <program language="r" xml:id="birthday-problem-mc-probabilities">
+        <input>
+rafalib::mypar(1,1)
+plot(n, prob)
+        </input>
+      </program>
+      <figure xml:id="fig-birthday-problem-mc-probabilities">
+        <caption>Monte Carlo estimates of shared-birthday probability by group size</caption>
+        <image source="images/discrete-probability-birthday-problem-mc-probabilities.png" width="70%">
+          <description>A scatter plot showing Monte Carlo estimates of the probability that at least two people share a birthday as group size increases from 1 to 60. The probability rises quickly, crossing one-half in the low twenties and approaching 1 for larger groups.</description>
+        </image>
+      </figure>
+      <p>
+        Now let's compute the exact probabilities rather than relying on Monte Carlo approximations. Using math gives the precise answer and is much faster since we don't need to simulate experiments. We apply a common probability trick: instead of finding the probability that at least two people share a birthday, we compute the probability that no one does. By the multiplication rule, person 1 can have any birthday, person 2 must choose from the remaining 364 out of 365 days, and so on, giving the probability that all <m>n</m> birthdays are unique as:
+      </p>
+      <me>
+        1 \times \frac{364}{365}\times\frac{363}{365} \dots \frac{365-n + 1}{365}
+      </me>
+      <p>
+        We can write a function that does this for any number and plot this as a red curve:
+      </p>
+      <program language="r" xml:id="birthday-problem-exact-probabilities">
+        <input>
+rafalib::mypar()
+exact_prob &lt;- function(n) 1 - prod(seq(365, 365 - n + 1)/365)
+eprob &lt;- sapply(n, exact_prob)
+plot(n, prob)
+lines(n, eprob, col = "red")
+        </input>
+      </program>
+      <figure xml:id="fig-birthday-problem-exact-probabilities">
+        <caption>Monte Carlo and exact birthday probabilities</caption>
+        <image source="images/discrete-probability-birthday-problem-exact-probabilities.png" width="70%">
+          <description>A plot of birthday-match probability versus group size with Monte Carlo estimates shown as points and the exact probability shown as a red curve. The two agree closely across the full range of group sizes.</description>
+        </image>
+      </figure>
+      <p>
+        This plot shows that the Monte Carlo simulation provided a very good estimate of the exact probability. Had we not been able to compute the exact probabilities, we could still accurately estimate them.
+      </p>
+    </subsection>
+  </section>
+
+  <section xml:id="infinity-in-practice">
+    <title>Infinity in practice</title>
+    <p>
+      The theory described here requires repeating experiments over and over indefinitely. In practice, we can't do this. In the examples above, we used <m>B=10,000</m> Monte Carlo experiments, yielding accurate estimates. The larger this number, the more accurate the estimate becomes, until the approximation is so good that your computer can't tell the difference. However, in more complex calculations, 10,000 may not be nearly enough. Moreover, for some calculations, 10,000 experiments might not be computationally feasible.
+    </p>
+    <p>
+      Although in this case we know the exact probability is <c>eprob[25]</c>, in practical scenarios, we won't know what the answer is beforehand, so we won't know if our Monte Carlo estimate is accurate. We know that the larger the <m>B</m>, the better the approximation. But how large do we need it to be? This is actually a challenging question, and answering it often requires advanced theoretical statistics training.
+    </p>
+    <p>
+      One practical approach is to check for the stability of the estimate. The following example illustrates the birthday problem for a group of 25 people.
+    </p>
+    <program language="r" xml:id="monte-carlo-convergence">
+      <input>
+rafalib::mypar()
+B &lt;- 10^seq(1, 5, len = 100)
+compute_prob &lt;- function(B, n = 25) mean(replicate(B, same_birthday(n)))
+prob &lt;- sapply(B, compute_prob)
+plot(log10(B), prob)
+abline(h = eprob[25], lty = 2)
+      </input>
+    </program>
+    <figure xml:id="fig-monte-carlo-convergence">
+      <caption>Monte Carlo convergence for the birthday problem</caption>
+      <image source="images/discrete-probability-monte-carlo-convergence.png" width="70%">
+        <description>A scatter plot of estimated birthday-match probability for a group of 25 people against log10(B), where B is the number of Monte Carlo repetitions. A horizontal dashed line marks the exact probability, and the estimates stabilize near that line as B increases.</description>
+      </image>
+    </figure>
+    <p>
+      In this plot, we can see that the values start to stabilize at around 1,000.
+    </p>
+  </section>
+
+  <exercises xml:id="exercises-discrete-probability">
+    <title>Exercises</title>
+    
+    <exercise>
+      <statement>
+        <p>
+          A box contains 3 cyan balls, 5 magenta balls, and 7 yellow balls. One ball is drawn at random. Write a Monte Carlo simulation to estimate and confirm the probability that the ball drawn is cyan.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Do the same for the probability that the ball will not be cyan?
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Instead of taking just one draw, consider taking two draws. You take the second draw without returning the first draw to the box. We call this sampling <em>without</em> replacement. Write a Monte Carlo simulation to estimate and confirm the probability of the first draw being cyan and the second draw not being cyan?
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Now repeat the experiment, but this time, after taking the first draw and recording the color, return it to the box and shake the box. We call this sampling <em>with</em> replacement. Write a Monte Carlo simulation to estimate and confirm the probability of the first draw being cyan and the second draw not being cyan?
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Let's say you've drawn 5 balls from the box, with replacement, and all have been yellow. What is the probability that the next one will be yellow?
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          If you roll a 6-sided die six times, write a Monte Carlo simulation to estimate and confirm the probability of not seeing a 6?
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Two teams, let's say the Celtics and the Cavaliers, are playing a seven game series. The Cavaliers are a better team and have a 60% chance of winning each game. What is the probability that the Celtics will win <em>at least</em> one game?
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Create a Monte Carlo simulation to confirm your answer to the previous problem. Use <c>B &lt;- 10000</c> simulations. Hint: use the following code to generate the results of the first four games:
+        </p>
+        <program language="r">
+          <input>
+celtic_wins &lt;- sample(c(0,1), 4, replace = TRUE, prob = c(0.6, 0.4))
+          </input>
+        </program>
+        <p>
+          The Celtics must win one of these 4 games.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Two teams, say the Cavaliers and the Warriors, are playing a seven game championship series. The first to win four games, therefore, wins the series. The teams are equally good so they each have a 50-50 chance of winning each game. If the Cavaliers lose the first game, what is the probability that they win the series?
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Confirm the results of the previous question with a Monte Carlo simulation.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Two teams, <m>A</m> and <m>B</m>, are playing a seven game series. Team <m>A</m> is better than team <m>B</m> and has a <m>p>0.5</m> chance of winning each game. Given a value <m>p</m>, the probability of winning the series for the underdog team <m>B</m> can be computed with the following function based on a Monte Carlo simulation:
+        </p>
+        <program language="r">
+          <input>
+prob_win &lt;- function(p, B =10000){
+  result &lt;- replicate(B, {
+    b_win &lt;- sample(c(1,0), 7, replace = TRUE, prob = c(1 - p, p))
+    sum(b_win) >= 4
+  })
+  mean(result)
+}
+          </input>
+        </program>
+        <p>
+          Use the function <c>sapply</c> to compute the probability, call it <c>ws</c>, of winning for <c>p &lt;- seq(0.5, 0.95, 0.025)</c>. Then plot the result.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Repeat the exercise above, but now keep the probability fixed at <c>p &lt;- 0.75</c> and compute the probability for different series lengths: best of 1 game, best of 3 games, best of 5 games, and so on. Specifically, <c>ns &lt;- seq(1, 25, 2)</c>. Hint: use the function below.
+        </p>
+        <program language="r">
+          <input>
+prob_win &lt;- function(n, p = 0.75, B = 10000){
+  result &lt;- replicate(B, {
+    b_win &lt;- sample(c(1,0), n, replace = TRUE, prob = c(1 - p, p))
+    sum(b_win) >= (n + 1)/2
+  })
+  mean(result)
+}
+          </input>
+        </program>
+      </statement>
+    </exercise>
+  </exercises>
+
+</chapter>

@@ -1,0 +1,1053 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="sec-parameters-and-estimates">
+  <title>Estimates and Confidence Intervals</title>
+  
+  <introduction>
+    <p>
+      Opinion polling has been conducted since the 19th century. The general aim is to describe the opinions held by a specific population on a given set of topics. In recent times, these polls have become especially common in the United States during presidential elections. Polls are useful when interviewing every member of a population is logistically impossible. The general strategy involves interviewing a smaller, randomly chosen group and then inferring the opinions of the entire population from those of this subset.
+    </p>
+    
+    <p>
+      Statistical theory, known as inference, provides the framework that justifies this process. In this part of the book, we describe the foundations of statistical inference and show how they are applied in opinion polling. In particular, we explain how pollsters use confidence intervals and the margin of error to quantify the uncertainty in their estimates and to report results that reflect the limits of what the data can reveal.
+    </p>
+    
+    <p>
+      Perhaps the best-known opinion polls are those conducted to determine which candidate is preferred by voters in a given election. Political strategists extensively use such polls to decide where to allocate resources, such as determining which regions to target in their efforts to mobilize voters.
+    </p>
+    
+    <p>
+      Elections are especially interesting examples of opinion polls because the true opinions of the entire population are revealed on election day. Of course, it costs millions of dollars to conduct a real election, which makes polling a cost-effective alternative for those seeking to forecast results. News organizations are also deeply invested in these forecasts, given the public's appetite for early insights into election outcomes.
+    </p>
+  </introduction>
+
+  <section xml:id="sec-poll-sampling-models">
+    <title>The sampling model for polls</title>
+    
+    <p>
+      We start by connecting probability theory to the task of using polls to learn about a population.
+    </p>
+    
+    <p>
+      Although typically the results of polls run by political candidates are kept private, polls are also conducted by news organizations because results tend to be of interest to the general public and made public. We will eventually be looking at these public datasets.
+    </p>
+    
+    <p>
+      Real Clear Politics<fn>http://www.realclearpolitics.com</fn> is an example of a news aggregator that organizes and publishes poll results. For example, they present the following poll results, reporting estimates of the popular vote for the 2016 presidential election<fn>http://www.realclearpolitics.com/epolls/2016/president/us/general_election_trump_vs_clinton-5491.html</fn>:
+    </p>
+    
+    <console>
+      <input>
+library(tidyverse)
+library(rvest)
+url &lt;- "https://web.archive.org/web/20161108012231/https://www.realclearpolitics.com/epolls/2016/president/us/general_election_trump_vs_clinton-5491.html"
+tab &lt;- read_html(url) |> html_node("table") |> html_table()
+tab &lt;- tab |> mutate(Poll = stringr::str_remove(Poll, "\\/.*")) |>
+  mutate(Poll = case_when(
+    Poll == "BloombergBloomberg" ~ "Bloomberg",
+    Poll == "FOX NewsFOX News" ~ "FOX News",
+    Poll == "MonmouthMonmouth"  ~ "Monmouth",  
+    Poll == "CBS NewsCBS News" ~ "CBS News",
+    TRUE ~ Poll))
+names(tab) &lt;- stringr::str_remove_all(names(tab), "\\s(.*)")
+tab
+      </input>
+      <output>
+         Poll          Date   Sample MoE Clinton Trump       Spread
+  RCP Average  10/31 - 11/7       --  --    47.2  44.3 Clinton +2.9
+    Bloomberg   11/4 - 11/6   799 LV 3.5    46.0  43.0   Clinton +3
+    Economist   11/4 - 11/7  3669 LV  --    49.0  45.0   Clinton +4
+          IBD   11/3 - 11/6  1026 LV 3.1    43.0  42.0   Clinton +1
+          ABC   11/3 - 11/6  2220 LV 2.5    49.0  46.0   Clinton +3
+     FOX News   11/3 - 11/6  1295 LV 2.5    48.0  44.0   Clinton +4
+     Monmouth   11/3 - 11/6   748 LV 3.6    50.0  44.0   Clinton +6
+     CBS News   11/2 - 11/6  1426 LV 3.0    47.0  43.0   Clinton +4
+     LA Times  10/31 - 11/6  2935 LV 4.5    43.0  48.0     Trump +5
+     NBC News   11/3 - 11/5  1282 LV 2.7    48.0  43.0   Clinton +5
+     NBC News  10/31 - 11/6 30145 LV 1.0    51.0  44.0   Clinton +7
+    McClatchy   11/1 - 11/3   940 LV 3.2    46.0  44.0   Clinton +2
+      Reuters  10/31 - 11/4  2244 LV 2.2    44.0  40.0   Clinton +4
+ GravisGravis 10/31 - 10/31  5360 RV 1.3    50.0  50.0          Tie
+      </output>
+    </console>
+    
+    <p>
+      Let's make some observations about the table above. First, observe that different polls, all conducted days before the election, report different <em>spreads</em>: the estimated difference between support for the two candidates. Notice that the reported spreads hover around what eventually became the actual result: Clinton won the popular vote by 2.1%. Additionally, we see a column titled <term>MoE</term> which stands for <em>margin of error</em>. We will learn what this means.
+    </p>
+    
+    <subsection xml:id="sec-polling-competition">
+      <title>A Motivating Example: The Polling Competition</title>
+      
+      <p>
+        To help us understand the connection between polls and what we have learned, let's construct a situation similar to what pollsters face. To simulate the challenge pollsters encounter in terms of competing with other pollsters for media attention, we will use an urn filled with beads to represent voters, and pretend we are competing for a $25 dollar prize. The challenge is to guess the spread between the proportion of blue and red beads in this urn (in this case, a pickle jar):
+      </p>
+      
+      <figure xml:id="fig-urn">
+        <caption>An urn containing beads representing voters</caption>
+        <image source="img/urn.jpg" width="30%"/>
+      </figure>
+      
+      <p>
+        Before making a prediction, you can take a sample (with replacement) from the urn. To reflect the fact that running polls is expensive, it costs you $0.10 for each bead you sample. Therefore, if your sample size is 250, and you win, you will break even since you would have paid $25 to collect your $25 prize. Your entry into the competition can be an interval. If the interval you submit contains the true proportion, you receive half what you paid and proceed to the second phase of the competition. In the second phase, the entry with the smallest interval is selected as the winner.
+      </p>
+      
+      <p>
+        The <term>dslabs</term> package includes a function that shows a random draw from this urn:
+      </p>
+      
+      <program language="r">
+        <input>
+set.seed(1)
+library(tidyverse)
+library(dslabs)
+rafalib::mypar()
+take_poll(25)
+        </input>
+      </program>
+      
+      <figure xml:id="fig-estimates-ci-take-poll">
+        <caption>Example of a simulated poll from the urn model</caption>
+        <image source="images/estimates-ci-take-poll.png" width="70%">
+          <description>A plot showing one simulated poll of 25 beads from the urn model, with red and blue beads representing voter preferences and the sample proportion summarized in the display.</description>
+        </image>
+      </figure>
+      
+      <p>
+        Think about how you would construct your interval based on the data shown above.
+      </p>
+      
+      <p>
+        We have just described a simple sampling model for opinion polls. In this model, the beads inside the urn represent individuals who will vote on election day. The red beads represent those voting for the Republican candidate, while the blue beads represent the Democrats. For simplicity, let's assume there are no other colors; that is, that there are just two parties: Republican and Democratic.
+      </p>
+    </subsection>
+  </section>
+
+  <section xml:id="sec-populations-samples-parameters">
+    <title>Populations, samples, parameters, and estimates</title>
+    
+    <p>
+      We want to predict the proportion of blue beads in the urn. Let's call this quantity <m>p</m>, which then tells us the proportion of red beads <m>1-p</m>, and the spread <m>p - (1-p)</m>, which simplifies to <m>2p - 1</m>.
+    </p>
+    
+    <p>
+      In statistical textbooks, the beads in the urn are called the <em>population</em>. The proportion of blue beads in the population <m>p</m> is called a <em>parameter</em>. The 25 beads we see in the previous plot are called a <em>sample</em>. The goal of statistical inference is to predict the parameter <m>p</m> based on the observed data in the sample.
+    </p>
+    
+    <p>
+      Can we do this with the 25 observations above? It is certainly informative. For example, given that we see 13 red and 12 blue beads, it seems unlikely that <m>p \gt .9</m> or <m>p \lt .1</m>. But are we ready to predict with certainty that there are more red beads than blue in the jar?
+    </p>
+    
+    <p>
+      We want to construct an estimate of <m>p</m> using only the information we observe. An estimate should be thought of as a summary of the observed data that we think is informative about the parameter of interest. It seems intuitive to think that the proportion of blue beads in the sample <m>0.48</m> must be at least related to the actual proportion <m>p</m>. But do we simply predict <m>p</m> to be 0.48? First, remember that the sample proportion is a random variable. If we run the command <c>take_poll(25)</c> four times, we get a different answer each time, since the sample proportion is a random variable.
+    </p>
+    
+    <program language="r">
+      <input>
+par(mfrow = c(2,2), mar = c(3, 1, 3, 0), mgp = c(1.5, 0.5, 0)) 
+take_poll(25); take_poll(25); take_poll(25); take_poll(25)
+      </input>
+    </program>
+    
+    <figure xml:id="fig-estimates-ci-four-polls">
+      <caption>Four simulated polls of size 25 from the urn model</caption>
+      <image source="images/estimates-ci-four-polls.png" width="80%">
+        <description>A four-panel display of repeated simulated polls, each showing 25 sampled beads from the urn model and illustrating how the observed sample proportion varies from poll to poll.</description>
+      </image>
+    </figure>
+    
+    <p>
+      Observe that in the four random samples shown above, the sample proportions range from 0.44 to 0.60. By describing the distribution of this random variable, we will be able to gain insights into how good this estimate is and how we can improve it.
+    </p>
+    
+    <subsection xml:id="sec-sample-average-estimate">
+      <title>The sample average as an estimate</title>
+      
+      <p>
+        Conducting an opinion poll is being modeled as taking a random sample from an urn. We propose using the proportion of blue beads in our sample as an <em>estimate</em> of the parameter <m>p</m>. Once we have this estimate, we can easily report an estimate for the spread <m>2p-1</m>. However, for simplicity, we will illustrate the concepts for estimating <m>p</m>. We will use our knowledge of probability to justify our use of the sample proportion and to quantify its proximity to the population proportion <m>p</m>.
+      </p>
+      
+      <p>
+        We start by defining the random variable <m>X</m> as <m>X=1</m>, if we pick a blue bead at random, and <m>X=0</m> if it is red. This implies that the population is a list of 0s and 1s. If we sample <m>N</m> beads, then the average of the draws <m>X_1, \dots, X_N</m> is equivalent to the proportion of blue beads in our sample. This is because adding the <m>X</m>s is equivalent to counting the blue beads, and dividing this count by the total <m>N</m> is equivalent to computing a proportion. We use the symbol <m>\bar{X}</m> to represent this average. In statistics textbooks, a bar on top of a symbol typically denotes the average.
+      </p>
+      
+      <p>
+        The theory we just covered about the sum of draws becomes useful because the average is a sum of draws multiplied by the constant <m>1/N</m>:
+      </p>
+      
+      <me>
+        \bar{X} = \frac{1}{N} \sum_{i=1}^N X_i
+      </me>
+      
+      <p>
+        For simplicity, let's assume that the draws are independent; after we see each sampled bead, we return it to the urn. In this case, what do we know about the distribution of the sum of draws? First, we know that the expected value of the sum of draws is <m>N</m> times the average of the values in the urn. We know that the average of the 0s and 1s in the urn must be <m>p</m>, the proportion of blue beads.
+      </p>
+      
+      <p>
+        Here, we encounter an important difference compared to what we did in the probability part of the book: we don't know the composition of the urn. While we know there are blue and red beads, we don't know how many of each. This is what we want to find out: we are trying to <em>estimate</em> <m>p</m>.
+      </p>
+    </subsection>
+    
+    <subsection xml:id="sec-parameters">
+      <title>Parameters</title>
+      
+      <p>
+        Just as we use variables to define unknowns in systems of equations, in statistical inference, we define <em>parameters</em> to represent unknown parts of our models. In the urn model, which we are using to simulate an opinion poll, we do not know the proportion of blue beads in the urn. We define the parameters <m>p</m> to represent this quantity. Since our main goal is determining <m>p</m>, we are going to <em>estimate this parameter</em>.
+      </p>
+      
+      <p>
+        The concepts presented here on how we estimate parameters, and provide insights into how good these estimates are, extend to many data analysis tasks. For example, we may want to determine the difference in health improvement between patients receiving treatment and a control group, investigate the health effects of smoking on a population, analyze the differences in racial groups of fatal shootings by police, or assess the rate of change in life expectancy in the US during the last 10 years. All these questions can be framed as a task of estimating a parameter from a sample.
+      </p>
+      
+      <note>
+        <p>
+          Introductory statistics textbooks typically begin by introducing the <em>population average</em> as the first example of a parameter. In our case, the parameter of interest <m>p</m> is defined as the proportion of 1s (blue) in the urn. Notice that this proportion is also equal to the average of all the numbers in the urn, since the 1s and 0s can be treated as numeric values.
+        </p>
+        
+        <p>
+          This means that our parameter <m>p</m> can be interpreted as a <term>population average</term>. For this reason, we will use <m>\bar{X}</m> to denote its <term>estimate</term>, the average computed from a sample of draws from the urn. Although many textbooks use the notation <m>\hat{p}</m> for this estimate, the symbol <m>\bar{X}</m> better emphasizes the connection between sample averages and population means, a concept that extends naturally to situations beyond binary data.
+        </p>
+      </note>
+    </subsection>
+  </section>
+
+  <section xml:id="sec-estimate-properties">
+    <title>Estimate properties: expected value and standard error</title>
+    
+    <p>
+      To understand how good our estimate is, we will describe the statistical properties of the random variable defined above: the sample proportion <m>\bar{X}</m>. Remember that <m>\bar{X}</m> is the sum of independent draws divided by a non-random constant so the rules we covered in <xref ref="sec-mean-var-eqs"/> apply.
+    </p>
+    
+    <p>
+      Applying the concepts we have learned we can show that:
+    </p>
+    
+    <me>
+      \mathrm{E}[\bar{X}] = p
+    </me>
+    
+    <p>
+      We can also use what we learned to determine the standard error:
+    </p>
+    
+    <me>
+      \mathrm{SE}[\bar{X}] = \sqrt{p(1-p)/N}
+    </me>
+    
+    <p>
+      This result reveals the power of polls. The expected value of the sample proportion <m>\bar{X}</m> is the parameter of interest <m>p</m>, and we can make the standard error as small as we want by increasing <m>N</m>. The law of large numbers tells us that with a large enough sample, our estimate converges to <m>p</m>.
+    </p>
+    
+    <p>
+      If we take a large enough sample to make our standard error about 1%, we will be quite certain about who will win. But how large does the poll have to be for the standard error to be this small?
+    </p>
+    
+    <p>
+      One problem is that we do not know <m>p</m>, so we can't actually compute the standard error. However, for illustrative purposes, let's assume that <m>p=0.51</m> and make a plot of the standard error versus the sample size <m>N</m>:
+    </p>
+    
+    <program language="r">
+      <input>
+p &lt;- 0.51
+N &lt;- 10^seq(1,5, len = 100)
+data.frame(N = N, SE = sqrt(p*(1 - p)/N)) |> ggplot(aes(N, SE)) + geom_line() + scale_x_continuous(breaks = c(10, 100, 1000, 10000), trans = "log10")
+      </input>
+    </program>
+    
+    <figure xml:id="fig-estimates-ci-se-vs-n">
+      <caption>Standard error as a function of sample size</caption>
+      <image source="images/estimates-ci-se-vs-n.png" width="70%">
+        <description>A line plot of the standard error for a sample proportion with p = 0.51 versus sample size on a log-scaled x-axis, showing the standard error shrinking as the poll size increases.</description>
+      </image>
+    </figure>
+    
+    <p>
+      The plot shows that we would need a poll of over 10,000 people to achieve a standard error that low. We rarely see polls of this size due in part to the associated costs. According to the Real Clear Politics table, sample sizes in opinion polls range from 500-3,500 people. For a sample size of 1,000 and <m>p=0.51</m>, the standard error is:
+    </p>
+    
+    <console>
+      <input>
+sqrt(p*(1 - p))/sqrt(1000)
+      </input>
+      <output>
+[1] 0.01580823
+      </output>
+    </console>
+    
+    <p>
+      or 1.5 percentage points. So even with large polls, for close elections, <m>\bar{X}</m> can lead us astray if we don't realize it is a random variable. Nonetheless, we can actually say more about how close we get to <m>p</m> and we do that in <xref ref="sec-clt"/>.
+    </p>
+    
+    <note>
+      <title>Polling versus forecasting</title>
+      
+      <p>
+        Before we continue, it's important to clarify a practical issue related to forecasting an election. If a poll is conducted four months before the election, it is estimating the <m>p</m> for that moment, and not for election day. The <m>p</m> for election night might be different, as people's opinions tend to fluctuate through time. Generally, the polls conducted the night before the election tend to be the most accurate, since opinions do not change significantly in a day. However, forecasters try to develop tools that model how opinions vary over time and aim to predict the election night results by taking into consideration these fluctuations. We will explore some approaches for doing this in <xref ref="sec-election-forecasting"/>.
+      </p>
+    </note>
+  </section>
+
+  <section xml:id="sec-confidence-intervals">
+    <title>Confidence Intervals</title>
+    
+    <p>
+      Pollsters summarize uncertainty using a single, easy-to-interpret number called the <em>margin of error</em>. The margin of error, together with the estimate of the parameter, defines an interval that they are <em>confident</em> contains the true value. But what does <em>confident</em> actually mean?
+    </p>
+    
+    <p>
+      To connect this idea to a familiar challenge, recall the competition described in <xref ref="sec-poll-sampling-models"/>, where you were asked to report an interval for the true proportion <m>p</m>. If your interval included the actual <m>p</m>, you recovered half the cost of your poll and advanced to the next round. A guaranteed way to move on would be to report a very wide interval, say <m>[0,1]</m>, which is certain to contain <m>p</m>. But such an interval is useless because it conveys no information, and you would lose to someone submitting a narrower one. Similarly, an election forecaster who predicts that the spread will be between <m>-100\%</m> and <m>100\%</m> would not be taken seriously. Even an interval between <m>-10\%</m> and <m>10\%</m> would be too vague to be meaningful.
+    </p>
+    
+    <p>
+      On the other hand, a very narrow interval is risky. A pollster who reports extremely tight intervals but frequently misses the true value will quickly lose credibility. The goal is to find a balance: intervals that are narrow enough to be informative but wide enough to be reliable.
+    </p>
+    
+    <p>
+      Statistical theory provides a way to quantify precisely what we mean by <em>confidence</em>, using the probability framework developed earlier. Specifically, we can construct intervals for which we can compute the probability of containing the true parameter <m>p</m>. When a pollster reports an estimate along with a <em>margin of error</em>, they are effectively reporting an interval with a 95% probability of containing the true parameter, known as a <term>95% confidence interval</term>.
+    </p>
+    
+    <subsection xml:id="sec-clt">
+      <title>The Central Limit Theorem</title>
+      
+      <p>
+        In <xref ref="sec-parameters-and-estimates"/>, we introduced the sample average <m>\bar{X}</m> as an estimate of the parameter <m>p</m>, and we showed how to compute its standard error. However, to calculate probabilities, we need the <em>distribution</em> of <m>\bar{X}</m>.
+      </p>
+      
+      <p>
+        In the <em>Probability</em> part of the book (<xref ref="sec-clt-prob"/>), we learned that when the sample size is large, the average of independent draws from a population is approximately normally distributed, regardless of the shape of the population. This is the <term>Central Limit Theorem (CLT)</term>. Because <m>\bar{X}</m> is the average of independent draws, the CLT applies directly here, and it is the main tool used to construct confidence intervals.
+      </p>
+      
+      <p>
+        Let's use it to answer a concrete question:
+      </p>
+      
+      <blockquote>
+        <p>
+          How likely is it that our sample estimate <m>\bar{X}</m> is within 2% of the true population proportion <m>p</m>?
+        </p>
+      </blockquote>
+      
+      <p>
+        We can express this as:
+      </p>
+      
+      <me>
+        \Pr(|\bar{X} - p| \leq 0.02)
+        = \Pr(\bar{X} \leq p + 0.02) - \Pr(\bar{X} \leq p - 0.02).
+      </me>
+      
+      <p>
+        If we standardize <m>\bar{X}</m>, subtracting its expected value and dividing by its standard error, we obtain a standard normal random variable <m>Z</m>:
+      </p>
+      
+      <me>
+        Z = \frac{\bar{X} - \mathrm{E}[\bar{X}]}{\mathrm{SE}[\bar{X}]}.
+      </me>
+      
+      <p>
+        Since <m>\mathrm{E}[\bar{X}] = p</m> and <m>\mathrm{SE}[\bar{X}] = \sqrt{p(1-p)/N}</m>, the probability above becomes:
+      </p>
+      
+      <me>
+        \Pr\left(Z \leq \frac{0.02}{\sqrt{p(1-p)/N}}\right) -
+        \Pr\left(Z \leq -\frac{0.02}{\sqrt{p(1-p)/N}}\right).
+      </me>
+      
+      <p>
+        To compute this, we need <m>\sqrt{p(1-p)/N}</m>, but <m>p</m> is unknown. Fortunately, the CLT still holds if we use a <em>plug-in estimate</em>, replacing <m>p</m> with our observed <m>\bar{X}</m>:
+      </p>
+      
+      <me>
+        \widehat{\mathrm{SE}}[\bar{X}] = \sqrt{\bar{X}(1 - \bar{X})/N}.
+      </me>
+      
+      <note>
+        <p>
+          In statistics, hats indicate estimates. For example, <m>\hat{p}</m> is often used instead of <m>\bar{X}</m> to denote the estimate of <m>p</m>. Similarly, <m>\widehat{\mathrm{SE}}</m> means we are estimating the standard error rather than computing it exactly.
+        </p>
+      </note>
+      
+      <p>
+        Using our earlier poll with <m>\bar{X} = 0.48</m> and <m>N = 25</m>, we obtain:
+      </p>
+      
+      <console>
+        <input>
+x_hat &lt;- 0.48
+se &lt;- sqrt(x_hat*(1 - x_hat)/25)
+se
+        </input>
+        <output>
+[1] 0.09991997
+        </output>
+      </console>
+      
+      <p>
+        Now we can compute the probability that our estimate is within 2% of the true value:
+      </p>
+      
+      <console>
+        <input>
+pnorm(0.02/se) - pnorm(-0.02/se)
+        </input>
+        <output>
+[1] 0.1586447
+        </output>
+      </console>
+      
+      <p>
+        There is only a small chance of being this close when <m>N = 25</m>.
+      </p>
+      
+      <p>
+        The same reasoning applies for any desired error. To find the error <m>\epsilon</m> that gives a 95% probability that <m>\bar{X}</m> is within that range of <m>p</m>, we solve:
+      </p>
+      
+      <me>
+        \Pr(|\bar{X} - p| \leq \epsilon) = 0.95.
+      </me>
+      
+      <p>
+        From the standard normal distribution, we know that
+      </p>
+      
+      <me>
+        \Pr(-1.96 \leq Z \leq 1.96) = 0.95.
+      </me>
+      
+      <p>
+        Therefore, <m>\epsilon = 1.96 \times \widehat{\mathrm{SE}}[\bar{X}]</m>.
+      </p>
+      
+      <p>
+        This result gives us a way to construct <term>confidence intervals</term> that, in repeated samples, contain the true parameter 95% of the time.
+      </p>
+    </subsection>
+    
+    <subsection xml:id="sec-constructing-ci">
+      <title>Constructing Confidence Intervals</title>
+      
+      <p>
+        Using this result, we can write the 95% confidence interval for <m>p</m> as:
+      </p>
+      
+      <me>
+        \left[\bar{X} - 1.96\,\widehat{\mathrm{SE}}[\bar{X}], \bar{X} + 1.96\,\widehat{\mathrm{SE}}[\bar{X}]\right].
+      </me>
+      
+      <p>
+        The endpoints of this interval are not fixed numbers—they depend on the data. Each time we take a new sample, we obtain a new <m>\bar{X}</m> and therefore a new confidence interval. To see this, we can repeat the sampling process using the same parameters as before:
+      </p>
+      
+      <console>
+        <input>
+p &lt;- 0.45
+N &lt;- 1000
+x &lt;- sample(c(0, 1), size = N, replace = TRUE, prob = c(1 - p, p))
+x_hat &lt;- mean(x)
+se_hat &lt;- sqrt(x_hat*(1 - x_hat)/N)
+c(x_hat - 1.96*se_hat, x_hat + 1.96*se_hat)
+        </input>
+        <output>
+[1] 0.4012976 0.4627024
+        </output>
+      </console>
+      
+      <p>
+        If you run this code several times, you'll see that the interval changes from run to run due to random sampling variation.
+      </p>
+      
+      <p>
+        The definition of a 95% confidence interval is that, over many repetitions of this process, about 95% of the intervals constructed in this way will contain the true value of <m>p</m>. Mathematically:
+      </p>
+      
+      <me>
+        \Pr\left(p \in \left[\bar{X} - 1.96 \,\widehat{\mathrm{SE}}[\bar{X}], \bar{X} + 1.96\,\widehat{\mathrm{SE}}[\bar{X}]\right]\right) = 0.95.
+      </me>
+      
+      <note>
+        <p>
+          Confidence intervals are not unique. We can construct other intervals that also have 95 percent coverage for <m>p</m>. For example, approaches that avoid going past 0 or 1 when <m>\bar{X}</m> is close to 0 or 1.
+        </p>
+        
+        <p>
+          The 95 percent confidence interval we derived is symmetric around <m>\bar{X}</m> and, under standard assumptions, is the shortest interval for which the probability of containing <m>p</m> is 95 percent. For a discussion of alternative intervals and their properties, see the recommended reading section.
+        </p>
+      </note>
+      
+      <p>
+        If we want a different confidence level, say 99%, we adjust the multiplier. The value <m>z</m> is determined by
+      </p>
+      
+      <me>
+        \Pr(-z \leq Z \leq z) = 1 - \alpha,
+      </me>
+      
+      <p>
+        which in R can be computed as:
+      </p>
+      
+      <program language="r">
+        <input>
+alpha &lt;- 0.01
+z &lt;- qnorm(1 - alpha/2)
+        </input>
+      </program>
+      
+      <p>
+        For example, <c>qnorm(0.975)</c> gives 1.96 for a 95% confidence interval, and <c>qnorm(0.995)</c> gives 2.58 for a 99% interval.
+      </p>
+    </subsection>
+    
+    <subsection xml:id="sec-monte-carlo-ci">
+      <title>A Monte Carlo Simulation</title>
+      
+      <p>
+        We can verify that the intervals we construct have the desired probability of including <m>p</m> using a Monte Carlo simulation. By repeatedly drawing samples and constructing confidence intervals, we can check how often the intervals actually contain the true value of <m>p</m>.
+      </p>
+      
+      <console>
+        <input>
+set.seed(1)
+N &lt;- 1000
+B &lt;- 10000
+p &lt;- 0.45
+inside &lt;- replicate(B, {
+  x &lt;- sample(c(0,1), size = N, replace = TRUE, prob = c(1 - p, p))
+  x_hat &lt;- mean(x)
+  se_hat &lt;- sqrt(x_hat*(1 - x_hat)/N)
+  p >= x_hat - 1.96*se_hat &amp; p &lt;= x_hat + 1.96*se_hat
+})
+mean(inside)
+        </input>
+        <output>
+[1] 0.9482
+        </output>
+      </console>
+      
+      <p>
+        As expected, the interval covers <m>p</m> about 95% of the time.
+      </p>
+      
+      <p>
+        The plot below shows the first 100 simulated confidence intervals. Each horizontal line represents one interval, and the black vertical line marks the true proportion <m>p</m>. Roughly 95% of the intervals overlap the line, while about 5% miss it, exactly as predicted.
+      </p>
+      
+      <program language="r">
+        <input>
+library(ggplot2)
+set.seed(1)
+tab &lt;- replicate(100, {
+  x &lt;- sample(c(0,1), size = N, replace = TRUE, prob = c(1 - p, p))
+  x_hat &lt;- mean(x)
+  se_hat &lt;- sqrt(x_hat*(1 - x_hat)/N)
+  hit &lt;-  p >= x_hat - 1.96*se_hat &amp; p &lt;= x_hat + 1.96*se_hat
+  c(x_hat, x_hat - 1.96*se_hat, x_hat + 1.96*se_hat, hit)
+})
+
+tab &lt;- data.frame(poll = 1:ncol(tab), t(tab))
+names(tab) &lt;- c("poll", "estimate", "low", "high", "hit")
+tab$p_inside &lt;- ifelse(tab$hit, "Yes", "No")
+ggplot(tab, aes(poll, estimate, ymin = low, ymax = high, col = p_inside)) + 
+  geom_point() +
+  geom_errorbar() + 
+  coord_flip() + 
+  geom_hline(yintercept = p)
+        </input>
+      </program>
+      
+      <figure xml:id="fig-estimates-ci-monte-carlo-intervals">
+        <caption>First 100 simulated confidence intervals</caption>
+        <image source="images/estimates-ci-monte-carlo-intervals.png" width="70%">
+          <description>A horizontal interval plot showing the first 100 simulated 95 percent confidence intervals, with a reference line marking the true proportion and colors distinguishing intervals that do and do not contain it.</description>
+        </image>
+      </figure>
+      
+      <note>
+        <p>
+          When applying this theory, remember that the <em>intervals</em> are random, not <m>p</m>. The confidence level refers to the procedure, not to a probability about <m>p</m> itself.
+        </p>
+      </note>
+    </subsection>
+    
+    <subsection xml:id="sec-moe">
+      <title>Margin of Error</title>
+      
+      <p>
+        Margins of error are closely related to confidence intervals. The connection is simple: the <em>margin of error</em> is the amount added to and subtracted from the estimate to form a confidence interval.
+      </p>
+      
+      <p>
+        For polls, the margin of error is given by
+      </p>
+      
+      <me>
+        z \times \sqrt{\bar{X}(1-\bar{X}) / N}.
+      </me>
+      
+      <p>
+        For a 95 percent confidence interval, this corresponds to using <m>z = 1.96</m>. Increasing the confidence level or decreasing the sample size both make the margin of error larger, while larger samples produce smaller margins of error.
+      </p>
+      
+      <p>
+        In practice, pollsters almost always report 95 percent confidence intervals. Unless otherwise stated, you should assume that the reported margin of error is based on this level of confidence. Results are typically presented as "estimate <m>\pm</m> margin of error." For example, if <m>\bar{X} = 0.52</m> with a margin of error of <m>0.03</m>, the result would be reported as "52% <m>\pm</m> 3%"
+      </p>
+    </subsection>
+    
+    <subsection xml:id="sec-huge-poll">
+      <title>Why Not Just Run a Huge Poll?</title>
+      
+      <p>
+        If we surveyed 100,000 people, the margin of error would shrink to less than 0.3%. In principle, we can make the margin of error as small as we want by increasing <m>N</m>.
+      </p>
+      
+      <p>
+        In practice, however, polling is limited not only by cost but also by <em>bias</em>. Real-world polls are rarely simple random samples. Some people do not respond, others misreport their preferences, and defining the population (for example, registered voters versus likely voters) is not straightforward.
+      </p>
+      
+      <p>
+        These imperfections introduce systematic errors that the margin of error does not capture. Historically, U.S. popular-vote polls have shown biases of about 2–3%. Understanding and modeling these biases is an essential part of modern election forecasting, a topic we return to in <xref ref="sec-models"/>.
+      </p>
+    </subsection>
+  </section>
+
+  <exercises xml:id="exercises-estimates-ci">
+    <title>Exercises</title>
+    
+    <exercise>
+      <statement>
+        <p>
+          Suppose you poll a population in which a proportion <m>p</m> of voters are Democrats and <m>1-p</m> are Republicans. Your sample size is <m>N=25</m>. Consider the random variable <m>S</m>, which is the total number of Democrats in your sample. What is the expected value of this random variable? Hint: It's a function of <m>p</m>.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          What is the standard error of <m>S</m>? Hint: It's a function of <m>p</m>.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Consider the random variable <m>S/N</m>. This is equivalent to the sample average, which we have been denoting as <m>\bar{X}</m>. What is the expected value of the <m>\bar{X}</m>? Hint: It's a function of <m>p</m>.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          What is the standard error of <m>\bar{X}</m>? Hint: It's a function of <m>p</m>.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Write a line of code that gives you the standard error <m>\mathrm{SE}[\bar{X}]</m> for problem 4 for several values of <m>p</m>, specifically for <c>p &lt;- seq(0, 1, length = 100)</c>. Make a plot of <m>\mathrm{SE}[\bar{X}]</m> versus <c>p</c>.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Copy the code from your solution to 5 and put it inside a for-loop to make three plots, one for <m>N=25</m>, <m>N=100</m>, and <m>N=1,000</m>.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          If we are interested in the difference in proportions, <m>\theta = p - (1-p)</m>, our estimate is <m>\hat{\theta} = \bar{X} - (1-\bar{X}) = 2\bar{X}-1</m>. Use the rules we learned about scaled random variables to derive the expected value of <m>\hat{\theta}</m>.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          What is the standard error of <m>\hat{\theta}</m>?
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          If <m>p=.45</m>, it means the Republicans are winning by a relatively large margin, since <m>\theta = -.1</m>, which is a 10% margin of victory. In this case, what is the standard error of <m>\hat{\theta} = 2\bar{X}-1</m> if we take a sample of <m>N=25</m>?
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Given the answer to exercise 9, which of the following best describes your strategy of using a sample size of <m>N=25</m>?
+        </p>
+        
+        <ol marker="a.">
+          <li>
+            <p>
+              The expected value of our estimate <m>2\bar{X}-1</m> is <m>\theta</m>, so our prediction will be accurate.
+            </p>
+          </li>
+          <li>
+            <p>
+              Our standard error is almost as large as the observed difference, so the chances of <m>2\bar{X}-1</m> representing a large margin are not small even when <m>p=0.5</m>. We should use a larger sample size.
+            </p>
+          </li>
+          <li>
+            <p>
+              The difference is 10% and the standard error is about 0.1, therefore much smaller than the difference.
+            </p>
+          </li>
+          <li>
+            <p>
+              Because we don't know <m>p</m>, we have no way of knowing that making <m>N</m> larger would actually improve our standard error.
+            </p>
+          </li>
+        </ol>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Write an <em>urn model</em> function that takes the proportion of Democrats <m>p</m> and the sample size <m>N</m> as arguments, and returns the sample average if Democrats are 1s and Republicans are 0s. Call the function <c>take_sample</c>.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Now assume <c>p &lt;- 0.45</c> and that your sample size is <m>N=100</m>. Take a sample 10,000 times and save the vector of <c>mean(X) - p</c> into an object called <c>errors</c>. Hint: Use the function you wrote for exercise 11 to write this in one line of code.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          The vector <c>errors</c> contains, for each simulated sample, the difference between the our estimate <m>\bar{X}</m> and the actual <m>p</m>. We refer to this difference as the <em>error</em>. Compute the average and make a histogram of the errors generated in the Monte Carlo simulation,
+        </p>
+        
+        <console>
+          <input>
+mean(errors)
+          </input>
+          <output>
+[1] 4.9e-05
+          </output>
+        </console>
+        
+        <program language="r">
+          <input>
+hist(errors)
+          </input>
+        </program>
+        
+        <figure xml:id="fig-estimates-ci-errors-histogram">
+          <caption>Histogram of Monte Carlo estimation errors</caption>
+          <image source="images/estimates-ci-errors-histogram.png" width="70%">
+            <description>A histogram of the simulated errors x-bar minus p from repeated polls, showing an approximately symmetric distribution centered near zero.</description>
+          </image>
+        </figure>
+        
+        <p>
+          and select which of the following best describes their distributions:
+        </p>
+        
+        <ol marker="a.">
+          <li>
+            <p>
+              The errors are all about 0.05.
+            </p>
+          </li>
+          <li>
+            <p>
+              The errors are all about -0.05.
+            </p>
+          </li>
+          <li>
+            <p>
+              The errors are symmetrically distributed around 0.
+            </p>
+          </li>
+          <li>
+            <p>
+              The errors range from -1 to 1.
+            </p>
+          </li>
+        </ol>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Note that the error <m>\bar{X}-p</m> is a random variable. In practice, the error is not observed because we do not know <m>p</m>. Here, we observe it since we constructed the simulation. What is the average size of the error if we define the size by taking the absolute value <m>| \bar{X} - p |</m>?
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          The standard error is related to the typical <term>size</term> of the error we make when predicting. For mathematical reasons related to the Central Limit Theorem, we actually use the standard deviation of <c>errors</c>, rather than the average of the absolute values, to quantify the typical size. What is this standard deviation of the errors?
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          The theory we just learned tells us what this standard deviation is going to be because <m>\mathrm{SE}[\bar{X}-p]=\mathrm{SE}[\bar{X}]</m> and we showed how to compute this. What does theory tell us is the standard error <m>\mathrm{SE}[\bar{X}-p]</m> is for a sample size of 100?
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          In practice, we don't know <m>p</m>, so we construct an estimate of the theoretical prediction by plugging in <m>\bar{X}</m> for <m>p</m>. Compute this estimate. Set the seed at 1 with <c>set.seed(1)</c>.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Note how close the standard error estimates obtained from the Monte Carlo simulation (exercise 15), the theoretical prediction (exercise 16), and the estimate of the theoretical prediction (exercise 17) are. The theory is working and it gives us a practical approach to knowing the typical error we will make if we predict <m>p</m> with <m>\bar{X}</m>. Another advantage that the theoretical result provides is that it gives an idea of how large a sample size is required to obtain the precision we need. Earlier, we learned that the largest standard errors occur for <m>p=0.5</m>. Create a plot of the largest standard error for <m>N</m> ranging from 100 to 5,000. Based on this plot, how large does the sample size have to be to have a standard error of about 1%?
+        </p>
+        
+        <ol marker="a.">
+          <li>
+            <p>
+              100
+            </p>
+          </li>
+          <li>
+            <p>
+              500
+            </p>
+          </li>
+          <li>
+            <p>
+              2,500
+            </p>
+          </li>
+          <li>
+            <p>
+              4,000
+            </p>
+          </li>
+        </ol>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          For sample size <m>N=100</m>, the Central Limit Theorem tells us that the distribution of <m>\bar{X}</m> is:
+        </p>
+        
+        <ol marker="a.">
+          <li>
+            <p>
+              practically equal to <m>p</m>.
+            </p>
+          </li>
+          <li>
+            <p>
+              approximately normal with expected value <m>p</m> and standard error <m>\sqrt{p(1-p)/N}</m>.
+            </p>
+          </li>
+          <li>
+            <p>
+              approximately normal with expected value <m>\bar{X}</m> and standard error <m>\sqrt{\bar{X}(1-\bar{X})/N}</m>.
+            </p>
+          </li>
+          <li>
+            <p>
+              not a random variable.
+            </p>
+          </li>
+        </ol>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Based on the answer from exercise 18, the error <m>\bar{X} - p</m> is:
+        </p>
+        
+        <ol marker="a.">
+          <li>
+            <p>
+              practically equal to 0.
+            </p>
+          </li>
+          <li>
+            <p>
+              approximately normal with expected value <m>0</m> and standard error <m>\sqrt{p(1-p)/N}</m>.
+            </p>
+          </li>
+          <li>
+            <p>
+              approximately normal with expected value <m>p</m> and standard error <m>\sqrt{p(1-p)/N}</m>.
+            </p>
+          </li>
+          <li>
+            <p>
+              not a random variable.
+            </p>
+          </li>
+        </ol>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          To corroborate your answer to exercise 19, make a qqplot of the <c>errors</c> you generated in exercise 12 to see if they follow a normal distribution.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Define <c>p=0.45</c> and <c>N=100</c> as in exercise 12. Then use the CLT to estimate the probability that <m>\bar{X}>0.5</m>. Assume you know <m>p=0.45</m> for this calculation.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Assume you are in a practical situation and you don't know <m>p</m>. Take a sample of size <m>N=100</m> and obtain a sample average of <m>\bar{X} = 0.51</m>. What is the CLT approximation for the probability that your error is equal to or larger than 0.01?
+        </p>
+      </statement>
+    </exercise>
+    
+    <p>
+      For the next exercises, we will use actual polls from the 2016 election included in the <term>dslabs</term> package. Specifically, we will use all the national polls that ended within one week prior to the election.
+    </p>
+    
+    <program language="r">
+      <input>
+library(dslabs)
+library(tidyverse)
+polls &lt;- polls_us_election_2016 |> 
+  filter(enddate >= "2016-10-31" &amp; state == "U.S.") 
+      </input>
+    </program>
+    
+    <exercise>
+      <statement>
+        <p>
+          For the first poll, you can obtain the samples size and estimated Clinton percentage with:
+        </p>
+        
+        <program language="r">
+          <input>
+N &lt;- polls$samplesize[1]
+x_hat &lt;- polls$rawpoll_clinton[1]/100
+          </input>
+        </program>
+        
+        <p>
+          Assume there are only two candidates and construct a 95% confidence interval for the election night proportion <m>p</m> of Clinton voters.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Add a confidence interval as two columns, call them <c>lower</c> and <c>upper</c>, to the object <c>polls</c>. Then show the <c>pollster</c>, <c>enddate</c>, <c>x_hat</c>,<c>lower</c>, <c>upper</c> variables. Hint: Define temporary columns <c>x_hat</c> and <c>se_hat</c>.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          The final tally for the popular vote was Clinton 48.2% and Trump 46.1%. Add a column, call it <c>hit</c>, to the previous table stating if the confidence interval included the true proportion <m>p=0.482</m> or not.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          For the table you just created, what proportion of confidence intervals included <m>p</m>?
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          If these confidence intervals are constructed correctly, and the theory holds up, what proportion should include <m>p</m>?
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          A much smaller proportion of the polls than expected produce confidence intervals containing <m>p</m>. If you look closely at the table, you will see that most polls that fail to include <m>p</m> are underestimating. The main reason for this is undecided voters, individuals polled that do not yet know who they will vote for or do not want to say. Because, historically, undecideds divide close to evenly between the two main candidates on election day, it is more informative to estimate the spread or the difference between the proportion of two candidates, we will denote tit with <m>\theta</m>, which in this election was <m>0.482 - 0.461 = 0.021</m>. Assume that there are only two parties and that <m>\theta = 2p - 1</m>. Redefine <c>polls</c> as below and re-do exercise 15, but for the difference.
+        </p>
+        
+        <program language="r">
+          <input>
+polls &lt;- polls_us_election_2016 |> 
+  filter(enddate >= "2016-10-31" &amp; state == "U.S.")  |>
+  mutate(theta_hat = rawpoll_clinton/100 - rawpoll_trump/100)
+          </input>
+        </program>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Now repeat exercise 26, but for the difference.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Now repeat exercise 27, but for the difference.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Although the proportion of confidence intervals increases substantially, it is still lower than 0.95. In the next chapter, we learn the reason for this. To motivate this, make a plot of the error, the difference between each poll's estimate and the actual <m>\theta=0.021</m>. Stratify by pollster.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise>
+      <statement>
+        <p>
+          Redo the plot that you made for exercise 32, but only for pollsters that took five or more polls.
+        </p>
+      </statement>
+    </exercise>
+  </exercises>
+
+</chapter>

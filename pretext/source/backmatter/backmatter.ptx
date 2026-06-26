@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<backmatter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="backmatter">
+  
+  <references xml:id="references">
+    <title>References</title>
+  </references>
+
+  <index xml:id="index-page">
+    <title>Index</title>
+    <index-list/>
+  </index>
+
+  <colophon xml:id="colophon">
+    <p>
+      This book was authored in <pretext/>.
+    </p>
+    <p>
+      Licensed under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International 
+      <url href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</url>
+    </p>
+  </colophon>
+
+</backmatter>

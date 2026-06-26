@@ -1,0 +1,1137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="matrices-in-R">
+  <title>Working with Matrices in R</title>
+  
+  <introduction>
+    <p>
+      When the number of variables associated with each observation is large and they can all be represented as numbers, it is often more convenient to store the data in a matrix and perform the analysis using linear algebra operations, rather than storing the data in a data frame and using <term>tidyverse</term> or <term>data.table</term> functions. Matrix operations form the computational foundation for many applications of linear algebra in data analysis.
+    </p>
+    
+    <p>
+      In fact, many of the most widely used machine learning algorithms, including linear regression, principal component analysis, neural networks, and deep learning, are built around linear algebra concepts, and their implementations rely heavily on efficient matrix operations. Becoming fluent in creating, manipulating, and interpreting matrices in R will make it easier to understand and implement these methods in practice.
+    </p>
+    
+    <p>
+      Although we introduce the mathematical framework of linear algebra in the next chapter, the examples we use there rely on being able to work with matrices in R. Therefore, before diving into the mathematical concepts, we begin here with the tools needed to create and operate on matrices in R.
+    </p>
+    
+    <p>
+      In <xref ref="sec-motivating-tasks"/>, at the end of the chapter, we present motivating examples and specific practical tasks that commonly arise in machine learning workflows, such as centering and scaling variables, computing distances, and applying linear transformations. These tasks can be completed efficiently using matrix operations, and the skills you develop in the earlier sections of the chapter will help you solve them. If you would like to understand the motivation for learning the matrix operations introduced in the previous sections, you may find it helpful to read <xref ref="sec-motivating-tasks"/> first.
+    </p>
+  </introduction>
+
+  <section xml:id="sec-matrix-notation">
+    <title>Notation</title>
+    
+    <p>
+      A matrix is a two-dimensional object defined by its number of rows and columns. In data analysis, it is common to organize data so that each row represents an observation and each column represents a variable measured on those observations. This structure allows us to perform computations across observations or variables using matrix operations, which are both efficient and conceptually aligned with the linear algebra techniques introduced in the next chapters.
+    </p>
+    
+    <p>
+      Note that matrices are a special case of <c>array</c>s, which can have more than two dimensions. For the concepts and applications covered in this book, matrices are sufficient. However, arrays are useful in more advanced settings, such as tensor-based computations, where data often have three or more dimensions.
+    </p>
+    
+    <note>
+      <p>
+        In machine learning, variables are often called <term>features</term>, while in statistics, they are often called <term>covariates</term>. Regardless of the terminology, when working with matrices, features are typically represented by the columns of the matrix, each column corresponds to one variable measured across all observations.
+      </p>
+    </note>
+    
+    <p>
+      In mathematical notation, matrices are usually represented with bold uppercase letters:
+    </p>
+    
+    <me>
+      \mathbf{X} = 
+      \begin{bmatrix}
+      x_{11}&amp;x_{12}&amp;\dots &amp; x_{1p}\\
+      x_{21}&amp;x_{22}&amp;\dots &amp; x_{2p}\\
+      \vdots &amp; \vdots &amp; \ddots &amp; \vdots\\
+      x_{n1}&amp;x_{n2}&amp;\dots&amp;x_{np}\\
+      \end{bmatrix}
+    </me>
+    
+    <p>
+      with <m>x_{ij}</m> representing the <m>j</m>-th variable for the <m>i</m>-th observation. The matrix is said to have dimensions <m>n \times p</m>, meaning it has <m>n</m> rows and <m>p</m> columns.
+    </p>
+    
+    <p>
+      We denote vectors with lower case bold letters and represent them as one column matrices, often referred to as <term>column vectors</term>. R follows this convention when converting a vector to a matrix. For example <c>as.matrix(1:n)</c> will have dimensions <c>n × 1</c>.
+    </p>
+    
+    <p>
+      However, <term>column vectors</term> should not be confused with the columns of the matrix. They have this name simply because they have one column.
+    </p>
+    
+    <p>
+      Mathematical descriptions of machine learning often make reference to vectors representing the <m>p</m> variables:
+    </p>
+    
+    <me>
+      \mathbf{x} =
+      \begin{bmatrix}
+      x_1\\
+      x_2\\
+      \vdots\\
+      x_p
+      \end{bmatrix}
+    </me>
+    
+    <p>
+      To distinguish between variables associated with the observations <m>i=1,\dots,n</m>, we add an index:
+    </p>
+    
+    <me>
+      \mathbf{x}_i = \begin{bmatrix}
+      x_{i1}\\
+      x_{i2}\\
+      \vdots\\
+      x_{ip}
+      \end{bmatrix}
+    </me>
+    
+    <warning>
+      <p>
+        Bold lower case letters are also commonly used to represent matrix columns rather than rows. This can be confusing because <m>\mathbf{x}_1</m> can represent either the first row or the first column of <m>\mathbf{X}</m>. One way to distinguish is to use notation similar to computer code. Specifically, using the colon <m>:</m> to represent <em>all</em>. So <m>\mathbf{X}_{1,:}</m> represents the first row and <m>\mathbf{X}_{:,1}</m> is the first column. Another approach is to distinguish by the letter used to index, with <m>i</m> used for rows and <m>j</m> used for columns. So <m>\mathbf{x}_i</m> is the <m>i</m>th row and <m>\mathbf{x}_j</m> is the <m>j</m>th column. With this approach, it is important to clarify which dimension, row or column is being represented. Further confusion can arise because, as aforementioned, it is common to represent all vectors, including the rows of a matrix, as one-column matrices.
+      </p>
+    </warning>
+  </section>
+
+  <section xml:id="sec-mnist">
+    <title>Case study: MNIST</title>
+    
+    <p>
+      The first step in handling mail received in the post office is to sort letters by zip code:
+    </p>
+    
+    <figure xml:id="fig-envelope">
+      <caption>Example envelope with address</caption>
+      <image source="../ml/img/how-to-write-a-address-on-an-envelope-how-to-write-the-address-on-an-envelope-write-address-on-envelope-india-finishedenvelope-x69070.png" width="40%">
+        <description>An envelope showing how to write addresses</description>
+      </image>
+    </figure>
+    
+    <p>
+      In the Machine Learning part of this book, we will describe how we can build computer algorithms to read handwritten digits, which robots then use to sort the letters. To do this, we first need to collect data, which in this case is a high-dimensional dataset and best stored in a matrix.
+    </p>
+    
+    <p>
+      The MNIST dataset was generated by digitizing thousands of handwritten digits, already read and annotated by humans<fn>http://yann.lecun.com/exdb/mnist/</fn>. Below are three images of written digits.
+    </p>
+    
+    <figure xml:id="fig-matrices-in-r-digit-images-example">
+      <caption>Three example handwritten digits</caption>
+      <image source="images/matrices-in-r-digit-images-example.png" width="70%">
+        <description>Three grayscale images of handwritten digits from the MNIST dataset.</description>
+      </image>
+    </figure>
+    
+    <p>
+      The images are converted into <m>28 \times 28 = 784</m> pixels and, for each pixel, we obtain a grey scale intensity between 0 (white) and 255 (black). The following plot shows the individual variables for each image.
+    </p>
+    
+    <figure xml:id="fig-matrices-in-r-example-images">
+      <caption>Pixel intensities for three handwritten digits</caption>
+      <image source="images/matrices-in-r-example-images.png" width="70%">
+        <description>A grid-style display showing the 28 by 28 pixel intensities for three handwritten digits.</description>
+      </image>
+    </figure>
+    
+    <p>
+      Each digitized image, indexed by <m>i</m>, is represented by 784 numerical variables corresponding to pixel intensities, along with a categorical outcome, or label, specifying the digit (<m>0</m>-<m>9</m>) depicted in the image.
+    </p>
+    
+    <p>
+      Let's load the data using the <term>dslabs</term> package:
+    </p>
+    
+    <program language="r">
+      <input>
+library(tidyverse)
+library(dslabs)
+mnist &lt;- read_mnist()
+      </input>
+    </program>
+    
+    <p>
+      The pixel intensities are saved in a matrix:
+    </p>
+    
+    <console>
+      <input>
+class(mnist$train$images)
+      </input>
+      <output>
+[1] "matrix" "array"
+      </output>
+    </console>
+    
+    <p>
+      The labels associated with each image are included in a vector:
+    </p>
+    
+    <console>
+      <input>
+table(mnist$train$labels)
+      </input>
+      <output>
+
+   0    1    2    3    4    5    6    7    8    9 
+5923 6742 5958 6131 5842 5421 5918 6265 5851 5949
+      </output>
+    </console>
+    
+    <p>
+      To simplify the code below, we will rename these <c>x</c> and <c>y</c> respectively:
+    </p>
+    
+    <program language="r">
+      <input>
+x &lt;- mnist$train$images
+y &lt;- mnist$train$labels
+      </input>
+    </program>
+  </section>
+
+  <section xml:id="sec-matrix-operations-in-r">
+    <title>Matrix Operations in R</title>
+    
+    <p>
+      Before we define and work through the tasks designed to teach matrix operations, we begin by reviewing some basic matrix functionality in R.
+    </p>
+    
+    <subsection xml:id="sec-creating-a-matrix">
+      <title>Creating a matrix</title>
+      
+      <p>
+        Scalars, vectors, and matrices are the basic building blocks of linear algebra. We have already encountered vectors in earlier chapters, and in R, scalars are represented as vectors of length 1. We now extend this understanding to matrices, starting with how to create them in R.
+      </p>
+      
+      <p>
+        We can create a matrix using the <c>matrix</c> function. The first argument is a vector containing the elements that will fill up the matrix. The second and third arguments determine the number of row and columns, respectively. So a typical way to create a matrix is to first obtain a vector of numbers containing the elements of the matrix and feeding it to the <c>matrix</c> function. For example, to create a <m>100 \times 2</m> matrix of normally distributed random variables, we write:
+      </p>
+      
+      <program language="r">
+        <input>
+mat &lt;- matrix(rnorm(100*2), 100, 2)
+        </input>
+      </program>
+      
+      <p>
+        Note that by default the matrix is filled in column by column:
+      </p>
+      
+      <console>
+        <input>
+matrix(1:15, 3, 5)
+        </input>
+        <output>
+     [,1] [,2] [,3] [,4] [,5]
+[1,]    1    4    7   10   13
+[2,]    2    5    8   11   14
+[3,]    3    6    9   12   15
+        </output>
+      </console>
+      
+      <p>
+        To fill the matrix row by row, we can use the <c>byrow</c> argument:
+      </p>
+      
+      <console>
+        <input>
+matrix(1:15, 3, 5, byrow = TRUE)
+        </input>
+        <output>
+     [,1] [,2] [,3] [,4] [,5]
+[1,]    1    2    3    4    5
+[2,]    6    7    8    9   10
+[3,]   11   12   13   14   15
+        </output>
+      </console>
+      
+      <p>
+        The function <c>as.vector</c> converts a matrix back into a vector:
+      </p>
+      
+      <console>
+        <input>
+as.vector(matrix(1:15, 3, 5))
+        </input>
+        <output>
+ [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
+        </output>
+      </console>
+      
+      <warning>
+        <p>
+          If the product of columns and rows does not match the length of the vector provided in the first argument, <c>matrix</c> recycles values. If the length of the vector is a sub-multiple or multiple of the number of rows, this happens <term>without warning</term>:
+        </p>
+        
+        <console>
+          <input>
+matrix(1:3, 3, 5)
+          </input>
+          <output>
+     [,1] [,2] [,3] [,4] [,5]
+[1,]    1    1    1    1    1
+[2,]    2    2    2    2    2
+[3,]    3    3    3    3    3
+          </output>
+        </console>
+      </warning>
+      
+      <p>
+        The function <c>as.matrix()</c> attempts to coerce its input into a matrix:
+      </p>
+      
+      <console>
+        <input>
+df &lt;- data.frame(a = 1:2, b = 3:4, c = 5:6)
+as.matrix(df)
+        </input>
+        <output>
+     a b c
+[1,] 1 3 5
+[2,] 2 4 6
+        </output>
+      </console>
+    </subsection>
+
+    <subsection xml:id="sec-dimensions-of-a-matrix">
+      <title>Dimensions of a matrix</title>
+      
+      <p>
+        The dimension of a matrix is an important characteristic needed to assure that certain linear algebra operations can be performed. The dimension is a two-number summary defined as the number of rows × the number of columns.
+      </p>
+      
+      <p>
+        The <c>nrow</c> function tells us how many rows that matrix has. Here is the number of rows <c>x</c> previously defined to store the MNIST training data:
+      </p>
+      
+      <console>
+        <input>
+nrow(x)
+        </input>
+        <output>
+[1] 60000
+        </output>
+      </console>
+      
+      <p>
+        The function <c>ncol</c> tells us how many columns:
+      </p>
+      
+      <console>
+        <input>
+ncol(x)
+        </input>
+        <output>
+[1] 784
+        </output>
+      </console>
+      
+      <p>
+        We learn that our dataset contains 60,000 observations (images) and 784 variables (pixels).
+      </p>
+      
+      <p>
+        The <c>dim</c> function returns the rows and columns:
+      </p>
+      
+      <console>
+        <input>
+dim(x)
+        </input>
+        <output>
+[1] 60000   784
+        </output>
+      </console>
+      
+      <p>
+        Now we can confirm that R follows the convention of defining vectors of length <m>n</m> as <m>n\times 1</m> matrices or <term>column vectors</term>:
+      </p>
+      
+      <console>
+        <input>
+vec &lt;- 1:10
+dim(matrix(vec))
+        </input>
+        <output>
+[1] 10  1
+        </output>
+      </console>
+    </subsection>
+
+    <subsection xml:id="sec-matrix-subsetting">
+      <title>Subsetting</title>
+      
+      <p>
+        To extract a specific entry from a matrix, for example the 300th row of the 100th column, we write:
+      </p>
+      
+      <program language="r">
+        <input>
+x[300, 100]
+        </input>
+      </program>
+      
+      <p>
+        We can extract subsets of the matrices by using vectors of indexes. For example, we can extract the first 100 pixels from the first 300 observations like this:
+      </p>
+      
+      <program language="r">
+        <input>
+x[1:300, 1:100]
+        </input>
+      </program>
+      
+      <p>
+        To extract an entire row or subset of rows, we leave the column dimension blank. So the following code returns all the pixels for the first 300 observations:
+      </p>
+      
+      <program language="r">
+        <input>
+x[1:300,]
+        </input>
+      </program>
+      
+      <p>
+        Similarly, we can subset any number of columns by keeping the first dimension blank. Here is the code to extract the first 100 pixels:
+      </p>
+      
+      <program language="r">
+        <input>
+x[,1:100]
+        </input>
+      </program>
+      
+      <warning>
+        <p>
+          If we subset just one row or just one column, the resulting object is no longer a matrix. For example notice what happens here:
+        </p>
+        
+        <console>
+          <input>
+dim(x[300,])
+          </input>
+          <output>
+NULL
+          </output>
+        </console>
+        
+        <p>
+          To avoid this, we can use the <c>drop</c> argument:
+        </p>
+        
+        <console>
+          <input>
+dim(x[100,,drop = FALSE])
+          </input>
+          <output>
+[1]   1 784
+          </output>
+        </console>
+      </warning>
+    </subsection>
+
+    <subsection xml:id="sec-transpose">
+      <title>The transpose</title>
+      
+      <p>
+        A common operation when working with matrices is the <term>transpose</term>. We use the transpose to understand several concepts described in the next several sections. This operation simply converts the rows of a matrix into columns. We use the symbols <m>\top</m> or <m>'</m> next to the bold upper case letter to denote the transpose:
+      </p>
+      
+      <md>
+        <mrow>\text{if } \,
+        \mathbf{X} = 
+        \begin{bmatrix}
+          x_{11}&amp;\dots &amp; x_{1p} \\
+          x_{21}&amp;\dots &amp; x_{2p} \\
+          \vdots &amp; \ddots &amp; \vdots \\
+          x_{n1}&amp;\dots &amp; x_{np} 
+        \end{bmatrix}</mrow>
+        <mrow>\text{ then }\,
+        \mathbf{X}^\top = 
+        \begin{bmatrix}
+          x_{11}&amp;x_{21}&amp;\dots &amp; x_{n1} \\
+          \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+          x_{1p}&amp;x_{2p}&amp;\dots &amp; x_{np} 
+        \end{bmatrix}</mrow>
+      </md>
+      
+      <p>
+        In R we compute the transpose using the function <c>t</c>
+      </p>
+      
+      <console>
+        <input>
+dim(x)
+dim(t(x))
+        </input>
+        <output>
+[1] 60000   784
+[1]   784 60000
+        </output>
+      </console>
+      
+      <p>
+        One use of the transpose is that we can write the matrix <m>\mathbf{X}</m> as rows of the column vectors representing the variables for each individual observation in the following way:
+      </p>
+      
+      <me>
+        \mathbf{X} =
+        \begin{bmatrix}
+        \mathbf{x}_1^\top\\
+        \mathbf{x}_2^\top\\
+        \vdots\\
+        \mathbf{x}_n^\top
+        \end{bmatrix}
+      </me>
+    </subsection>
+
+    <subsection xml:id="sec-row-col-summaries">
+      <title>Row and column summaries</title>
+      
+      <p>
+        A common operation with matrices is to apply the same function to each row or to each column. For example, we may want to compute row averages and standard deviations. The <c>apply</c> function lets you do this. The first argument is the matrix, the second is the dimension, 1 for rows, 2 for columns, and the third is the function to be applied.
+      </p>
+      
+      <p>
+        So, for example, to compute the averages and standard deviations of each row, we write:
+      </p>
+      
+      <program language="r">
+        <input>
+avgs &lt;- apply(x, 1, mean)
+sds &lt;- apply(x, 1, sd)
+        </input>
+      </program>
+      
+      <p>
+        To compute these for the columns, we simply change the 1 to a 2:
+      </p>
+      
+      <program language="r">
+        <input>
+avgs &lt;- apply(x, 2, mean)
+sds &lt;- apply(x, 2, sd)
+        </input>
+      </program>
+      
+      <p>
+        Because these operations are so common, special functions are available to perform them. So, for example, the functions <c>rowMeans</c> computes the average of each row:
+      </p>
+      
+      <program language="r">
+        <input>
+avg &lt;- rowMeans(x)
+        </input>
+      </program>
+      
+      <p>
+        and the function <c>rowSds</c> from the <term>matrixStats</term> packages computes the standard deviations for each row:
+      </p>
+      
+      <program language="r">
+        <input>
+library(matrixStats)
+sds &lt;- rowSds(x)
+        </input>
+      </program>
+      
+      <p>
+        The functions <c>colMeans</c> and <c>colSds</c> provide the version for columns.
+      </p>
+      
+      <p>
+        For other fast implementations of common operation take a look at what is available in the <term>matrixStats</term> package.
+      </p>
+    </subsection>
+
+    <subsection xml:id="sec-conditional-filtering">
+      <title>Conditional filtering</title>
+      
+      <p>
+        One of the advantages of matrices operations over <term>tidyverse</term> operations is that we can easily select columns based on summaries of the columns.
+      </p>
+      
+      <p>
+        Note that logical filters can be used to subset matrices in a similar way in which they can be used to subset vectors. Here is a simple example subsetting columns with logicals:
+      </p>
+      
+      <console>
+        <input>
+matrix(1:15, 3, 5)[,c(FALSE, TRUE, TRUE, FALSE, TRUE)]
+        </input>
+        <output>
+     [,1] [,2] [,3]
+[1,]    4    7   13
+[2,]    5    8   14
+[3,]    6    9   15
+        </output>
+      </console>
+      
+      <p>
+        This implies that we can select rows with conditional expression. In the following example we remove all observations containing at least one <c>NA</c>:
+      </p>
+      
+      <program language="r">
+        <input>
+x[apply(!is.na(x), 1, all),]
+        </input>
+      </program>
+      
+      <p>
+        This being a common operation, we have a <term>matrixStats</term> function to do it faster:
+      </p>
+      
+      <program language="r">
+        <input>
+x[!rowAnyNAs(x),]
+        </input>
+      </program>
+    </subsection>
+
+    <subsection xml:id="sec-indexing-matrices">
+      <title>Indexing with matrices</title>
+      
+      <p>
+        An operation that facilitates efficient coding is that we can change entries of a matrix based on conditionals applied to that same matrix. Here is a simple example:
+      </p>
+      
+      <console>
+        <input>
+mat &lt;- matrix(1:15, 3, 5)
+mat[mat &gt; 6 &amp; mat &lt; 12] &lt;- 0
+mat
+        </input>
+        <output>
+     [,1] [,2] [,3] [,4] [,5]
+[1,]    1    4    0    0   13
+[2,]    2    5    0    0   14
+[3,]    3    6    0   12   15
+        </output>
+      </console>
+      
+      <p>
+        A useful application of this approach is that we can change all the <c>NA</c> entries of a matrix to something else:
+      </p>
+      
+      <program language="r">
+        <input>
+x[is.na(x)] &lt;- 0
+        </input>
+      </program>
+    </subsection>
+  </section>
+
+  <section xml:id="sec-vectorization-for-matrices">
+    <title>Vectorization for matrices</title>
+    
+    <p>
+      Vectorization is one of the main reasons R is so efficient for numerical computation with data. Many operations that would otherwise require explicit loops can instead be applied directly to entire matrices or vectors, making the code both faster and easier to read.
+    </p>
+    
+    <subsection xml:id="sec-matrix-vector-operations">
+      <title>Matrix-vector operations</title>
+      
+      <p>
+        A common example of matrix vectorization is centering rows: subtracting the mean of each row from its corresponding entries. Although this can be done with the <c>scale()</c> function
+      </p>
+      
+      <program language="r">
+        <input>
+scale(x, scale = FALSE)
+        </input>
+      </program>
+      
+      <p>
+        R's vectorization rules make it possible to achieve this more directly and efficiently. We use row centering as an example, but this approach applies broadly to many operations discussed throughout this chapter.
+      </p>
+      
+      <p>
+        In R, if we subtract a vector <c>a</c> from a matrix <c>x</c>: <c>x-a</c>, the first element of <c>a</c> is subtracted from the first row, the second element from the second row, and so on. Mathematically, this operation can be written as:
+      </p>
+      
+      <me>
+        \begin{bmatrix}
+        X_{11}&amp;\dots &amp; X_{1p} \\
+        X_{21}&amp;\dots &amp; X_{2p} \\
+        \vdots &amp; \ddots &amp; \vdots \\
+        X_{n1}&amp;\dots &amp; X_{np}
+        \end{bmatrix} -
+        \begin{bmatrix}
+        a_1\\
+        a_2\\
+        \vdots \\
+        a_n
+        \end{bmatrix} =
+        \begin{bmatrix}
+        X_{11}-a_1&amp;\dots &amp; X_{1p}-a_1\\
+        X_{21}-a_2&amp;\dots &amp; X_{2p}-a_2\\
+        \vdots &amp; \ddots &amp; \vdots\\
+        X_{n1}-a_n&amp;\dots &amp; X_{np}-a_n
+        \end{bmatrix}
+      </me>
+      
+      <p>
+        This means we can center each row of <c>x</c> with this single line of code:
+      </p>
+      
+      <program language="r">
+        <input>
+x - rowMeans(x)
+        </input>
+      </program>
+      
+      <p>
+        The same vectorization applies to other arithmetic operations, such as division. For example, we can both center and scale the rows with:
+      </p>
+      
+      <program language="r">
+        <input>
+(x - rowMeans(x))/rowSds(x)
+        </input>
+      </program>
+      
+      <p>
+        This is equivalent to <c>scale(x)</c>, but done explicitly to show the underlying vectorized operations.
+      </p>
+    </subsection>
+
+    <subsection xml:id="sec-the-sweep-function">
+      <title>The sweep function</title>
+      
+      <p>
+        If we instead want to scale the columns, the following code will not work as expected because subtraction is applied row-wise:
+      </p>
+      
+      <program language="r">
+        <input>
+x - colMeans(x)
+        </input>
+      </program>
+      
+      <p>
+        One workaround is to transpose the matrix, apply the operation, and transpose back:
+      </p>
+      
+      <program language="r">
+        <input>
+t(t(x) - colMeans(x))
+        </input>
+      </program>
+      
+      <p>
+        This works, but it's cumbersome and inefficient for large matrices due to repeated transpositions.
+      </p>
+      
+      <p>
+        The <c>sweep</c> function provides a clearer and more general solution for performing vectorized operations on matrices. It is similar to <c>apply</c>, but designed specifically for array-like data and elementwise arithmetic.
+      </p>
+      
+      <p>
+        When used with a matrix <c>x</c>, <c>sweep</c> takes three main arguments:
+      </p>
+      
+      <ul>
+        <li><p><c>MARGIN</c> - which dimension to operate over (<c>1</c> for rows, <c>2</c> for columns)</p></li>
+        <li><p><c>STATS</c> - the vector of values to <em>sweep out</em> (e.g., means or standard deviations)</p></li>
+        <li><p><c>FUN</c> - the operation to apply (default is subtraction <c>"-"</c>)</p></li>
+      </ul>
+      
+      <p>
+        For example, to subtract each column's mean we write:
+      </p>
+      
+      <program language="r">
+        <input>
+sweep(x, MARGIN = 2, STATS = colMeans(x), FUN = "-")
+        </input>
+      </program>
+      
+      <p>
+        This centers each column so that its average is zero. Because R allows omitting argument names when defaults are clear, a concise and common shorthand is:
+      </p>
+      
+      <program language="r">
+        <input>
+sweep(x, 2, colMeans(x))
+        </input>
+      </program>
+      
+      <p>
+        Similarly, to center rows we write:
+      </p>
+      
+      <program language="r">
+        <input>
+sweep(x, 1, rowMeans(x))
+        </input>
+      </program>
+      
+      <p>
+        (Though note that <c>x - rowMeans(x)</c> is typically faster for this specific operation.)
+      </p>
+      
+      <p>
+        To scale rather than center, simply change the operation:
+      </p>
+      
+      <program language="r">
+        <input>
+sweep(x, 2, colSds(x), "/")
+        </input>
+      </program>
+      
+      <p>
+        The <c>sweep</c> function also generalizes beyond matrices, it can handle arrays with more than two dimensions and statistics vectors (<c>STATS</c>) of matching dimension.
+      </p>
+    </subsection>
+
+    <subsection xml:id="sec-matrix-matrix-operations">
+      <title>Matrix-matrix operations</title>
+      
+      <p>
+        In R, if you add, subtract, multiple or divide two matrices, the operation is done element-wise. For example, if two matrices are stored in <c>x</c> and <c>y</c>, then <c>x*y</c> does not result in matrix multiplication as defined in <xref ref="sec-matrix-mult"/>. Instead, the entry in row <m>i</m> and column <m>j</m> of this product is the product of the entry in row <m>i</m> and column <m>j</m> of <c>x</c> and <c>y</c>, respectively.
+      </p>
+    </subsection>
+  </section>
+
+  <section xml:id="sec-motivating-tasks">
+    <title>Motivating tasks</title>
+    
+    <p>
+      To motivate the use of matrices in R, we will pose six tasks that illustrate how matrix operations can help with data exploration of the handwritten digits dataset. Each task highlights a basic matrix operation that is commonly used in R. By seeing how these operations can be implemented with fast and simple code, you will gain hands-on experience with the kinds of computations that arise frequently in high-dimensional data analysis. The primary goal of these tasks is to help you learn how matrix operations work in practice.
+    </p>
+    
+    <subsection>
+      <title>Visualize the original image</title>
+      
+      <p>
+        The pixel intensities are provided as rows in a matrix. Using what we learned in <xref ref="sec-creating-a-matrix"/>, we can convert each row into a <m>28 \times 28</m> matrix that we can visualize as an image. As an example, we will use the third observation. From the label, we know this is a:
+      </p>
+      
+      <console>
+        <input>
+y[3]
+        </input>
+        <output>
+[1] 4
+        </output>
+      </console>
+      
+      <p>
+        The third row of the matrix <c>x[3,]</c> contains the 784 pixel intensities. If we assume these were entered in order, we can convert them back to a <m>28 \times 28</m> matrix using:
+      </p>
+      
+      <program language="r">
+        <input>
+grid &lt;- matrix(x[3,], 28, 28)
+        </input>
+      </program>
+      
+      <p>
+        To visualize the data, we can use <c>image</c> in the following way:
+      </p>
+      
+      <program language="r">
+        <input>
+image(1:28, 1:28, grid)
+        </input>
+      </program>
+      
+      <p>
+        However, because the y-axis in <c>image</c> goes bottom to top and <c>x</c> stores pixels top to bottom the code above shows shows a flipped image. To flip it back we can use:
+      </p>
+      
+      <program language="r">
+        <input>
+image(1:28, 1:28, grid[, 28:1])
+        </input>
+      </program>
+      
+      <figure xml:id="fig-matrices-in-r-matrix-image">
+        <caption>Reconstructed handwritten digit from matrix entries</caption>
+        <image source="images/matrices-in-r-matrix-image.png" width="50%">
+          <description>A 28 by 28 heatmap showing a handwritten digit reconstructed from pixel intensities.</description>
+        </image>
+      </figure>
+    </subsection>
+
+    <subsection>
+      <title>Do some digits require more ink to write than others?</title>
+      
+      <p>
+        Let's study the distribution of the total pixel darkness and how it varies by digits.
+      </p>
+      
+      <p>
+        We can use what we learned in <xref ref="sec-row-col-summaries"/> to computed this average for each pixel and the display the values for each digit using a boxplot:
+      </p>
+      
+      <program language="r">
+        <input>
+avg &lt;- rowMeans(x)
+boxplot(avg ~ y)
+        </input>
+      </program>
+      
+      <figure xml:id="fig-matrices-in-r-boxplot-of-digit-averages">
+        <caption>Average pixel darkness by digit</caption>
+        <image source="images/matrices-in-r-boxplot-of-digit-averages.png" width="70%">
+          <description>A boxplot comparing average pixel darkness across handwritten digits 0 through 9.</description>
+        </image>
+      </figure>
+      
+      <p>
+        From this plot we see that, not surprisingly, 1s use less ink than other digits.
+      </p>
+    </subsection>
+
+    <subsection>
+      <title>Are some pixels uninformative?</title>
+      
+      <p>
+        We now examine the variation of each pixel across digits to identify and remove those that provide little information for classification. Pixels that show little variation across images do not help distinguish between digits and can safely be excluded. In many cases, removing uninformative features not only simplifies the analysis but also reduces the dataset's size substantially, improving computational speed.
+      </p>
+      
+      <p>
+        Using what we learned in Sections <xref ref="sec-row-col-summaries"/> and <xref ref="sec-conditional-filtering"/>, we can efficiently compute and filter out such columns. To quantify each pixel's variability, we calculate its standard deviation across all images using the <c>colSds</c> function from the <term>matrixStats</term> package:
+      </p>
+      
+      <program language="r">
+        <input>
+sds &lt;- colSds(x)
+        </input>
+      </program>
+      
+      <p>
+        A quick look at the distribution of these values shows that some pixels have very low entry to entry variability:
+      </p>
+      
+      <program language="r">
+        <input>
+hist(sds, breaks = 30, main = "SDs")
+        </input>
+      </program>
+      
+      <figure xml:id="fig-matrices-in-r-sds-histogram">
+        <caption>Distribution of pixel standard deviations</caption>
+        <image source="images/matrices-in-r-sds-histogram.png" width="70%">
+          <description>A histogram showing the distribution of standard deviations across the 784 pixel positions.</description>
+        </image>
+      </figure>
+      
+      <p>
+        This makes sense since we don't write in some parts of the box. Here is the variance plotted by location after using what we learned in <xref ref="sec-creating-a-matrix"/> to create a <m>28 \times 28</m> matrix:
+      </p>
+      
+      <program language="r">
+        <input>
+image(1:28, 1:28, matrix(sds, 28, 28)[, 28:1])
+        </input>
+      </program>
+      
+      <figure xml:id="fig-matrices-in-r-pixel-variance">
+        <caption>Pixel variability by location</caption>
+        <image source="images/matrices-in-r-pixel-variance.png" width="50%">
+          <description>A 28 by 28 heatmap showing how much each pixel varies across all handwritten digit images.</description>
+        </image>
+      </figure>
+      
+      <p>
+        We see that there is little variation in the corners.
+      </p>
+      
+      <p>
+        We could remove features that have no variation since these can't help us predict.
+      </p>
+      
+      <p>
+        So if we wanted to remove uninformative predictors from our matrix, we could write this one line of code:
+      </p>
+      
+      <console>
+        <input>
+new_x &lt;- x[,colSds(x) &gt; 60]
+dim(new_x)
+        </input>
+        <output>
+[1] 60000   322
+        </output>
+      </console>
+      
+      <p>
+        Only the columns for which the standard deviation is above 60 are kept, which removes over half the predictors.
+      </p>
+    </subsection>
+
+    <subsection>
+      <title>Can we remove smudges?</title>
+      
+      <p>
+        We will first look at the distribution of all pixel values.
+      </p>
+      
+      <program language="r">
+        <input>
+hist(as.vector(x), breaks = 30, main = "Pixel intensities")
+        </input>
+      </program>
+      
+      <figure xml:id="fig-matrices-in-r-histogram-all-pixels">
+        <caption>Distribution of all pixel intensities</caption>
+        <image source="images/matrices-in-r-histogram-all-pixels.png" width="70%">
+          <description>A histogram of all pixel intensity values in the MNIST training images, showing many near-zero values and a spike near darker intensities.</description>
+        </image>
+      </figure>
+      
+      <p>
+        This shows a clear dichotomy which is explained as parts of the image with ink and parts without. If we think that values below, say, 50 are smudges, we can quickly make them zero using what we learned in <xref ref="sec-indexing-matrices"/>:
+      </p>
+      
+      <program language="r">
+        <input>
+new_x &lt;- x
+new_x[new_x &lt; 50] &lt;- 0
+        </input>
+      </program>
+    </subsection>
+
+    <subsection>
+      <title>Binarize the data</title>
+      
+      <p>
+        The histogram above seems to suggest that this data is mostly binary. A pixel either has ink or does not. Applying what we learned in <xref ref="sec-indexing-matrices"/>, we can binarize the data using just matrix operations:
+      </p>
+      
+      <program language="r">
+        <input>
+bin_x &lt;- x
+bin_x[bin_x &lt; 255/2] &lt;- 0 
+bin_x[bin_x &gt; 255/2] &lt;- 1
+        </input>
+      </program>
+      
+      <p>
+        We can also convert to a matrix of logicals and then coerce to numbers using what we learned in <xref ref="sec-vectorization-for-matrices"/>:
+      </p>
+      
+      <program language="r">
+        <input>
+bin_X &lt;- (x &gt; 255/2)*1
+        </input>
+      </program>
+    </subsection>
+
+    <subsection>
+      <title>Standardize the digits</title>
+      
+      <p>
+        Finally, we will scale each column to have the same average and standard deviation.
+      </p>
+      
+      <p>
+        Using what we learned in <xref ref="sec-vectorization-for-matrices"/> implies that we can scale each row of a matrix as follows:
+      </p>
+      
+      <program language="r">
+        <input>
+(x - rowMeans(x))/rowSds(x)
+        </input>
+      </program>
+      
+      <p>
+        And for the columns we can combine two calls to <c>sweep</c>:
+      </p>
+      
+      <program language="r">
+        <input>
+sweep(sweep(x, 2, colMeans(x)), 2, colSds(x), FUN = "/")
+        </input>
+      </program>
+      
+      <p>
+        Note we can use this to standardize rows as well by replacing <c>2</c> with <c>1</c> and use <c>rowMeans</c> and <c>rowSds</c>.
+      </p>
+      
+      <p>
+        Finally, note that equivalent functionality can often be achieved with:
+      </p>
+      
+      <program language="r">
+        <input>
+t(scale(t(x)))
+        </input>
+      </program>
+      
+      <p>
+        This version can be faster for large matrices, though it's less explicit about what's happening.
+      </p>
+    </subsection>
+  </section>
+
+  <section xml:id="sec-exercises-matrices">
+    <title>Exercises</title>
+    
+    <exercises>
+      <exercise>
+        <statement>
+          <p>
+            Create a 100 by 10 matrix of randomly generated normal numbers. Put the result in <c>x</c>.
+          </p>
+        </statement>
+      </exercise>
+      
+      <exercise>
+        <statement>
+          <p>
+            Apply the three R functions that give you the dimension of <c>x</c>, the number of rows of <c>x</c>, and the number of columns of <c>x</c>, respectively.
+          </p>
+        </statement>
+      </exercise>
+      
+      <exercise>
+        <statement>
+          <p>
+            Add the scalar 1 to row 1, the scalar 2 to row 2, and so on, to the matrix <c>x</c>.
+          </p>
+        </statement>
+      </exercise>
+      
+      <exercise>
+        <statement>
+          <p>
+            Add the scalar 1 to column 1, the scalar 2 to column 2, and so on, to the matrix <c>x</c>. Hint: Use <c>sweep</c> with <c>FUN = "+"</c>.
+          </p>
+        </statement>
+      </exercise>
+      
+      <exercise>
+        <statement>
+          <p>
+            Compute the average of each row of <c>x</c>.
+          </p>
+        </statement>
+      </exercise>
+      
+      <exercise>
+        <statement>
+          <p>
+            Compute the average of each column of <c>x</c>.
+          </p>
+        </statement>
+      </exercise>
+      
+      <exercise>
+        <statement>
+          <p>
+            For each digit in the MNIST training data, compute the proportion of pixels that are in a <em>grey area</em>, defined as values between 50 and 205. Make a boxplot by digit class. Hint: Use logical operators and <c>rowMeans</c>.
+          </p>
+        </statement>
+      </exercise>
+    </exercises>
+  </section>
+
+</chapter>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="reading-prob">
+  <title>Recommended Reading</title>
+
+  <ul>
+    <li>
+      <p>
+        <em>Fisher, R. A. (1935). The Design of Experiments. Edinburgh: Oliver &amp; Boyd.</em>
+        A foundational text that introduced the principles of randomization and experimental control, forming the basis of modern statistical design.
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>Montgomery, D. C. (2017). Design and Analysis of Experiments (9th ed.). Wiley.</em>
+        A comprehensive and accessible modern treatment of experimental design, emphasizing applications and interpretation.
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>David Freedman, Robert Pisani &amp; Roger Purves, Statistics.</em>
+        This book emphasizes clear reasoning, real examples, and conceptual insight rather than formula memorization.
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>A First Course in Probability by Sheldon Ross</em> - a widely used undergraduate text that builds a solid foundation through clear explanations and a broad range of exercises.
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>Introduction to Probability by Joseph K. Blitzstein and Jessica Hwang</em> - an engaging, example-driven introduction that emphasizes problem solving and intuition.
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>An Introduction to Probability Theory and Its Applications, Volume 1 by William Feller</em> - a rigorous classic that provides a deeper and more formal treatment of the subject.
+      </p>
+    </li>
+  </ul>
+
+</chapter>

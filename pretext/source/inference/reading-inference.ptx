@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="reading-inference">
+  <title>Recommended Reading</title>
+  
+  <introduction>
+    <p>
+      The following books and resources provide additional depth on the topics covered in this part of the book.
+    </p>
+  </introduction>
+
+  <ul>
+    <li>
+      <p>
+        <em>Freedman, D., Pisani, R., &amp; Purves, R. (2007). Statistics (4th ed.).</em>
+        Emphasizes conceptual understanding of estimation and uncertainty. Especially strong on interpreting standard errors and margins of error.
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>Moore, D. S., McCabe, G. P., &amp; Craig, B. A. (2017). Introduction to the Practice of Statistics (9th ed.).</em>
+        A classic intro text that develops inference from sampling distributions through confidence intervals and practical interpretation.
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>Berger, J. O. (1985). Statistical Decision Theory and Bayesian Analysis (2nd ed.). Springer-Verlag.</em>
+        A classic and comprehensive reference that develops Bayesian methods from first principles of decision theory. Recommended for readers who wish to explore the mathematical foundations in more depth.
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>Nate Silver (2016). How FiveThirtyEight's Election Forecast Works.</em>
+        FiveThirtyEight's official explanation of the 2016 model, including poll weighting, correlated errors, and simulation methodology.
+        <url href="https://fivethirtyeight.com/features/how-fivethirtyeights-election-forecast-works/">https://fivethirtyeight.com/features/how-fivethirtyeights-election-forecast-works/</url>
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>FiveThirtyEight (2020). How Our Presidential Forecast Works (2020 Edition).</em>
+        Details updates to the 2020 model, including adjustments for state and national polling correlation, house effects, and uncertainty in turnout and the Electoral College.
+        <url href="https://fivethirtyeight.com/features/how-our-presidential-forecast-works/">https://fivethirtyeight.com/features/how-our-presidential-forecast-works/</url>
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>Andrew Gelman (2020). Election Forecasting: Why We're Not as Sure as We Think.</em>
+        A statistical perspective on model uncertainty, correlated polling errors, and the interpretation of forecast probabilities.
+        <url href="https://statmodeling.stat.columbia.edu/2020/11/02/election-forecasting-why-were-not-as-sure-as-we-think/">https://statmodeling.stat.columbia.edu/2020/11/02/election-forecasting-why-were-not-as-sure-as-we-think/</url>
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>James, G., Witten, D., Hastie, T., &amp; Tibshirani, R. (2021). An Introduction to Statistical Learning (2nd ed.). Springer.</em>
+        See the chapter on resampling methods for a clear, concise introduction to the bootstrap with intuitive examples and code.
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>Efron, B., &amp; Tibshirani, R. J. (1993). An Introduction to the Bootstrap. Chapman &amp; Hall/CRC.</em>
+        The classic, authoritative treatment. Develops the bootstrap from first principles, with theory, practical guidance, and many examples.
+      </p>
+    </li>
+  </ul>
+
+</chapter>

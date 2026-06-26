@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="reading-highdim">
+  <title>Recommended Reading</title>
+  
+  <introduction>
+    <p>
+      The following books and resources provide additional depth on the topics covered in this part of the book.
+    </p>
+  </introduction>
+
+  <ul>
+    <li>
+      <p>
+        <em>Hefferon, J. (2017). Linear Algebra.</em>
+        A free and accessible open-source textbook designed for beginners, with clear explanations, worked examples, and plenty of exercises. Ideal for self-learners or students seeking to build both intuition and practical skills.
+        <url href="http://joshua.smcvt.edu/linearalgebra/">Available online</url>
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>Strang, G. (2019). Linear Algebra and Learning from Data.</em>
+        Focuses on the role of linear algebra in modern machine learning and data science. A practical companion to statistical and algorithmic methods.
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>Seber, G. A. F. (2003). Linear Regression Analysis (2nd ed.).</em>
+        A concise and mathematically rigorous exploration of regression, grounded in matrix algebra. Offers expanded coverage of diagnostics, model fitting, selection, and prediction.
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>James, G., Witten, D., Hastie, T., &amp; Tibshirani, R. (2021). An Introduction to Statistical Learning (2nd ed.).</em>
+        A highly accessible introduction to statistical learning, including clear explanations and examples of regularization techniques such as ridge regression and the lasso. Available <url href="https://www.statlearning.com/">online for free</url>.
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>Hastie, T., Tibshirani, R., &amp; Friedman, J. (2009). The Elements of Statistical Learning: Data Mining, Inference, and Prediction (2nd ed.).</em>
+        The authoritative reference on regularization and other machine learning techniques. More theoretical and in-depth, suited for readers looking for a deeper mathematical understanding.
+      </p>
+    </li>
+
+    <li>
+      <p>
+        <em>Koren, Y., Bell, R., &amp; Volinsky, C. (2009). The BellKor Solution to the Netflix Prize.</em> A technical yet accessible explanation of the ensemble of models that won the Netflix Prize, detailing matrix factorization, neighborhood models, and hybrid ensemble techniques.
+        <url href="https://www.netflixprize.com/assets/GrandPrize2009_BPC_BellKor.pdf">Available online</url>
+      </p>
+    </li>
+  </ul>
+
+</chapter>

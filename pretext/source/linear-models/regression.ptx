@@ -1,0 +1,884 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="sec-regression">
+  <title>Introduction to Regression</title>
+  
+  <introduction>
+    <p>
+      To understand the concepts of correlation and simple regression, we turn to the dataset that gave birth to regression itself. The example comes from genetics. Francis Galton<fn>https://en.wikipedia.org/wiki/Francis_Galton</fn> studied variation and heredity in human traits, collecting data from families to investigate how characteristics are passed from parents to children. Through this work, he introduced the ideas of correlation and regression and explored how pairs of variables that follow a normal distribution are related. Of course, when Galton collected his data, our understanding of genetics was far more limited than it is today. A central question he sought to answer was: How well can we predict a child's height based on the parents' height? The statistical tools he developed to address this question remain foundational and are now used in a wide range of applications. We conclude the chapter by discussing a concept known as the regression fallacy, a common misunderstanding that arises when interpreting regression results, and we illustrate it with a real data example from the world of sports.
+    </p>
+  </introduction>
+
+  <section xml:id="case-study-is-height-hereditary">
+    <title>Case study: is height hereditary?</title>
+
+    <p>
+      We have access to Galton's family height data through the <c>HistData</c> package. This data contains heights on several dozen families: mothers, fathers, daughters, and sons. To imitate Galton's analysis, we will create a dataset with the heights of fathers and a randomly selected son from each family. We use the <c>data.table</c> package here because it allows for more succint code:
+    </p>
+
+    <program language="r">
+      <input>
+library(data.table)
+library(HistData)
+
+set.seed(1983)
+galton &lt;- as.data.table(GaltonFamilies)
+galton &lt;- galton[gender == "male", .SD[sample(.N, 1)], by = family]
+galton &lt;- galton[, .(father, son = childHeight)]
+      </input>
+    </program>
+
+    <p>
+      Suppose we were asked to summarize the father and son data. Since both distributions are well approximated by the normal distribution, we could use the two averages and two standard deviations as summaries:
+    </p>
+
+    <console>
+      <input>
+galton[, .(f_avg=mean(father), f_sd=sd(father), s_avg=mean(son), s_sd=sd(son))]
+      </input>
+      <output>
+      f_avg     f_sd   s_avg     s_sd
+1: 69.09888 2.546555 69.1933 2.716917
+      </output>
+    </console>
+
+    <p>
+      However, this summary fails to describe an important characteristic of the data: the trend that the taller the father, the taller the son.
+    </p>
+
+    <figure xml:id="scatterplot">
+      <caption>Scatterplot of father and son heights</caption>
+      <image source="images/regression-scatterplot.png" width="40%">
+        <description>Scatterplot showing the relationship between father and son heights</description>
+      </image>
+    </figure>
+
+    <p>
+      We will learn that the correlation coefficient is an informative summary of how two variables move together and then motivate simple regression by noting how this can be used to predict one variable using the other.
+    </p>
+  </section>
+
+  <section xml:id="sec-corr-coef">
+    <title>The correlation coefficient</title>
+
+    <p>
+      The correlation coefficient is defined for a list of pairs <m>(x_1, y_1), \dots, (x_n,y_n)</m> as the average of the product of the standardized values:
+    </p>
+
+    <me>
+      \rho = \frac{1}{n} \sum_{i=1}^n \left( \frac{x_i-\mu_x}{\sigma_x} \right)\left( \frac{y_i-\mu_y}{\sigma_y} \right)
+    </me>
+
+    <p>
+      with <m>\mu_x, \mu_y</m> the averages of <m>x_1,\dots, x_n</m> and <m>y_1, \dots, y_n</m>, respectively, and <m>\sigma_x, \sigma_y</m> the standard deviations. The Greek letter for <m>r</m>, <m>\rho</m> is commonly used in statistics books to denote the correlation. It is not a coincidence that <m>r</m> is the first letter in <em>regression</em>. Soon we learn about the connection between correlation and regression.
+    </p>
+
+    <p>
+      We can represent the formula above with R code using:
+    </p>
+
+    <program language="r">
+      <input>
+rho &lt;- mean(scale(x) * scale(y))
+      </input>
+    </program>
+
+    <p>
+      To see why this equation captures how two variables move together, note that each term <m>\frac{x_i - \mu_x}{\sigma_x}</m> represents how many standard deviations the value <m>x_i</m> is from the mean of <m>x</m>, and <m>\frac{y_i - \mu_y}{\sigma_y}</m> does the same for <m>y_i</m> relative to the mean of <m>y</m>. If <m>x</m> and <m>y</m> are unrelated, the product of these standardized values, <m>\left(\frac{x_i - \mu_x}{\sigma_x}\right)\left(\frac{y_i - \mu_y}{\sigma_y}\right)</m>, will be positive (positive times positive or negative times negative) about as often as it is negative (positive times negative or negative times positive). When averaged, these products cancel out, giving a correlation near zero. If <m>x</m> and <m>y</m> tend to increase or decrease together, most products will be positive, resulting in a positive correlation. If one increases when the other decreases, most products will be negative, resulting in a negative correlation.
+    </p>
+
+    <p>
+      The correlation coefficient is always between -1 and 1. We can show this mathematically and we include as an exercise for you to prove.
+    </p>
+
+    <p>
+      For other pairs, the correlation is between -1 and 1. The correlation, computed with the function <c>cor</c>, between father and son's heights is about 0.5:
+    </p>
+
+    <console>
+      <input>
+galton[, cor(father, son)]
+      </input>
+      <output>
+[1] 0.4303697
+      </output>
+    </console>
+
+    <warning>
+      <p>
+        The function <c>cor(x, y)</c> computes the sample correlation, which divides the sum of products by <c>length(x)-1</c> rather than <c>length(x)</c>. The rationale for this is similar to the reason we divide by <c>length(x)-1</c> when computing the sample standard deviation <c>sd(x)</c>. Namely, this adjustment helps account for the degrees of freedom in the sample, which is necessary for unbiased estimates.
+      </p>
+    </warning>
+
+    <p>
+      To see what data looks like for different values of <m>\rho</m>, here are six examples of pairs with correlations ranging from -0.9 to 0.99:
+    </p>
+
+    <figure xml:id="what-correlation-looks-like">
+      <caption>Examples of data with different correlation coefficients</caption>
+      <image source="images/regression-what-correlation-looks-like.png" width="100%">
+        <description>Six panels showing scatterplots with correlations ranging from -0.9 to 0.99</description>
+      </image>
+    </figure>
+
+    <subsection xml:id="sample-correlation-is-a-random-variable">
+      <title>Sample correlation is a random variable</title>
+
+      <p>
+        Before we continue connecting correlation to regression, let's remind ourselves about random variability.
+      </p>
+
+      <p>
+        In most data analysis projects, we observe data that includes random variation. For example, in many cases, we do not observe data for the entire population of interest, but rather for a random sample. As with the average and standard deviation, the <em>sample correlation</em> is the most commonly used estimate of the population correlation. This implies that the correlation we compute and use as a summary is a random variable.
+      </p>
+
+      <p>
+        By way of illustration, let's assume that the pairs of fathers and sons is our entire population. A less fortunate geneticist can only afford measurements from a random sample of 25 pairs. The sample correlation can be computed with:
+      </p>
+
+      <program language="r">
+        <input>
+r &lt;- galton[sample(.N, 25, replace = TRUE), cor(father, son)]
+        </input>
+      </program>
+
+      <p>
+        <c>r</c> is a random variable. We can run a Monte Carlo simulation to see its distribution:
+      </p>
+
+      <figure xml:id="sample-correlation-distribution">
+        <caption>Distribution of sample correlation</caption>
+        <image source="images/regression-sample-correlation-distribution.png" width="60%">
+          <description>Histogram showing the distribution of sample correlation from Monte Carlo simulation</description>
+        </image>
+      </figure>
+
+      <p>
+        We see that the expected value of <c>r</c> is the population correlation:
+      </p>
+
+      <console>
+        <input>
+mean(r)
+        </input>
+        <output>
+[1] 0.4273407
+        </output>
+      </console>
+
+      <p>
+        and that it has a relatively high standard error relative to the range of values <c>r</c> can take:
+      </p>
+
+      <console>
+        <input>
+sd(r)
+        </input>
+        <output>
+[1] 0.1607791
+        </output>
+      </console>
+
+      <p>
+        So, when interpreting correlations, remember that correlations derived from samples are estimates containing uncertainty.
+      </p>
+
+      <p>
+        Also, note that because the sample correlation is an average of independent draws, the central limit actually applies: for large enough <m>N</m>, the distribution of <c>r</c> is approximately normal with expected value <m>\rho</m> and standard deviation <m>\frac{1-r^2}{\sqrt{N}}</m>. Note that the derivation of this standard deviation is complex and not shown here.
+      </p>
+
+      <p>
+        In our example, the qqplot below shows that <m>N=25</m> is not large enough for the normal approximation to work well. The tail of the observed distribution falls consistently below what the theoretical normal distribution predicts:
+      </p>
+
+      <figure xml:id="small-sample-correlation-not-normal">
+        <caption>QQ plot showing sample correlation distribution for N=25</caption>
+        <image source="images/regression-small-sample-correlation-not-normal.png" width="60%">
+          <description>QQ plot demonstrating that N=25 is too small for normal approximation</description>
+        </image>
+      </figure>
+
+      <p>
+        If you increase <m>N</m>, you will see the distribution converging to normal.
+      </p>
+    </subsection>
+
+    <subsection xml:id="sec-ascombe">
+      <title>Correlation is not always a useful summary</title>
+
+      <p>
+        Correlation is not always a good summary of the relationship between two variables. The following four artificial datasets, referred to as Anscombe's quartet, famously illustrate this point. All these pairs have a correlation of 0.82:
+      </p>
+
+      <figure xml:id="ascombe-quartet">
+        <caption>Anscombe's quartet</caption>
+        <image source="images/regression-ascombe-quartet.png" width="80%">
+          <description>Four panels showing different data patterns all with correlation 0.82</description>
+        </image>
+      </figure>
+
+      <p>
+        To understand when correlation is meaningful as a summary statistic, we return to the example of predicting a son's height using his father's height. This example will help motivate and define linear regression. We start by demonstrating how correlation can be useful for prediction.
+      </p>
+    </subsection>
+  </section>
+
+  <section xml:id="sec-conditional-expectation">
+    <title>Conditional expectations</title>
+
+    <p>
+      Galton wanted to understand how well we can predict a child's height from the parents' height. To begin, we frame this as a prediction problem.
+    </p>
+
+    <p>
+      Suppose we are asked to guess the height of a randomly selected son, but we are not told the father's height. Because the distribution of sons' heights is approximately normal, the most reasonable single-number prediction is the population mean, <m>\mu_y</m>, since this is the value around which the data are most concentrated. Later, in <xref ref="sec-ml-conditionals" />, we explain that the mean also has desirable mathematical properties for prediction: it minimizes expected squared error.
+    </p>
+
+    <p>
+      Therefore, without any information about the father, our best prediction for the son's height is simply the average height of sons in the population. In practice, we approximate this using the sample average.
+    </p>
+
+    <p>
+      But what if we are told that the father is taller than average, say 72 inches tall, do we still guess <m>\mu_y</m> for the son?
+    </p>
+
+    <p>
+      It turns out that, if we were able to collect data from a very large number of fathers that are 72 inches, the distribution of their sons' heights would be normally distributed. This implies that the average of the distribution computed on this subset would be our best prediction.
+    </p>
+
+    <p>
+      In general, we call this approach <em>conditioning</em>. The idea is that we divide a population into groups, or strata, based on the value of one variable, and then compute summaries of the other variable within each group.
+    </p>
+
+    <p>
+      To describe this mathematically, suppose we have a population of pairs <m>(x_1, y_1), \dots, (x_n, y_n)</m>, such as all father and son height pairs in England. We learned that if we pick a random pair <m>(X, Y)</m> from this population, the expected value and best predictor of <m>Y</m> is <m>\mathrm{E}[Y] = \mu_y</m>.
+    </p>
+
+    <p>
+      Now, instead of the entire population, we focus on a specific subgroup defined by a fixed value of <m>X</m>. In our example, this is all pairs for which the father's height is 72 inches. This subgroup is itself a population, so the same ideas apply. The <m>y_i</m> values in this subgroup follow a distribution called the <em>conditional distribution</em>, and this distribution has an expected value called the <em>conditional expectation</em>. In our example, the conditional expectation is the average height of all sons whose fathers are 72 inches tall.
+    </p>
+
+    <p>
+      We write <m>Y \mid X = x</m> to mean a random value of <m>Y</m> selected only from the pairs where the event <m>X = x</m> holds. In other words, <m>Y \mid X = 72</m> represents the random height of a son chosen from among those whose fathers are 72 inches tall.
+    </p>
+
+    <p>
+      The notation for the conditional expectation is:
+    </p>
+
+    <me>
+      \mathrm{E}[Y \mid X = x]
+    </me>
+
+    <p>
+      where <m>x</m> is the fixed value defining the subset. Similarly, we denote the standard deviation within that subset, or strata, as:
+    </p>
+
+    <me>
+      \mathrm{SD}[Y \mid X = x] = \sqrt{\mathrm{Var}(Y \mid X = x)}
+    </me>
+
+    <p>
+      Because the conditional expectation <m>\mathrm{E}[Y \mid X = x]</m> is the best predictor of <m>Y</m> for an individual in the group defined by <m>X = x</m>, many data science problems can be viewed as estimating this quantity. The conditional standard deviation, <m>\mathrm{SD}[Y \mid X = x]</m>, describes how precise that prediction is.
+    </p>
+
+    <p>
+      So to obtain a prediction we want to estimate <m>E[Y|X=72]</m> using the sample collected by Galton. When using continuous data we often have the challenge that there are not that many data points where <m>X = 72</m>:
+    </p>
+
+    <console>
+      <input>
+sum(galton$father == 72)
+      </input>
+      <output>
+[1] 8
+      </output>
+    </console>
+
+    <p>
+      If we change the number to 72.5, we get even fewer data points:
+    </p>
+
+    <console>
+      <input>
+sum(galton$father == 72.5)
+      </input>
+      <output>
+[1] 1
+      </output>
+    </console>
+
+    <p>
+      A practical way to improve estimates of the conditional expectations is to define strata of observations with similar value of <m>x</m>. In our example, we can round father heights to the nearest inch and assume that they are all 72 inches. If we do this, we end up with the following prediction for the son of a father that is 72 inches tall:
+    </p>
+
+    <console>
+      <input>
+mean(galton[round(father) == 72]$son)
+      </input>
+      <output>
+[1] 70.5
+      </output>
+    </console>
+
+    <p>
+      Note that a 72 inch father is taller than average, specifically standard deviations taller than the average father. Our prediction is also taller than average, but only standard deviations larger than the average son. The predicted height for sons of 72 inch fathers have <em>regressed</em> some to the average height. We notice that the reduction in how many SDs taller is about 0.5, which happens to be close to the sample correlation. As we will see in a later section, this is not a coincidence.
+    </p>
+
+    <p>
+      If we want to make a prediction of any height, not just 72 inches, we could apply the same approach to each strata. Stratification followed by boxplots lets us see the distribution of each group:
+    </p>
+
+    <figure xml:id="boxplot-1">
+      <caption>Boxplot of son heights by father height strata</caption>
+      <image source="images/regression-boxplot-1.png" width="40%">
+        <description>Boxplot showing son heights grouped by rounded father heights</description>
+      </image>
+    </figure>
+
+    <p>
+      Not surprisingly, the centers of the groups are increasing with height. Furthermore, these centers appear to follow a linear relationship. Below, we plot the averages of each group. If we take into account that these averages are random variables with standard errors, the data is consistent with these points following a straight line:
+    </p>
+
+    <figure xml:id="conditional-averages-follow-line">
+      <caption>Conditional averages follow a line</caption>
+      <image source="images/regression-conditional-averages-follow-line.png" width="40%">
+        <description>Plot showing conditional averages of son heights forming a linear pattern</description>
+      </image>
+    </figure>
+
+    <p>
+      Note that while we divided the data into one-inch groups, the sample size in each group is still small and not the same. The groups corresponding to taller fathers are much smaller, which makes their averages more variable.
+    </p>
+
+    <p>
+      The fact that these conditional averages follow a line is not a coincidence. In the next section, we explain that this line, known as the <em>regression line</em>, improves the precision of our estimates. However, it is not always appropriate to estimate conditional expectations with the regression line, so we also describe Galton's theoretical justification that helps us understand when to use it.
+    </p>
+
+    <note>
+      <p>
+        Conditional expectations are not only useful when the relationship between variables is linear. In fact, much of what we call machine learning can be understood as the task of estimating conditional expectations for complex relationships that go well beyond a straight line. We explore this idea in more detail in the machine learning part of the book, including <xref ref="sec-ml-conditionals" />, which covers conditional expectations and probabilities.
+      </p>
+    </note>
+  </section>
+
+  <section xml:id="the-regression-line">
+    <title>The regression line</title>
+
+    <p>
+      If we are predicting a random variable <m>Y</m> knowing the value of another <m>X=x</m> using a regression line, then we predict that for every standard deviation, <m>\sigma_X</m>, that <m>x</m> increases above the average <m>\mu_X</m>, our prediction <m>\hat{y}</m> increase <m>\rho</m> standard deviations <m>\sigma_Y</m> above the average <m>\mu_Y</m> with <m>\rho</m> the correlation between <m>X</m> and <m>Y</m>. The formula for the regression is therefore:
+    </p>
+
+    <me>
+      \left( \frac{\hat{y}-\mu_Y}{\sigma_Y} \right) = \rho \left( \frac{x-\mu_X}{\sigma_X} \right)
+    </me>
+
+    <p>
+      We can rewrite it like this:
+    </p>
+
+    <me>
+      \hat{y} = \mu_Y + \rho \left( \frac{x-\mu_X}{\sigma_X} \right) \sigma_Y
+    </me>
+
+    <p>
+      If there is perfect correlation, the regression line predicts an increase that is the same number of SDs. If there is 0 correlation, then we don't use <m>x</m> at all for the prediction and simply predict the average <m>\mu_Y</m>. For values between 0 and 1, the prediction is somewhere in between. If the correlation is negative, we predict a reduction instead of an increase.
+    </p>
+
+    <p>
+      Note that if the correlation is positive and lower than 1, our prediction is closer, in standard units, to the average height than the value used to predict, <m>x</m>, is to the average of the <m>x</m>s. This is why we call it <em>regression</em>: the sons regresses to the average height. In fact, the title of Galton's paper was: <em>Regression toward mediocrity in hereditary stature</em>.
+    </p>
+
+    <p>
+      We can add regression lines to plots by converting the formula above to the form <m>\hat{y} = m + bx</m>, which gives us a slope <m>m = \rho \frac{\sigma_y}{\sigma_x}</m> and intercept <m>b = \mu_y - m \mu_x</m>:
+    </p>
+
+    <figure xml:id="regression-line">
+      <caption>Regression line</caption>
+      <image source="images/regression-regression-line.png" width="40%">
+        <description>Scatterplot with regression line overlaid</description>
+      </image>
+    </figure>
+
+    <note>
+      <p>
+        With <c>ggplot</c> we don't need to calculate all these summaries and can easily add a regression line using the <c>geom_smooth</c> function:
+      </p>
+
+      <figure xml:id="geom-smooth-regression-line">
+        <caption>Regression line added with <c>geom_smooth</c></caption>
+        <image source="images/regression-geom-smooth-line.png" width="40%">
+          <description>Scatterplot of father and son heights with a fitted linear regression line and confidence band added using geom_smooth.</description>
+        </image>
+      </figure>
+
+      <p>
+        In <xref ref="sec-lm-function" /> we explain what <c>lm</c> means here.
+      </p>
+    </note>
+
+    <p>
+      Note that the regression formula implies that if we first standardize the variables, that is subtract the average and divide by the standard deviation, then the regression line has intercept 0 and slope equal to the correlation <m>\rho</m>. You can make same plot, but using standard units like this:
+    </p>
+
+    <figure xml:id="regression-line-standard-units">
+      <caption>Regression line in standard units</caption>
+      <image source="images/regression-standardized-regression-line.png" width="40%">
+        <description>Scatterplot of standardized father and son heights with a regression line through the origin whose slope equals the correlation.</description>
+      </image>
+    </figure>
+
+    <subsection xml:id="linear-regression-improves-precision">
+      <title>Linear regression improves precision</title>
+
+      <p>
+        We now compare the two approaches to prediction that we have introduced:
+      </p>
+
+      <p>
+        <ol>
+          <li>Round fathers' heights to the nearest inch, stratify, and take the average within each group.</li>
+          <li>Compute the regression line and use it to predict.</li>
+        </ol>
+      </p>
+
+      <p>
+        Our goal is to estimate the expected value and the standard error of the predictions obtained with each method. We want the expected value to very close to the true population average and the standard error to be samll. To do this, we use a Monte Carlo simulation. Specifically, we repeatedly draw random samples of size <m>N = 50</m> families from the population, compute both types of predictions for each sample, and then examine the distribution of these repeated estimates. The mean of this distribution provides an estimate of the expected value of each method, and its standard deviation provides an estimate of the standard error, which reflects how variable the prediction is across random samples.
+      </p>
+
+      <program language="r">
+        <input>
+B &lt;- 1000
+N &lt;- 50
+
+conditional_avg &lt;- replicate(B, {
+  dat &lt;- galton[sample(.N, N, replace = TRUE)]
+  dat[round(father) == 72, if (.N) mean(son) else NA]
+})
+
+linear_regression_prediction &lt;- replicate(B, {
+  dat &lt;- galton[sample(.N, N, replace = TRUE)]
+  dat[, mean(son) + cor(father, son)*(72 - mean(father))/sd(son)*sd(father)]
+})
+        </input>
+      </program>
+
+      <p>
+        Although the expected values from both methods are nearly the same:
+      </p>
+
+      <console>
+        <input>
+mean(conditional_avg, na.rm = TRUE)
+mean(linear_regression_prediction)
+        </input>
+        <output>
+[1] 70.47253
+[1] 70.43207
+        </output>
+      </console>
+
+      <p>
+        the standard error for the linear regression prediction is much smaller:
+      </p>
+
+      <console>
+        <input>
+sd(conditional_avg, na.rm = TRUE)
+sd(linear_regression_prediction)
+        </input>
+        <output>
+[1] 1.075993
+[1] 0.5344485
+        </output>
+      </console>
+
+      <p>
+        This means that the linear-regression-based prediction is far more stable across repeated samples. The reason is intuitive: the conditional average is based on a relatively small subset of data, the fathers whose heights are about 72 inches, so its estimate is more variable. In some samples, we may even have very few or no observations in that group, which is why we use <c>na.rm=TRUE</c>. The regression line, on the other hand, is estimated using information from the entire dataset, which makes its predictions much more precise.
+      </p>
+
+      <p>
+        So why not always use the regression line for prediction? Because it is not always appropriate. For example, Anscombe provided cases for which the data does not have a linear relationship. So are we justified in using the regression line to predict? Galton answered this in the positive for height data. The next section provides a justification.
+      </p>
+    </subsection>
+
+    <subsection xml:id="the-bivariate-normal-distribution-justification">
+      <title>The bivariate normal distribution justification</title>
+
+      <p>
+        Correlation and the regression slope are widely used summary statistics, but they are often misused or misinterpreted. Anscombe's examples provide over-simplified cases in which the correlation is not a useful summary. But there are many real-life examples.
+      </p>
+
+      <p>
+        The main way we motivate appropriate use of correlation as a summary, involves the <em>bivariate normal distribution</em>.
+      </p>
+
+      <p>
+        When a pair of random variables is approximated by the bivariate normal distribution, scatterplots look like ovals. As we saw in <xref ref="sec-corr-coef" />, they can be thin (high correlation) or circle-shaped (no correlation).
+      </p>
+
+      <p>
+        A more technical way to define the bivariate normal distribution is the following: if
+      </p>
+
+      <p>
+        <ul>
+          <li><m>X</m> is a normally distributed random variable,</li>
+          <li><m>Y</m> is also a normally distributed random variable, and</li>
+          <li>the conditional distribution of <m>Y</m> for any <m>X=x</m> is approximately normal,</li>
+        </ul>
+      </p>
+
+      <p>
+        then the pair is approximately bivariate normal.
+      </p>
+
+      <p>
+        When three or more variables have the property that each pair is bivariate normal, we say the variables follow a <em>multivariate</em> normal distribution or that they are <em>jointly</em> normal.
+      </p>
+
+      <p>
+        If we think the height data is well approximated by the bivariate normal distribution, then we should see the normal approximation hold for each strata. Here we stratify the son heights by the standardized father heights and see that the assumption appears to hold:
+      </p>
+
+      <figure xml:id="qqnorm-of-strata">
+        <caption>QQ plots of son heights by father height strata</caption>
+        <image source="images/regression-qqnorm-of-strata.png" width="80%">
+          <description>Multiple QQ plots showing normality within each stratum</description>
+        </image>
+      </figure>
+
+      <p>
+        Galton used mathematical statistics to demonstrate that, when two variables follow a bivariate normal distribution, computing the regression line is equivalent to computing conditional expectations. We don't show the derivation here, but we can show that under this assumption, for any given value of <m>x</m>, the expected value of the <m>Y</m> in pairs for which <m>X=x</m> is:
+      </p>
+
+      <me>
+        \mathrm{E}[Y | X=x] = \mu_Y +  \rho \frac{x-\mu_X}{\sigma_X}\sigma_Y
+      </me>
+
+      <p>
+        This is the regression line, with slope <m>\rho \frac{\sigma_Y}{\sigma_X}</m> and intercept <m>\mu_y - \rho\mu_X\frac{\sigma_Y}{\sigma_X}</m>. It is equivalent to the regression equation we showed earlier which can be written like this:
+      </p>
+
+      <me>
+        \frac{\mathrm{E}[Y \mid X=x]  - \mu_Y}{\sigma_Y} = \rho \frac{x-\mu_X}{\sigma_X}
+      </me>
+
+      <p>
+        This implies that, if our data is approximately bivariate, the regression line gives the conditional probability. Therefore, we can obtain a much more stable estimate of the conditional expectation by finding the regression line and using it to predict.
+      </p>
+
+      <p>
+        In summary, if our data is approximately bivariate, then the conditional expectation, the best prediction of <m>Y</m> given we know the value of <m>X</m>, is given by the regression line.
+      </p>
+    </subsection>
+
+    <subsection xml:id="variance-explained">
+      <title>Variance explained</title>
+
+      <p>
+        The bivariate normal theory also tells us that the standard deviation of the <em>conditional</em> distribution described above is:
+      </p>
+
+      <me>
+        \mathrm{SD}[Y \mid X=x ] = \sigma_Y \sqrt{1-\rho^2}
+      </me>
+
+      <p>
+        To see why this is intuitive, notice that without conditioning we are looking at the variability of all the sons: <m>\mathrm{SD}(Y) = \sigma_Y</m>. But once we condition, we are only looking at the variability of the sons with a tall, 72 inch father. This group will all tend to be somewhat tall so the standard deviation is reduced.
+      </p>
+
+      <p>
+        Specifically, it is reduced to <m>\sqrt{1-\rho^2} = \sqrt{1 - 0.25}</m> = 0.87 of what it was originally. We could say that father heights "explain" 13% of the variability observed in son heights.
+      </p>
+
+      <p>
+        The statement "<m>X</m> explains such and such percent of the variability" is commonly used in academic papers. In this case, this percent actually refers to the variance (the SD squared). So if the data is bivariate normal, the variance is reduced by <m>1-\rho^2</m>, so we say that <m>X</m> explains <m>1- (1-\rho^2)=\rho^2</m> (the correlation squared) of the variance.
+      </p>
+
+      <p>
+        But it is important to remember that the "variance explained" statement has this clear interpretation only when the data is approximated by a bivariate normal distribution.
+      </p>
+    </subsection>
+
+    <subsection xml:id="there-are-two-regression-lines">
+      <title>There are two regression lines</title>
+
+      <p>
+        We computed a regression line to predict the son's height from father's height. We used these calculations:
+      </p>
+
+      <program language="r">
+        <input>
+m_1 &lt;- with(params, r*s_y/s_x)
+b_1 &lt;- with(params, mu_y - m_1*mu_x)
+        </input>
+      </program>
+
+      <p>
+        which gives us the function <m>\mathrm{E}[Y\mid X=x] = b_1 + m_1 x</m>.
+      </p>
+
+      <p>
+        What if we want to predict the father's height based on the son's? It is important to know that this is not determined by computing the inverse function.
+      </p>
+
+      <p>
+        We need to compute <m>\mathrm{E}[X \mid Y=y]</m>. Since the data is approximately bivariate normal, the theory described earlier tells us that this conditional expectation will follow a line with slope and intercept:
+      </p>
+
+      <program language="r">
+        <input>
+m_2 &lt;- with(params, r*s_x/s_y)
+b_2 &lt;- with(params, mu_x - m_2*mu_y)
+        </input>
+      </program>
+
+      <p>
+        Using these calculations we get <m>\mathrm{E}[X \mid Y=y] = b_2 + m_2 y</m>. Again, we see regression to the average: the prediction for the father is closer to the father average than the son heights <m>y</m> is to the son average.
+      </p>
+
+      <p>
+        Here is a plot showing the two regression lines, with blue for the predicting son heights with father heights, and red for predicting father heights with son heights:
+      </p>
+
+      <figure xml:id="two-regression-lines">
+        <caption>Two regression lines</caption>
+        <image source="images/regression-two-regression-lines.png" width="40%">
+          <description>Scatterplot showing both regression lines</description>
+        </image>
+      </figure>
+    </subsection>
+  </section>
+
+  <section xml:id="the-regression-fallacy">
+    <title>The regression fallacy</title>
+
+    <p>
+      Wikipedia defines the <em>sophomore slump</em> as:
+    </p>
+
+    <blockquote>
+      <p>
+        A sophomore slump or sophomore jinx or sophomore jitters refers to an instance in which a second, or sophomore, effort fails to live up to the standards of the first effort. It is commonly used to refer to the apathy of students (second year of high school, college or university), the performance of athletes (second season of play), singers/bands (second album), television shows (second seasons) and movies (sequels/prequels).
+      </p>
+    </blockquote>
+
+    <p>
+      In Major League Baseball, the rookie of the year (ROY) award is given to the first-year player who is judged to have performed the best. The <em>sophomore slump</em> phrase is used to describe the observation that ROY award winners don't do as well during their second year. For example, a Fox Sports article asked "Will MLB's tremendous rookie class of 2015 suffer a sophomore slump?"
+    </p>
+
+    <p>
+      Does the data confirm the existence of a sophomore slump? Let's take a look. Examining the data for a widely used measure of success, the batting average, we see that this observation holds true for the top performing ROYs:
+    </p>
+
+    <program language="r">
+      <input>
+library(Lahman)
+
+## Convert to data.table
+Fielding &lt;- as.data.table(Fielding)
+People   &lt;- as.data.table(People)
+Batting  &lt;- as.data.table(Batting)
+AwardsPlayers &lt;- as.data.table(AwardsPlayers)
+
+setorder(Fielding, playerID, -G)
+playerInfo &lt;- Fielding[, .SD[1], by = playerID][, .(playerID, POS)][
+  People[, .(playerID, nameFirst, nameLast)], on = .(playerID)
+]
+
+ROY &lt;- AwardsPlayers[awardID == "Rookie of the Year",
+                     .(playerID, rookie_year = yearID)]
+ROY &lt;- merge(ROY, playerInfo, all.x = TRUE)
+ROY &lt;- merge(ROY, Batting, all.x = TRUE)
+ROY[, AVG := H / AB]
+ROY &lt;- ROY[POS != "P"]
+
+## Keep rookie and sophomore seasons only, and only players with both seasons
+ROY &lt;- ROY[, .SD[yearID %in% c(unique(rookie_year), unique(rookie_year + 1))], by = playerID]
+ROY[ , rookie := fifelse(yearID == rookie_year, "rookie", "sophomore")]
+ROY &lt;- ROY[!is.na(AVG)]
+ROY &lt;- ROY[, if (.N == 2) .SD, by = playerID]
+ROY &lt;- ROY[, .(playerID, rookie_year, rookie, nameFirst, nameLast, AVG)]
+
+## Wide layout: one column for rookie and sophomore AVG
+ROY &lt;- dcast(ROY, playerID + nameFirst + nameLast + rookie_year ~ rookie, value.var = "AVG")
+
+## Order by rookie AVG (descending)
+setorder(ROY, -rookie)
+      </input>
+    </program>
+
+    <console>
+      <input>
+ROY[1:5, .(nameFirst, nameLast, rookie_year, rookie, sophomore)]
+      </input>
+      <output>
+   nameFirst nameLast rookie_year    rookie sophomore
+1:    Willie  McCovey        1959 0.3541667 0.2384615
+2:    Ichiro   Suzuki        2001 0.3497110 0.3214838
+3:        Al   Bumbry        1973 0.3370787 0.2333333
+4:      Fred     Lynn        1975 0.3314394 0.3136095
+5:    Albert   Pujols        2001 0.3288136 0.3135593
+      </output>
+    </console>
+
+    <p>
+      So is it "jitters" or a "jinx"? To answer this question, let's turn our attention to all the players that played the 2013 and 2014 seasons and batted more than 130 times (minimum to win Rookie of the Year).
+    </p>
+
+    <program language="r">
+      <input>
+two_years &lt;- Batting[yearID %in% 2013:2014]
+two_years &lt;- two_years[,.(H = sum(H, na.rm = TRUE), AB = sum(AB, na.rm = TRUE)),
+                     by = .(playerID, yearID)]
+two_years &lt;- two_years[AB &gt;= 130, .(playerID, yearID, AVG = H/AB)]
+two_years &lt;- dcast(two_years, playerID ~ yearID, value.var = "AVG")
+two_years &lt;- two_years[!is.na(`2013`) &amp; !is.na(`2014`)]
+two_years &lt;- merge(two_years, playerInfo, all.x = TRUE)[POS != "P"][, .(nameFirst, nameLast, `2013`, `2014`)][order(-`2013`)]
+      </input>
+    </program>
+
+    <p>
+      The same pattern arises when we look at the top performers: batting averages go down for most of the top performers.
+    </p>
+
+    <console>
+      <input>
+two_years[1:5]
+      </input>
+      <output>
+   nameFirst nameLast      2013      2014
+1:    Miguel  Cabrera 0.3477477 0.3126023
+2:    Hanley  Ramirez 0.3453947 0.2828508
+3:   Michael  Cuddyer 0.3312883 0.3315789
+4:   Scooter  Gennett 0.3239437 0.2886364
+5:       Joe    Mauer 0.3235955 0.2769231
+      </output>
+    </console>
+
+    <p>
+      But these are not rookies! Also, look at what happens to the worst performers of 2013:
+    </p>
+
+    <console>
+      <input>
+two_years[order(`2013`)][1:5]
+      </input>
+      <output>
+   nameFirst nameLast      2013      2014
+1:     Danny Espinosa 0.1582278 0.2192192
+2:       Dan    Uggla 0.1785714 0.1489362
+3:      Jeff   Mathis 0.1810345 0.2000000
+4:     B. J.    Upton 0.1841432 0.2080925
+5:      Adam  Rosales 0.1904762 0.2621951
+      </output>
+    </console>
+
+    <p>
+      Their batting averages mostly go up! Is this some sort of reverse sophomore slump? It is not. There is no such thing as a sophomore slump. This is all explained with a simple statistical fact: the correlation for performance in two separate years is high, but not perfect:
+    </p>
+
+    <figure xml:id="regression-fallacy">
+      <caption>Batting average in 2013 vs 2014</caption>
+      <image source="images/regression-regression-fallacy.png" width="40%">
+        <description>Scatterplot of batting averages showing regression to the mean</description>
+      </image>
+    </figure>
+
+    <p>
+      The correlation is approximately 0.46 and the data look very much like a bivariate normal distribution, which means we predict a 2014 batting average <m>\hat{y}</m> for any given player that had a 2013 batting average <m>x</m> with:
+    </p>
+
+    <me>
+      \frac{\hat{y} - .255}{.032} = 0.46 \left( \frac{x - .261}{.031}\right)
+    </me>
+
+    <p>
+      Because the correlation is not perfect, regression tells us that, on average, expect high performers from 2013 to do a bit worse in 2014. It's not a jinx; it's just due to chance. The ROY are selected from the top values of <m>x</m>, so it is expected that <m>y</m> will regress to the mean.
+    </p>
+  </section>
+
+  <section xml:id="regression-exercises">
+    <title>Exercises</title>
+
+    <exercise number="1">
+      <statement>
+        <p>
+          Show that the correlation coefficient must be less than or equal to 1. Hint: The correlation cannot be higher than in the case of a perfect linear relationship. Consider <m>y_i = a + b x_i</m> with <m>b > 0</m>. Substitute <m>a + b x_i</m> for <m>y_i</m> in the correlation formula and simplify.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise number="2">
+      <statement>
+        <p>
+          Show that the correlation coefficient must be greater than or equal to -1. Hint: The correlation cannot be more negative than in the case of a perfectly decreasing linear relationship. Consider <m>y_i = a - b x_i</m> with <m>b > 0</m>. Substitute <m>a - b x_i</m> for <m>y_i</m> in the correlation formula and simplify as in Exercise 1.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise number="3">
+      <statement>
+        <p>
+          We performed a Monte Carlo simulation and found that with <m>N=25</m> and the CLT was not a great approximation for the distribution of the sample correlation. Generate correlated data using the <c>mvrnorm</c> function from the <c>MASS</c> package:
+        </p>
+
+        <console>
+          <input>
+library(MASS)
+N &lt;- 25
+dat &lt;- mvrnorm(N, c(0, 0), matrix(c(1, 0.9, 0.9, 1), 2, 2))
+cor(dat[,1], dat[,2])
+          </input>
+          <output>
+[1] 0.9437435
+          </output>
+        </console>
+
+        <p>
+          Perform 10,000 Monte Carlo simulations for <c>N &lt;- c(25, 50, 100, 250, 500, 1000)</c> to determine when the CLT starts becoming a useful approximation.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise number="4">
+      <statement>
+        <p>
+          Repeat exercise 3 but for correlations of 0.9 instead of 0.5.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise number="5">
+      <statement>
+        <p>
+          Repeat exercise 3 but for correlations of 0.1 instead of 0.5.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise number="6">
+      <statement>
+        <p>
+          Load the <c>GaltonFamilies</c> data from the <c>HistData</c> package. The children in each family are listed by gender and then by height. Create a dataset called <c>galton</c> by picking a male and female at random.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise number="7">
+      <statement>
+        <p>
+          Make a scatterplot for heights between mothers and daughters, mothers and sons, fathers and daughters, and fathers and sons.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise number="8">
+      <statement>
+        <p>
+          Compute the correlation in heights between mothers and daughters, mothers and sons, fathers and daughters, and fathers and sons.
+        </p>
+      </statement>
+    </exercise>
+  </section>
+</chapter>

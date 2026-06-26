@@ -1,0 +1,852 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="sec-resampling-methods">
+  <title>Resampling and Model Assessment</title>
+  
+  <introduction>
+    <p>
+      In this chapter, we introduce resampling, one of the most important ideas in machine learning. Here we focus on the conceptual and mathematical aspects. We will describe how to implement resampling methods in practice with the <term>caret</term> package later in <xref ref="sec-caret"/>. To motivate the concept, we will use the two predictor digits data presented in <xref ref="sec-ml-conditionals"/> and introduce k-nearest neighbors (kNN), to demonstrate the ideas.
+    </p>
+  </introduction>
+
+  <section xml:id="sec-knn-cv-intro">
+    <title>Motivation with k-nearest neighbors</title>
+    
+    <p>
+      We are interested in estimating the conditional probability function:
+    </p>
+    
+    <me>
+      p(\mathbf{x}) = \mathrm{Pr}(Y = 1 \mid X_1 = x_1 , X_2 = x_2).
+    </me>
+    
+    <p>
+      as defined in <xref ref="sec-ml-conditionals"/>.
+    </p>
+    
+    <p>
+      With k-nearest neighbors (kNN) we estimate <m>p(\mathbf{x})</m> in a similar way to bin smoothing. First, we define the distance between all observations based on the features. Then, for any point <m>\mathbf{x}_0</m>, we estimate <m>p(\mathbf{x}_0)</m> by identifying the <m>k</m> nearest points to <m>\mathbf{x}_0</m> and taking an average of the <m>y</m>s associated with these points. We refer to the set of points used to compute the average as the <term>neighborhood</term>.
+    </p>
+    
+    <p>
+      Due to the connection we described earlier between conditional expectations and conditional probabilities, this gives us <m>\hat{p}(\mathbf{x}_0)</m>, just like the bin smoother gave us an estimate of a trend. As with bin smoothers, we can control the flexibility of our estimate through a parameter, in the case the number o neighbors <m>k</m>: larger <m>k</m>s result in smoother estimates, while smaller <m>k</m>s result in more flexible and wiggly estimates.
+    </p>
+    
+    <p>
+      To fit a <m>k</m>-nearest neighbors model, we use the <c>knn3</c> function from the <term>caret</term> package. The help file shows two ways to call this function; we will use the <term>formula interface</term>, which lets us write the model in the form
+    </p>
+    
+    <pre>
+outcome ~ predictor_1 + predictor_2 + ...
+    </pre>
+    
+    <p>
+      Because our training set is stored in a data frame, we can use the shorthand <c>y ~ .</c> to mean "use <c>y</c> as the outcome and all other columns as predictors."
+    </p>
+    
+    <p>
+      We must also choose the number of neighbors <m>k</m>. The default is <c>k = 5</c>, which we will use here. Putting this together, our call looks like:
+    </p>
+    
+    <program language="r">
+      <input>
+library(dslabs)
+library(caret)
+knn_fit &lt;- knn3(y ~ ., data = mnist_27$train, k = 5)
+      </input>
+    </program>
+    
+    <p>
+      In this case, since our dataset is balanced and we care just as much about sensitivity as we do about specificity, we will use accuracy to quantify performance.
+    </p>
+    
+    <p>
+      The <c>predict</c> function for <c>knn3</c> returns estimes of <m>p(\mathbf{x})</m> (<c>type = "prob"</c>) or the prediction (<c>type = "class"</c>):
+    </p>
+    
+    <program language="r">
+      <input>
+y_hat_knn &lt;- predict(knn_fit, mnist_27$test, type = "class")
+      </input>
+    </program>
+    
+    <p>
+      We see that kNN, with the default parameter, already beats GLM:
+    </p>
+    
+    <console>
+      <input>
+mean(y_hat_knn == mnist_27$test$y)
+      </input>
+      <output>
+[1] 0.815
+      </output>
+    </console>
+    
+    <p>
+      To see why this is the case, we plot <m>\hat{p}(\mathbf{x})</m> and compare it to the true conditional probability <m>p(\mathbf{x})</m>:
+    </p>
+    
+    <program language="r">
+      <input>
+# We use this function to plot the estimated conditional probabilities
+plot_cond_prob &lt;- function(p_hat = NULL){
+  tmp &lt;- mnist_27$true_p
+  if (!is.null(p_hat)) {
+    tmp &lt;- mutate(tmp, p = p_hat)
+  }
+  tmp |&gt; ggplot(aes(x_1, x_2, z = p)) +
+  geom_raster(aes(fill = p), show.legend = FALSE) +
+  scale_fill_gradientn(colors = c("#F8766D", "white", "#00BFC4")) +
+  stat_contour(breaks = c(0.5), color = "black")
+}
+
+library(tidyverse)
+p1 &lt;- plot_cond_prob() + ggtitle("True conditional probability")
+
+p2 &lt;- plot_cond_prob(predict(knn_fit, mnist_27$true_p)[,2]) +
+  ggtitle("kNN-5 estimate")
+library(gridExtra)
+
+grid.arrange(p2, p1, nrow = 1)
+      </input>
+    </program>
+    
+    <figure xml:id="knn-fit">
+      <caption>Comparison of true conditional probability and kNN-5 estimate</caption>
+      <image source="images/resampling-methods-knn-fit.png" width="70%">
+        <description>Side-by-side plots showing the kNN-5 estimate (left) and the true conditional probability (right)</description>
+      </image>
+    </figure>
+    
+    <p>
+      We see that kNN adapts better to the non-linear shape of <m>p(\mathbf{x})</m>. However, our estimate has some islands of blue in the red area, which intuitively does not make much sense. We notice that we have higher accuracy in the train set compared to the test set:
+    </p>
+    
+    <console>
+      <input>
+y_hat_knn &lt;- predict(knn_fit, mnist_27$train, type = "class")
+mean(y_hat_knn == mnist_27$train$y)
+
+y_hat_knn &lt;- predict(knn_fit, mnist_27$test, type = "class")
+mean(y_hat_knn == mnist_27$test$y)
+      </input>
+      <output>
+[1] 0.8825
+[1] 0.815
+      </output>
+    </console>
+    
+    <p>
+      This is due to what we call <term>over-training</term>.
+    </p>
+  </section>
+
+  <section xml:id="sec-over-training">
+    <title>Over-training</title>
+    
+    <p>
+      With kNN, over-training is at its worst when we set <m>k = 1</m>. With <m>k = 1</m>, the estimate for each <m>\mathbf{x}</m> in the training set is obtained with just the <m>y</m> corresponding to that point. In this case, if the <m>x_1</m> and <m>x_2</m> are unique, we will obtain perfect accuracy in the training set because each point is used to predict itself (if the predictors are not unique and have different outcomes for at least one set of predictors, then it is impossible to predict perfectly).
+    </p>
+    
+    <p>
+      Here we fit a kNN model with <m>k = 1</m> and confirm we get near perfect accuracy in the training set:
+    </p>
+    
+    <console>
+      <input>
+knn_fit_1 &lt;- knn3(y ~ ., data = mnist_27$train, k = 1)
+y_hat_knn_1 &lt;- predict(knn_fit_1, mnist_27$train, type = "class")
+mean(y_hat_knn_1 == mnist_27$train$y)
+      </input>
+      <output>
+[1] 0.99625
+      </output>
+    </console>
+    
+    <p>
+      But in the test set, accuracy is actually worse than what we obtained with regression:
+    </p>
+    
+    <console>
+      <input>
+y_hat_knn_1 &lt;- predict(knn_fit_1, mnist_27$test, type = "class")
+mean(y_hat_knn_1 == mnist_27$test$y)
+      </input>
+      <output>
+[1] 0.74
+      </output>
+    </console>
+    
+    <p>
+      We can see the over-fitting problem by plotting the decision rule boundaries produced by <m>\hat{p}(\mathbf{x})</m>:
+    </p>
+    
+    <program language="r">
+      <input>
+tmp &lt;- mnist_27$true_p
+tmp$knn &lt;- predict(knn_fit_1, newdata = mnist_27$true_p)[,2]
+p1 &lt;- tmp |&gt;
+  ggplot() +
+  geom_point(data = mnist_27$train, aes(x_1, x_2, color = y),
+             pch = 21, show.legend = FALSE) +
+  scale_fill_gradientn(colors = c("#F8766D","white","#00BFC4")) +
+  stat_contour(aes(x_1, x_2, z = knn), breaks = c(0.5), color = "black") +
+  ggtitle("Train set")
+
+p2 &lt;- tmp |&gt;
+  ggplot() +
+  geom_point(data = mnist_27$test, aes(x_1, x_2, color = y), 
+             pch = 21, show.legend = FALSE) +
+  scale_fill_gradientn(colors = c("#F8766D","white","#00BFC4")) +
+  stat_contour(aes(x_1, x_2, z = knn), breaks = c(0.5), color = "black") +
+  ggtitle("Test set")
+
+grid.arrange(p1, p2, nrow = 1)
+      </input>
+    </program>
+    
+    <figure xml:id="knn-1-overfit">
+      <caption>kNN-1 decision boundaries showing overfitting on train set (left) and poor performance on test set (right)</caption>
+      <image source="images/resampling-methods-knn-1-overfit.png" width="70%">
+        <description>Side-by-side plots showing decision boundaries for train and test sets with k=1</description>
+      </image>
+    </figure>
+    
+    <p>
+      The estimate <m>\hat{p}(\mathbf{x})</m> follows the training data too closely (left). You can see that, in the training set, boundaries have been drawn to perfectly surround a single red point in a sea of blue. Because most points <m>\mathbf{x}</m> are unique, the prediction is either 1 or 0 and the prediction for that point is the associated label. However, once we introduce the test set (right), we see that many of these small islands now have the opposite color and we end up making several incorrect predictions.
+    </p>
+  </section>
+
+  <section xml:id="sec-over-smoothing">
+    <title>Over-smoothing</title>
+    
+    <p>
+      Although not as badly as with <m>k=1</m>, we saw that with <m>k = 5</m> we also over-trained. Hence, we should consider a larger <m>k</m>. Let's try, as an example, a much larger number: <m>k = 401</m>.
+    </p>
+    
+    <console>
+      <input>
+knn_fit_401 &lt;- knn3(y ~ ., data = mnist_27$train, k = 401)
+y_hat_knn_401 &lt;- predict(knn_fit_401, mnist_27$test, type = "class")
+mean(y_hat_knn_401 == mnist_27$test$y)
+      </input>
+      <output>
+[1] 0.79
+      </output>
+    </console>
+    
+    <p>
+      The estimate turns out to be similar to the one obtained with regression:
+    </p>
+    
+    <program language="r">
+      <input>
+fit_lm &lt;- lm(y ~ ., data = mutate(mnist_27$train, y=y == "7"))
+p_hat &lt;- predict(fit_lm, newdata = mnist_27$true_p)
+p_hat &lt;- scales::squish(p_hat, c(0, 1))
+p1 &lt;- plot_cond_prob(p_hat) +
+  ggtitle("Regression")
+
+p2 &lt;- plot_cond_prob(predict(knn_fit_401, mnist_27$true_p)[,2]) +
+  ggtitle("kNN-401")
+  
+grid.arrange(p1, p2, nrow = 1)
+      </input>
+    </program>
+    
+    <figure xml:id="mnist-27-glm-est">
+      <caption>Comparison of regression and kNN-401 estimates showing over-smoothing</caption>
+      <image source="images/resampling-methods-mnist-27-glm-est.png" width="70%">
+        <description>Side-by-side plots comparing regression (left) and kNN-401 (right) estimates</description>
+      </image>
+    </figure>
+    
+    <p>
+      In this case, <m>k</m> is so large that it does not permit enough flexibility. We call this <term>over-smoothing</term>.
+    </p>
+  </section>
+
+  <section xml:id="sec-tuning-parameters">
+    <title>Tuning parameters</title>
+    
+    <p>
+      It is very common for machine learning algorithms to require that we set one or more values <em>before</em> fitting the model. A simple example is the choice of <m>k</m> in k-Nearest Neighbors (kNN). In <xref ref="sec-example-algorithms"/>, we will see additional examples. These values are referred to as <term>tuning parameters</term>, and an important part of applying machine learning in practice is choosing them, often called <term>tuning the model</term>.
+    </p>
+    
+    <p>
+      So how do we pick tuning parameters? For instance, how do we decide on the best <m>k</m> in kNN? In principle, we want the value of <m>k</m> that maximizes accuracy or, equivalently, minimizes the expected MSE as defined in <xref ref="sec-mse"/>. The challenge is that we do not know the true expected error. The goal of <term>resampling methods</term> is to estimate this error for any given algorithm and set of tuning parameters, such as <m>k</m>.
+    </p>
+    
+    <p>
+      To see why we need resampling, let's repeat what we did earlier: compare training and test set accuracy, but now for a range of <m>k</m> values. We can then plot the accuracy estimates for each choice of <m>k</m>:
+    </p>
+    
+    <program language="r">
+      <input>
+ks &lt;- seq(3, 251, 2)
+accuracy &lt;- sapply(ks, function(k){
+  fit &lt;- knn3(y ~ ., data = mnist_27$train, k = k)
+  
+  y_hat &lt;- predict(fit, mnist_27$train, type = "class")
+  cm_train &lt;- confusionMatrix(y_hat, mnist_27$train$y)
+  train_error &lt;- cm_train$overall[["Accuracy"]]
+  
+  y_hat &lt;- predict(fit, mnist_27$test, type = "class")
+  cm_test &lt;- confusionMatrix(y_hat, mnist_27$test$y)
+  test_error &lt;- cm_test$overall[["Accuracy"]]
+  
+  c(train = train_error, test = test_error)
+})
+
+data.frame(k = ks, train = accuracy["train",], test = accuracy["test",]) |&gt;
+  pivot_longer(-k, values_to = "accuracy", names_to = "set") |&gt;
+  mutate(set = factor(set, levels = c("test", "train"))) |&gt;
+  ggplot(aes(k, accuracy, color = set)) + 
+  geom_line() +
+  geom_point()
+      </input>
+    </program>
+    
+    <figure xml:id="accuracy-vs-k-knn">
+      <caption>Accuracy versus k for kNN showing training and test set estimates</caption>
+      <image source="images/resampling-methods-accuracy-vs-k-knn.png" width="70%">
+        <description>Line plot showing training and test accuracy across different k values</description>
+      </image>
+    </figure>
+    
+    <p>
+      First, note that the estimate obtained from the training set is generally more optimistic, higher accuracy, than the estimate from the test set, with the gap being larger for smaller values of <m>k</m>. This is a classic symptom of <term>overfitting</term>.
+    </p>
+    
+    <p>
+      Should we simply choose the value of <m>k</m> that gives the highest accuracy on the test set and report its accuracy?
+      This approach has two important drawbacks:
+    </p>
+    
+    <p>
+      <ol>
+        <li>
+          <p>
+            <em>The accuracy–versus–(k) curve is noisy.</em> We do not expect small changes in <m>k</m> to cause large changes in accuracy or MSE. The jagged pattern occurs because each accuracy estimate is based on a finite test sample, so it fluctuates due to random variation. As a result, the "best" <m>k</m> may appear best just by chance.
+          </p>
+        </li>
+        <li>
+          <p>
+            <em>We are using the test set twice.</em>
+            Although we are not fitting the model on the test set, we <em>are</em> using it to choose <m>k</m> and then using it again to report accuracy. This leads to an optimistic estimate of performance that will typically not hold up on truly new data.
+          </p>
+        </li>
+      </ol>
+    </p>
+    
+    <p>
+      <term>Resampling methods</term> provide a principled solution to both problems by reducing variability and ensuring that test data are not used twice, once for evaluation and again for tuning.
+    </p>
+  </section>
+
+  <section xml:id="sec-math-resampling">
+    <title>Mathematical description of resampling methods</title>
+    
+    <p>
+      In <xref ref="sec-knn-cv-intro"/> we introduced <m>k</m>-nearest neighbors (kNN) as a simple example to motivate this chapter. In that setting, the algorithm depends on only one tuning parameter, <m>k</m>, which directly affects performance. More generally, machine learning algorithms often involve <em>multiple</em> tuning parameters. Here we use the notation <m>\lambda</m> to represent the full set of parameters that define the algorithm.
+    </p>
+    
+    <p>
+      To keep track of how these choices affect performance, we write the predictions produced by a given parameter set for observation <m>i</m> as <m>\hat{y}_i(\lambda)</m> and the corresponding mean squared error as <m>\mathrm{MSE}(\lambda)</m>. Our goal is to find the value of <m>\lambda</m> that minimizes <m>\mathrm{MSE}(\lambda)</m>.
+    </p>
+    
+    <p>
+      Resampling methods provide practical ways to estimate <m>\mathrm{MSE}(\lambda)</m> and therefore guide us toward the best tuning parameters.
+    </p>
+    
+    <p>
+      An intuitive first attempt is the apparent error defined in <xref ref="sec-mse"/> and used in the previous section:
+    </p>
+    
+    <me>
+      \hat{\mbox{MSE}}(\lambda) = \frac{1}{N}\sum_{i = 1}^N \left\{\hat{y}_i(\lambda) - y_i\right\}^2
+    </me>
+    
+    <p>
+      As noted in the previous section, this estimate is a random variable, based on just one test set, with enough variability to affect the choice of the best <m>\lambda</m> substantially.
+    </p>
+    
+    <p>
+      Now imagine a world in which we could obtain data repeatedly, say from new random samples. We could take a very large number <m>B</m> of new samples, split each of them into training and test sets, and define:
+    </p>
+    
+    <me>
+      \frac{1}{B} \sum_{b=1}^B \frac{1}{N}\sum_{i=1}^N \left\{\hat{y}_i^b(\lambda) - y_i^b\right\}^2
+    </me>
+    
+    <p>
+      with <m>y_i^b</m> the <m>i</m>th observation in test sample <m>b</m> and <m>\hat{y}_{i}^b(\lambda)</m> the prediction obtained with the algorithm defined by parameter <m>\lambda</m> and trained on train set <m>b</m>. The law of large numbers tells us that as <m>B</m> becomes larger, this quantity gets closer and closer to <m>\mbox{MSE}(\lambda)</m>. This is of course a theoretical consideration as we rarely get access to more than one dataset for algorithm development, but the concept inspires resampling methods.
+    </p>
+    
+    <p>
+      The general idea behind resampling methods is to generate a series of different random samples from the data at hand. There are several approaches to doing this, but all randomly generate several smaller datasets that are not used for training, and instead are used to estimate MSE. Next, we describe <em>cross validation</em>, one of the most widely used resampling methods.
+    </p>
+  </section>
+
+  <section xml:id="sec-cross-validation">
+    <title>Cross validation</title>
+    
+    <p>
+      Overall, we are provided a dataset (blue) and we need to build an algorithm, using this dataset, that will eventually be used in completely independent datasets (yellow) that we might not even see.
+    </p>
+    
+    <figure xml:id="cv-1">
+      <caption>Original dataset (blue) and future independent datasets (yellow)</caption>
+      <image source="ml/img/cv-1.png" width="35%">
+        <description>Diagram showing original data and future data</description>
+      </image>
+    </figure>
+    
+    <p>
+      So to imitate this situation, we start by carving out a piece of our dataset and pretend it is an independent dataset: we divide the dataset into a <term>training set</term> (blue) and a <term>test set</term> (red). We will train the entirety of our algorithm, including the choice of parameter <m>\lambda</m>, exclusively on the training set and use the test set only for evaluation purposes.
+    </p>
+    
+    <p>
+      We usually try to select a small piece of the dataset so that we have as much data as possible to train. However, we also want the test set to be large so that we obtain a stable estimate of the MSE without fitting an impractical number of models. Typical choices are to use 10%-20% of the data for testing.
+    </p>
+    
+    <figure xml:id="cv-3">
+      <caption>Dataset divided into training (blue) and test (red) sets</caption>
+      <image source="ml/img/cv-3.png" width="35%">
+        <description>Diagram showing train/test split</description>
+      </image>
+    </figure>
+    
+    <p>
+      Let's reiterate that it is indispensable that we not use the test set at all: not for filtering out rows, not for selecting features, not for anything!
+    </p>
+    
+    <p>
+      But then how do we optimize <m>\lambda</m>? In cross validation, we achieve this by splitting the training set into two: the training and validation sets.
+    </p>
+    
+    <figure xml:id="cv-4">
+      <caption>Training set further divided into training (blue) and validation (green) sets</caption>
+      <image source="ml/img/cv-4.png" width="35%">
+        <description>Diagram showing train/validation split</description>
+      </image>
+    </figure>
+    
+    <p>
+      We will do this many times assuring that the estimates of MSE obtained in each dataset are independent from each other. There are several proposed methods for doing this. Here we describe one of these approaches, K-fold cross validation, in detail to provide the general idea used in all approaches.
+    </p>
+    
+    <subsection xml:id="sec-k-fold-cv">
+      <title>K-fold cross validation</title>
+      
+      <p>
+        As a reminder, we are going to imitate the concept used when introducing this version of the MSE:
+      </p>
+      
+      <me>
+        \mbox{MSE}(\lambda) \approx\frac{1}{B} \sum_{b = 1}^B \frac{1}{N}\sum_{i = 1}^N \left(\hat{y}_i^b(\lambda) - y_i^b\right)^2
+      </me>
+      
+      <p>
+        We want to generate a dataset that can be thought of as independent random sample, and do this <m>B</m> times. The K in K-fold cross validation, represents the number of time <m>B</m>. In the illustrations below we show an example that uses <m>B = 5</m>.
+      </p>
+      
+      <p>
+        We will eventually end up with <m>B</m> samples, but let's start by describing how to construct the first: we simply pick <m>M = N/B</m> observations at random (we round if <m>M</m> is not a round number) and think of these as a random sample <m>y_1^b, \dots, y_M^b</m>, with <m>b = 1</m>. We call this the validation set.
+      </p>
+      
+      <p>
+        Now we can fit the model in the training set, then compute the apparent error on the independent set:
+      </p>
+      
+      <me>
+        \hat{\mbox{MSE}}_b(\lambda) = \frac{1}{M}\sum_{i = 1}^M \left(\hat{y}_i^b(\lambda) - y_i^b\right)^2
+      </me>
+      
+      <p>
+        As a reminder, this is just one sample and will therefore return a noisy estimate of the true error. In K-fold cross validation, we randomly split the observations into <m>B</m> non-overlapping sets:
+      </p>
+      
+      <figure xml:id="cv-5">
+        <caption>Training data split into K=5 non-overlapping folds</caption>
+        <image source="ml/img/cv-5.png" width="35%">
+          <description>Diagram showing 5-fold split of training data</description>
+        </image>
+      </figure>
+      
+      <p>
+        Now we repeat the calculation above for each of these sets <m>b = 1,\dots,B</m> and obtain <m>\hat{\mbox{MSE}}_1(\lambda),\dots, \hat{\mbox{MSE}}_B(\lambda)</m>. Then, for our final estimate, we compute the average:
+      </p>
+      
+      <me>
+        \hat{\mbox{MSE}}(\lambda) = \frac{1}{B} \sum_{b = 1}^B \hat{\mbox{MSE}}_b(\lambda)
+      </me>
+      
+      <p>
+        and obtain an estimate of our loss. A final step would be to select the <m>\lambda</m> that minimizes the MSE.
+      </p>
+    </subsection>
+    
+    <subsection xml:id="sec-how-many-folds">
+      <title>How many folds?</title>
+      
+      <p>
+        Now how do we pick the cross validation fold? Large values of <m>B</m> are preferable because the training data better imitates the original dataset. However, larger values of <m>B</m> will have much slower computation time: for example, 100-fold cross validation will be 10 times slower than 10-fold cross validation. For this reason, the choices of <m>B = 5</m> and <m>B = 10</m> are popular.
+      </p>
+    </subsection>
+    
+    <subsection xml:id="sec-estimate-mse-optimized">
+      <title>Estimate MSE of our optimized algorithm</title>
+      
+      <p>
+        We have described how to use cross validation to optimize parameters. However, we now have to take into account the fact that the optimization occurred on the training data and we therefore need an estimate of our final algorithm based on data that was not used to optimize the choice. Here is where we use the test set we separated early on:
+      </p>
+      
+      <figure xml:id="cv-6">
+        <caption>Using the held-out test set for final evaluation</caption>
+        <image source="ml/img/cv-6.png" width="35%">
+          <description>Diagram showing final evaluation on test set</description>
+        </image>
+      </figure>
+      
+      <p>
+        We can actually do cross validation again, say five times:
+      </p>
+      
+      <figure xml:id="cv-7">
+        <caption>Multiple rounds of cross validation on test set</caption>
+        <image source="ml/img/cv-7.png" width="35%">
+          <description>Diagram showing repeated cross validation</description>
+        </image>
+      </figure>
+      
+      <p>
+        and obtain a final estimate of our expected loss by averaging the five MSE estimates. However, note that last cross validation iteration means that our entire compute time gets multiplied by the number of repetitions. You will soon learn that fitting each algorithm takes time because we are performing many complex computations. As a result, we are always looking for ways to reduce this time. For the final evaluation, we often just use the one test set.
+      </p>
+      
+      <p>
+        Once we are satisfied with this model and want to make it available to others, we could refit the model on the entire dataset, without changing the optimized parameters.
+      </p>
+      
+      <figure xml:id="cv-8">
+        <caption>Refitting the final model on the entire dataset</caption>
+        <image source="ml/img/cv-8.png" width="35%">
+          <description>Diagram showing final model trained on all data</description>
+        </image>
+      </figure>
+    </subsection>
+  </section>
+
+  <section xml:id="sec-bootstrap-resampling">
+    <title>Boostrap resampling</title>
+    
+    <p>
+      Typically, cross-validation involves partitioning the original dataset into a training set to train the model and a testing set to evaluate it. With the bootstrap approach, based on the ideas described in <xref ref="sec-bootstrap"/>, you can create multiple different training datasets via bootstrapping. This method is sometimes called bootstrap aggregating or bagging.
+    </p>
+    
+    <p>
+      In bootstrap resampling, we create a large number of bootstrap samples from the original training dataset. Each bootstrap sample is created by randomly selecting observations with replacement, usually the same size as the original training dataset. For each bootstrap sample, we fit the model and compute the MSE estimate on the observations not selected in the random sampling, referred to as the <term>out-of-bag observations</term>. These out-of-bag observations serve a similar role to a validation set in standard cross-validation.
+    </p>
+    
+    <p>
+      We then average the MSEs obtained in the out-of-bag observations from each bootstrap sample to estimate the model's performance.
+    </p>
+    
+    <p>
+      This approach is actually the default approach in the <term>caret</term> package. We describe how to implement resampling methods with the <term>caret</term> package in <xref ref="ml-in-practice"/>.
+    </p>
+  </section>
+
+  <section xml:id="sec-mse-estimates">
+    <title>Comparison of MSE estimates</title>
+    
+    <p>
+      In <xref ref="sec-knn-cv-intro"/>, we computed an estimate of MSE based just on the provided test set (shown in red in the plot below). Here we show how the cross-validation techniques described above help reduce variability. The green curve below shows the results of applying K-fold cross validation with 10 folds, leaving out 10% of the data for validation. We can see that the variance is reduced substantially. The blue curve is the result of using 100 bootstrap samples to estimate MSE. The variability is reduced even further, but at the cost of a 10 fold increase in computation time.
+    </p>
+    
+    <program language="r">
+      <input>
+set.seed(2023-11-30)
+boot &lt;- train(y ~ ., method = "knn", tuneGrid = data.frame(k=ks), 
+              data = mnist_27$train, 
+              trControl = trainControl(number = 100))
+cv &lt;- train(y ~ ., method = "knn", 
+            tuneGrid = data.frame(k = ks), 
+            data = mnist_27$train,
+            trControl = trainControl(method = "cv", 
+                                     number = 10, p = .9))
+
+data.frame(k = ks, naive = accuracy["test",], 
+           cv = cv$results[,2],
+           boot = boot$results[,2]) |&gt;
+  pivot_longer(-k, values_to = "Accuracy", names_to = "set") |&gt;
+  mutate(set = factor(set, levels = c("naive", "cv", "boot"),
+                      labels = c("Simple", "10-fold", "Boostrap"))) |&gt;
+  ggplot(aes(k, Accuracy, color = set)) + 
+  geom_line()
+      </input>
+    </program>
+    
+    <figure xml:id="k-fold-versus-bootstrap">
+      <caption>Comparison of MSE estimation methods: Simple (red), 10-fold CV (green), and Bootstrap (blue)</caption>
+      <image source="images/resampling-methods-k-fold-versus-bootstrap.png" width="70%">
+        <description>Line plot comparing accuracy across different k values using three estimation methods</description>
+      </image>
+    </figure>
+    
+    <p>
+      Note that the three resampling approaches lead to different choices of <m>\lambda</m>.
+      Using the accuracy curves:
+    </p>
+    
+    <p>
+      <ul>
+        <li><p>The naive approach selects <m>\lambda = k</m> with the highest test accuracy.</p></li>
+        <li><p>The 10-fold cross-validation approach selects <m>\lambda = k</m> with the highest cross-validated accuracy.</p></li>
+        <li><p>The bootstrap approach selects <m>\lambda = k</m> with the highest bootstrap accuracy.</p></li>
+      </ul>
+    </p>
+    
+    <p>
+      These differences highlight an important point: your choice of <m>\lambda</m> is only as good as your estimate of the test error. Reliable resampling methods are essential for finding a tuning parameter that truly generalizes well.
+    </p>
+  </section>
+
+  <section xml:id="sec-resampling-exercises">
+    <title>Exercises</title>
+    
+    <introduction>
+      <p>
+        We will work with a dataset in which <em>the predictors and the outcome are entirely unrelated</em>. This setting helps us understand how misleading results can arise when we accidentally "peek" at the test set or use the full dataset to perform feature selection.
+      </p>
+      
+      <p>
+        Generate the dataset:
+      </p>
+      
+      <program language="r">
+        <input>
+set.seed(1996)
+n &lt;- 1000
+p &lt;- 10000
+x &lt;- matrix(rnorm(n * p), n, p)
+colnames(x) &lt;- paste0("x_", 1:p)
+y &lt;- factor(rbinom(n, 1, 0.5))   # completely random binary outcome
+
+# smaller subset for initial exercises
+x_subset &lt;- x[, sample(p, 100)]
+        </input>
+      </program>
+      
+      <p>
+        Because <c>x</c> and <c>y</c> are independent, no classifier should achieve an accuracy much larger than 0.5.
+      </p>
+    </introduction>
+    
+    <exercise xml:id="ex-resampling-1">
+      <statement>
+        <p>
+          Using only <c>x_subset</c>, randomly split the data into 80% training and 20% test.
+        </p>
+        
+        <p>
+          Fit a logistic regression model (<c>glm</c>, family = "binomial") on the training set and compute the test-set accuracy.
+        </p>
+        
+        <p>
+          Repeat this entire procedure <em>five times</em> with new random splits and report the <em>average test accuracy</em>.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise xml:id="ex-resampling-2">
+      <statement>
+        <p>
+          We now pick predictors using t-tests, even though all predictors are noise. For each column of <c>x</c>, compute a t-test comparing values in the <c>y = 1</c> group to <c>y = 0</c>, and extract p-values:
+        </p>
+        
+        <program language="r">
+          <input>
+pvals &lt;- apply(x, 2, function(col) t.test(col ~ y)$p.value)
+          </input>
+        </program>
+        
+        <p>
+          Create an index <c>ind</c> with the predictors whose p-values are &lt; 0.01. How many predictors survive this cutoff?
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise xml:id="ex-resampling-3">
+      <statement>
+        <p>
+          Define:
+        </p>
+        
+        <program language="r">
+          <input>
+x_subset &lt;- x[, ind]
+          </input>
+        </program>
+        
+        <p>
+          Repeat Exercise 1 but using this new <c>x_subset</c>.
+        </p>
+        
+        <p>
+          What is the <em>average test accuracy</em> now? Is it above 0.5?
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise xml:id="ex-resampling-4">
+      <statement>
+        <p>
+          Why is accuracy &gt; 0.5 if the data are independent?
+        </p>
+        
+        <p>
+          Choose the <em>best</em> explanation:
+        </p>
+        
+        <p>
+          <ol marker="a">
+            <li><p>The function <c>train</c> estimates accuracy on the same data used to train the model.</p></li>
+            <li><p>We are over-fitting because the model uses 100 predictors.</p></li>
+            <li><p>We used the <em>entire dataset</em> to perform feature selection, but cross-validation was done <em>after</em> selecting predictors.</p></li>
+            <li><p>High accuracy is simply random variation.</p></li>
+          </ol>
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise xml:id="ex-resampling-5">
+      <statement>
+        <p>
+          Redo the analysis, but this time perform <em>feature selection <em>within</em> each resampling split</em>.
+        </p>
+        
+        <p>
+          This means:
+        </p>
+        
+        <p>
+          <ul>
+            <li><p>For each fold or resample,</p></li>
+            <li><p>select predictors using <em>only</em> the training portion,</p></li>
+            <li><p>fit the model using those selected predictors,</p></li>
+            <li><p>evaluate on the corresponding test/validation portion.</p></li>
+          </ul>
+        </p>
+        
+        <p>
+          You should now obtain an accuracy close to 0.5. Explain why.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise xml:id="ex-resampling-6">
+      <statement>
+        <p>
+          Load the <c>tissue_gene_expression</c> dataset.
+        </p>
+        
+        <p>
+          Split the data:
+        </p>
+        
+        <p>
+          <ul>
+            <li><p>80% training</p></li>
+            <li><p>20% test</p></li>
+          </ul>
+        </p>
+        
+        <p>
+          Then, within the training set, repeatedly split into:
+        </p>
+        
+        <p>
+          <ul>
+            <li><p>90% training</p></li>
+            <li><p>10% validation</p></li>
+          </ul>
+        </p>
+        
+        <p>
+          Use these validation splits to choose the best <em>k</em> for a kNN classifier (using <c>train</c>).
+        </p>
+        
+        <p>
+          Report the value of <c>k</c> that performs best.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise xml:id="ex-resampling-7">
+      <statement>
+        <p>
+          Using the best <c>k</c> found in Exercise 6, retrain the kNN model on the entire training set, and evaluate its accuracy on the held-out test set.
+        </p>
+        
+        <p>
+          Is the accuracy much worse, much better, or roughly the same as what you observed on the validation sets?
+          Explain why this comparison matters.
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise xml:id="ex-resampling-8">
+      <statement>
+        <p>
+          We can create bootstrap samples using <c>createResample</c>.
+        </p>
+        
+        <program language="r">
+          <input>
+set.seed(1995)
+indexes &lt;- createResample(mnist_27$train$y, 10)
+          </input>
+        </program>
+        
+        <p>
+          In the first bootstrap sample, how many times do the indices 3, 4, and 7 appear?
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise xml:id="ex-resampling-9">
+      <statement>
+        <p>
+          Repeat the previous exercise for all 10 bootstrap samples.
+        </p>
+        
+        <p>
+          Which indices never appear at all in each sample?
+          How many observations on average get omitted?
+        </p>
+      </statement>
+    </exercise>
+    
+    <exercise xml:id="ex-resampling-10">
+      <statement>
+        <p>
+          Explain in your own words why a bootstrap sample (sampling with replacement):
+        </p>
+        
+        <p>
+          <ul>
+            <li><p>must include some observations multiple times,</p></li>
+            <li><p>must omit others entirely, and</p></li>
+            <li><p>is still considered a valid "resampled dataset."</p></li>
+          </ul>
+        </p>
+        
+        <p>
+          Relate this explanation to the idea of using bootstrap samples to estimate prediction error.
+        </p>
+      </statement>
+    </exercise>
+  </section>
+
+</chapter>

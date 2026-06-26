@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="intro-to-linear-models">
+  <title>Introduction to Linear Models</title>
+  
+  <introduction>
+    <p>
+      Up to this point, the book has focused mainly on datasets with a single variable. In real data analysis,
+      however, we are often interested in the relationship between two or more variables. In this part of the
+      book, we introduce linear models, a general framework that unifies methods for studying associations
+      among variables, including simple and multivariable regression, treatment effect models, association
+      tests, and generalized linear models. We will use several case studies to illustrate these ideas. We
+      will examine whether height is hereditary (<xref ref="sec-regression"/>), whether a high-fat diet makes
+      mice heavier (<xref ref="sec-treatment-effect-models"/>), whether there is gender bias in research
+      funding in the Netherlands (<xref ref="sec-association-tests"/>), and how to build a baseball team on a
+      budget (<xref ref="sec-multivariable-regression"/>). We also include a chapter on the important concept
+      that association is not causation (<xref ref="sec-association-not-causation"/>), with a detailed discussion
+      and examples of the challenges that arise when interpreting relationships between variables.
+    </p>
+    <p>
+      For a reminder that association is not causation, see Tyler
+      Vigen's <fn><url href="https://www.tylervigen.com/spurious-correlations">Spurious Correlations</url></fn>.
+    </p>
+  </introduction>
+
+</chapter>
