@@ -25,4 +25,10 @@ docs
 .agents
 */archive
 archive
-docs/Introduction-to-Data-Science.pdf 
+docs/Introduction-to-Data-Science.pdf
+pretext/assets/images/*
+!pretext/assets/images/placeholder.jpeg
+pretext/assets/linear-models/
+pretext/assets/ml/
+pretext/assets/img/
+pretext/ml/
