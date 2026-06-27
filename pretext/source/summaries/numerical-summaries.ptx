@@ -4,7 +4,7 @@
   
   <introduction>
     <p>
-      Histograms and density plots provide excellent summaries of a distribution. But can we summarize even further? We often see the average and standard deviation used as summary statistics: a two-number summary! To understand what these summaries are and why they are so widely used, we need to understand the normal distribution.
+      Histograms and density plots provide excellent summaries of a distribution. But can we summarize even further? We often see the average and standard deviation used as summary statistics: a two-number summary! To see why these summaries are especially useful, we introduce the normal distribution.
     </p>
 
     <program language="r">
@@ -23,7 +23,7 @@ library(dslabs)
     </p>
 
     <p>
-      Rather than using data, the normal distribution is defined with a mathematical formula. For any interval <m>(a,b)</m>, the proportion of values in that interval can be computed using this formula:
+      Rather than using data, the normal distribution is defined with a mathematical formula — unlike the empirical distributions in the previous chapter, the normal distribution is a <em>theoretical</em> distribution (theoretical distributions will be discussed more in <xref ref="random-variables"/>). For any interval <m>(a,b)</m>, the proportion of values in that interval can be computed using this formula:
     </p>
 
     <me>
@@ -31,7 +31,7 @@ library(dslabs)
     </me>
 
     <p>
-      But you don't need to memorize the formula to use the normal distribution in practics. The most important characterstics is that it is completely defined by just two parameters: <m>\mu</m> and <m>\sigma</m>. The rest of the symbols in the formula represent the interval ends, <m>a</m> and <m>b</m>, and known mathematical constants <m>\pi</m> and <m>e</m>. These two parameters, <m>\mu</m> and <m>\sigma</m>, are referred to as the <em>mean</em> and the <em>standard deviation</em> (SD) of the distribution, respectively (<m>\mu</m> and <m>\sigma</m> are the Greek letters for <m>m</m> and <m>s</m>). In R the fucntion <c>pnorm</c> let's us compute the <m>\mathrm{Pr}(x \leq a)</m> for any <m>a, \mu</m>, and <m>\sigma</m>:
+      But you don't need to memorize the formula to use the normal distribution in practice. The most important characteristic is that it is completely defined by just two parameters: <m>\mu</m> and <m>\sigma</m>. The rest of the symbols in the formula represent the interval ends, <m>a</m> and <m>b</m>, and known mathematical constants <m>\pi</m> and <m>e</m>. These two parameters, <m>\mu</m> and <m>\sigma</m>, are referred to as the <em>mean</em> and the <em>standard deviation</em> (SD) of the distribution, respectively (<m>\mu</m> and <m>\sigma</m> are the Greek letters for <m>m</m> and <m>s</m>). In R the function <c>pnorm</c> lets us compute the <m>\mathrm{Pr}(x \leq a)</m> for any <m>a, \mu</m>, and <m>\sigma</m>:
     </p>
 
     <program language="r">
@@ -62,13 +62,17 @@ pnorm(a, mu, sigma)
     <p>
       The fact that the distribution is defined by just two parameters implies that if a dataset's distribution is approximated by the normal distribution, all the information needed to describe the distribution can be encoded in just two numbers: the mean and the standard deviation.
     </p>
+
+    <p>
+      Although introduced in the context of the normal distribution, the mean and standard deviation apply to any list of numbers. We will revisit these summaries for discrete distributions in <xref ref="random-variables"/>; for now, we focus on computing them from data.
+    </p>
   </section>
 
   <section xml:id="sec-average-and-sd-def">
-    <title>The average and standard deviation</title>
+    <title>The mean and standard deviation</title>
     
     <p>
-      Discrete distributions also have means and standard deviations. We will discuss these terms in more detail in <xref ref="random-variables"/>. For a list of values <m>x_1, \dots, x_n</m> the mean, call it <m>\mu_x</m> is defined by
+      For a list of values <m>x_1, \dots, x_n</m> we define the <em>mean</em> and <em>standard deviation</em>. The mean, denoted <m>\mu_x</m>, is defined by
     </p>
 
     <me>
@@ -113,18 +117,24 @@ s &lt;- sd(x)
       </input>
     </program>
 
-    <note>
+    <warning>
       <p>
-        For reasons explained in a later section, <c>sd(x)</c> divides by <c>length(x)-1</c> rather than <c>length(x)</c>. But note that when <c>length(x)</c> is large, <c>sd(x)</c> and <c>sqrt(sum((x-mu)^2)/length(x))</c> are practically equal.
+        For reasons explained in <xref ref="sec-population-sd"/>, <c>sd(x)</c> divides by <m>n-1</m> rather than <m>n</m>. When <m>n</m> is large, however, the difference is negligible:
       </p>
-    </note>
+      <me>
+        \frac{1}{n}\sum_{i=1}^n (x_i - \mu_x)^2 \approx \frac{1}{n-1}\sum_{i=1}^n (x_i - \mu_x)^2.
+      </me>
+      <p>
+        We will explain why <m>n-1</m> is often preferred in <xref ref="sec-population-sd"/>. For now, we will use <c>sd(x)</c> to compute the standard deviation of the values in <c>x</c>.
+      </p>
+    </warning>
 
     <p>
-      If the distribution of the values stored in <c>x</c> is well approximated by a normal distribution, it makes sense to use the normal distribution with mean <c>m &lt;- mean(x)</c> and standard deviation <c>s &lt;- sd(x)</c>. This means that the entire distribution of <c>x</c> can be summarized with just these two numbers!
+      If the distribution of the values stored in <c>x</c> is well approximated by a normal distribution, we can use <c>m &lt;- mean(x)</c> and <c>s &lt;- sd(x)</c> as estimates of the normal distribution's mean <m>\mu</m> and standard deviation <m>\sigma</m>. Then the entire distribution of <c>x</c> can be summarized with just these two numbers!
     </p>
 
     <p>
-      The plot below shows the smooth density of the observed data (blue) and the corresponding normal approximation (black line):
+      The plot below shows the smooth density of the observed data (blue) and the corresponding normal approximation (black line) with mean <m>\mu = 69.3</m> and SD <m>\sigma = 3.6</m>:
     </p>
 
     <program language="r">
@@ -144,11 +154,11 @@ s &lt;- sd(x)
     </figure>
 
     <p>
-      The normal distribution appears to be a good approximation. For example, the probabilities computed using <c>pnorm</c> closely match those estimated directly from the data.
+      The normal distribution appears to be a good approximation. To check this, we can see if the probabilities computed using <c>pnorm</c> closely match those estimated directly from the data.
     </p>
 
     <p>
-      To check this, we can compare the proportion of observations falling within a given interval, say <m>(a, b]</m>, as predicted by the normal model to the actual proportion observed in the data. The proportion of values in the interval <m>[a, b]</m> can be computed with:
+      For example, we can compare the proportion of observations falling within a given interval, say <m>(a, b]</m>, as predicted by the normal model to the actual proportion observed in the data. The proportion of values in the interval <m>[a, b]</m> can be computed with:
     </p>
 
     <program language="r">
@@ -197,7 +207,7 @@ mean(x &gt; 62.1 &amp; x &lt;= 76.5)
 
     <note>
       <p>
-        When using the normal approximation with discrete data (for example, when heights are rounded to the nearest inch), note that <c>mean(x &lt; a)</c> and <c>mean(x &lt;= a)</c> may differ. In such cases, it's common to apply a <em>continuity correction</em>, using <c>pnorm(a + delta/2, m, s)</c> to approximate <c>mean(x &lt;= a)</c>, where <c>delta</c> is the bin width (in our example, 1 inch). In our dataset, however, some students reported more precise measurements, so the degree of discretization varies. As a result, care should be taken when applying the normal approximation.
+        When using the normal approximation with discrete data (for example, when heights are rounded to the nearest inch), note that <c>mean(x &lt; a)</c> and <c>mean(x &lt;= a)</c> may differ. In such cases, it's common to apply a <em>continuity correction</em>, using <c>pnorm(a + delta/2, m, s)</c> to approximate <c>mean(x &lt;= a)</c>, where <c>delta</c> is the bin width (in our example, 1 inch). In our dataset, however, some students reported more precise measurements, so the degree of discretization varies. As a result, the normal approximation should be applied with care.
       </p>
     </note>
   </section>
@@ -206,11 +216,11 @@ mean(x &gt; 62.1 &amp; x &lt;= 76.5)
     <title>Standard units</title>
     
     <p>
-      For data that is approximately normally distributed, it is convenient to think in terms of <em>standard units</em>. The standard unit of a value tells us how many standard deviations away from the average it is. Specifically, for a value <c>x</c> from a vector <c>x</c>, we define the value of <c>x</c> in standard units as <c>z = (x - m)/s</c> with <c>m</c> and <c>s</c> the average and standard deviation of <c>x</c>, respectively. Why is this convenient?
+      For data that is approximately normally distributed, it is convenient to think in terms of <em>standard units</em>. The standard unit of a value tells us how many standard deviations away from the average it is. Specifically, for a value <m>x_i</m> from a list <m>(x_1, \dots, x_n)</m>, we define the value of <m>x_i</m> in standard units as <m>z_i = (x_i - \mu_x)/\sigma_x</m> with <m>\mu_x</m> and <m>\sigma_x</m> the average and standard deviation of the list, respectively.
     </p>
 
     <p>
-      First, revisit the formula for the normal distribution and observe that what is being exponentiated is <m>-z^2/2</m> with <m>z</m> equivalent to <m>x</m> in standard units. Because the maximum of <m>e^{-z^2/2}</m> is at <m>z = 0</m>, this explains why the maximum of the distribution occurs at the mean. It also explains the symmetry since <m>- z^2/2</m> is symmetric around 0. Second, note that by converting the normally distributed data to standard units, we can quickly ascertain whether, for example, a person is about average (<m>z = 0</m>), one of the tallest (<m>z \approx 2</m>), one of the shortest (<m>z \approx -2</m>), or an extremely rare occurrence (<m>z &gt; 3</m> or <m>z &lt; -3</m>). Remember that it does not matter what the original units are, these rules apply to any data that is approximately normal.
+      Why is this convenient? First, revisit the formula for the normal distribution and observe that what is being exponentiated is <m>-z^2/2</m> with <m>z</m> equivalent to <m>x</m> in standard units. Because the maximum of <m>e^{-z^2/2}</m> is at <m>z = 0</m>, this explains why the maximum of the distribution occurs at the mean. It also explains the symmetry since <m>- z^2/2</m> is symmetric around 0. Second, note that by converting the normally distributed data to standard units, we can quickly ascertain whether, for example, a person is about average (<m>z = 0</m>), one of the tallest (<m>z \approx 2</m>), one of the shortest (<m>z \approx -2</m>), or an extremely rare occurrence (<m>z &gt; 3</m> or <m>z &lt; -3</m>). Remember that it does not matter what the original units are, these rules apply to any data that is approximately normal.
     </p>
 
     <p>
@@ -472,25 +482,11 @@ round((pnorm(r[2]) - pnorm(r[1]))*100, 3)
       </p>
 
       <p>
-        To make the definition stricter, Tukey proposed using a wider multiplier, such as 3 instead of 1.5, to flag <em>far-out outliers</em>. For normally distributed data, the range
-      </p>
-
-      <console>
-        <input>
-r &lt;- c(q1 - 3*iqr , q3 + 3*iqr)
-round((pnorm(r[2]) - pnorm(r[1]))*100, 4)
-        </input>
-        <output>
-[1] 99.9998
-        </output>
-      </console>
-
-      <p>
-        captures about 99.9999% of all values, meaning that only about two in a million observations would fall outside it. In <term>ggplot</term> <c>geom_boxplot()</c> function, this multiplier is controlled by the <c>coef</c> argument, which defaults to 1.5.
+        To identify <em>far-out outliers</em> more strictly, Tukey proposed using a wider multiplier, such as 3 instead of 1.5, to define the outlier boundaries. For normally distributed data, using a multiplier of 3 means the range <c>c(q1 - 3*iqr, q3 + 3*iqr)</c> contains approximately 99.9998% of all values. This means only about 2 in a million observations would be flagged as outliers. Any function that flags outliers must choose a multiplier; in <term>ggplot2</term>'s <c>geom_boxplot()</c> function, this is controlled via the <c>coef</c> argument, which defaults to 1.5.
       </p>
 
       <p>
-        Let's apply Tukey's rule to our height data. The extreme 180-foot measurement is well beyond the range defined by <m>Q_3 + 3 \times \text{IQR}</m>:
+        Let's apply Tukey's rule to our height data. The extreme 180-foot measurement is well beyond the upper bound of this range defined by <m>Q_3 + 3 \times \text{IQR}</m>:
       </p>
 
       <console>
