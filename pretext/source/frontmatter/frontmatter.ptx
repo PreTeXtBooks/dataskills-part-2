@@ -45,8 +45,9 @@
     </p>
   </preface>
 
-  <introduction xml:id="introduction">
-    <title>Introduction</title>
+
+  <preface xml:id="preface-introduction">
+      <title>Introduction</title>
     <p>
       The phrase <em>data science</em> began gaining significant popularity around 2012, thanks in part to 
       the publication titled <em>"Data Scientist: The Most Alluring Profession of the 21st Century"</em>
@@ -95,6 +96,7 @@
       the main thing we teach here: <em>thinking statistically</em> about data-driven questions. This skill 
       involves formulating questions, visually exploring data, identifying sources of variability, and reasoning 
       about uncertainty. These are human-centered tasks that remain at the heart of data analysis.
+      This book focuses on the statistical and probabilistic foundations of machine learning, which provide essential tools for understanding how algorithms learn from data and make predictions. While we do not cover deep learning, large language models, or generative models—topics with extensive resources available elsewhere—the principles and techniques presented here form the conceptual foundation upon which these advanced methods are built.
     </p>
     <p>
       The book is divided into six parts: <em>Summary Statistics</em>, <em>Probability</em>, 
@@ -111,7 +113,7 @@
       <url href="https://github.com/rafalab/dsbook-part-2">GitHub</url>
       <fn><url href="https://github.com/rafalab/dsbook-part-2">https://github.com/rafalab/dsbook-part-2</url></fn>.
     </p>
-  </introduction>
+  </preface>
 
   <acknowledgement xml:id="acknowledgement">
     <title>Acknowledgments</title>
