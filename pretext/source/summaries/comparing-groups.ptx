@@ -206,12 +206,13 @@ abline(0,1)
             In R, this is computed with <c>pnorm</c>:
         </p>
 
-        <program language = "r">
+        <program language="r">
             <input>
 pnorm(-1.96)
             </input>
-</program>
-<console>
+        </program>
+
+        <console>
             <output>
 [1] 0.0249979
             </output>
@@ -224,12 +225,13 @@ pnorm(-1.96)
             <c>qnorm</c>:
         </p>
 
-        <program language = "r">
+        <program language="r">
             <input>
 qnorm(0.975)
             </input>
-</program>
-<console>
+        </program>
+
+        <console>
             <output>
 [1] 1.959964
             </output>
@@ -242,12 +244,13 @@ qnorm(0.975)
             <c>sd</c> arguments:
         </p>
 
-        <program language = "r">
+        <program language="r">
             <input>
 qnorm(0.975, mean = 69, sd = 3)
             </input>
-</program>
-<console>
+        </program>
+
+        <console>
             <output>
 [1] 74.87989
             </output>
@@ -259,13 +262,14 @@ qnorm(0.975, mean = 69, sd = 3)
             For example, here are the quartiles of male heights:
         </p>
 
-        <program language = "r">
+        <program language="r">
             <input>
 x &lt;- with(heights, height[sex == "Male"])
 quantile(x, c(0.25, 0.50, 0.75))
             </input>
-</program>
-<console>
+        </program>
+
+        <console>
             <output>
 25% 50% 75% 
  67  69  72 
@@ -316,9 +320,15 @@ abline(0, 1)
             </image>
         </figure>
 
-       <p>
-           Recall that the qqplot in <xref ref = "quantile-quantile-plots"</xref> compared quantiles from two sets of observations, where points along the identity line indicated similar distributions. In this case, the theoretical quantiles along the x-axis are computed using the sample mean and standard deviation. Here, the identity line marks where we expect points to lie if the data really came from this theoretical distribution.
-       </p>
+        <p>
+            Recall that the qqplot in <xref ref="quantile-quantile-plots"/>
+            compared quantiles from two sets of observations, where points along
+            the identity line indicated similar distributions.
+            In this case, the theoretical quantiles along the x-axis are
+            computed using the sample mean and standard deviation.
+            Here, the identity line marks where we expect points to lie if the
+            data really came from this theoretical distribution.
+        </p>
 
         <p>
             Because the points fall close to the identity line, we conclude that
@@ -337,8 +347,10 @@ abline(a = 0, b = 1)
             </input>
         </program>
 
-<p>And similarly with ggplot2, which uses a different vector of probabilities than our p:
-</p>
+        <p>
+            And similarly with ggplot2, which uses a different vector of
+            probabilities than our p:
+        </p>
 
         <program language="r">
             <input>
@@ -347,8 +359,8 @@ heights |&gt; filter(sex == "Male") |&gt;
   ggplot(aes(sample = scale(height))) + 
   geom_qq() +
   geom_abline()
-</input>
-</program>
+            </input>
+        </program>
 
         <p>
             R provides built-in functions for generating qqplots that compare
@@ -374,7 +386,15 @@ qqline(x)
         </figure>
 
         <p>
-            The function <c>qqnorm()</c> plots the sample quantiles of the data <c>x</c> against theoretical quantiles from a standard normal distribution. The function <c>qqline()</c> adds a reference line representing where we would expect points to lie if the data were normally distributed with the same mean and standard deviation as the observed sample. Because the sample and theoretical quantiles are not on the same scale, this reference is no longer the identity line.
+            The function <c>qqnorm()</c> plots the sample quantiles of the data
+            <c>x</c> against theoretical quantiles from a standard normal
+            distribution.
+            The function <c>qqline()</c> adds a reference line representing
+            where we would expect points to lie if the data were normally
+            distributed with the same mean and standard deviation as the
+            observed sample.
+            Because the sample and theoretical quantiles are not on the same
+            scale, this reference is no longer the identity line.
         </p>
 
         <note>
@@ -423,8 +443,8 @@ qqline(x)
         </p>
 
         <p>
-            Boxplots are useful when we want to quickly compare
-            two or more distributions.
+            Boxplots are useful when we want to quickly compare two or more
+            distributions.
             Here are the heights for females and males:
         </p>
 
@@ -498,14 +518,15 @@ heights |&gt; ggplot(aes(sex, height, fill = sex)) + geom_boxplot()
             Regarding the five smallest values, note that these are:
         </p>
 
-        <program language = "r">
+        <program language="r">
             <input>
 heights |&gt; filter(sex == "Female") |&gt; 
   top_n(5, desc(height)) |&gt;
   pull(height)
             </input>
-</program>
-<console>
+        </program>
+
+        <console>
             <output>
 [1] 51 53 55 52 52
             </output>
