@@ -1,855 +1,1245 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+
 <chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="sec-numeric-summaries">
-  <title>Numerical Summaries</title>
-  
-  <introduction>
-    <p>
-      Histograms and density plots provide excellent summaries of a distribution. But can we summarize even further? We often see the average and standard deviation used as summary statistics: a two-number summary! To see why these summaries are especially useful, we introduce the normal distribution.
-    </p>
+    <title>Numerical Summaries</title>
 
-    <program language="r">
-      <input>
-library(tidyverse)
-library(dslabs)
-      </input>
-    </program>
-  </introduction>
+    <introduction>
+        <p>
+            Histograms and density plots provide excellent summaries of a
+            distribution.
+            But can we summarize even further?
+            We often see the average and standard deviation used as summary
+            statistics: a two-number summary!
+            To see why these summaries are especially useful, we introduce the
+            normal distribution.
+        </p>
+    </introduction>
 
-  <section xml:id="sec-normal-distribution">
-    <title>The normal distribution</title>
-    
-    <p>
-      The normal distribution, also known as the bell curve and as the Gaussian distribution, is one of the most famous mathematical concepts in history. One reason for this is that approximately normal distributions occur in many situations, including gambling winnings, heights, weights, blood pressure, standardized test scores, and experimental measurement errors. There are explanations for these occurrences, which we will describe later. Here we focus on how the normal distribution helps us summarize data.
-    </p>
+    <section xml:id="sec-normal-distribution">
+        <title>The normal distribution</title>
 
-    <p>
-      Rather than using data, the normal distribution is defined with a mathematical formula — unlike the empirical distributions in the previous chapter, the normal distribution is a <em>theoretical</em> distribution (theoretical distributions will be discussed more in <xref ref="random-variables"/>). For any interval <m>(a,b)</m>, the proportion of values in that interval can be computed using this formula:
-    </p>
+        <p>
+            The normal distribution, also known as the bell curve and as the
+            Gaussian distribution, is one of the most famous mathematical
+            concepts in history.
+            One reason for this is that approximately normal distributions occur
+            in many situations, including gambling winnings, heights, weights,
+            blood pressure, standardized test scores, and experimental
+            measurement errors.
+            There are explanations for these occurrences, which we will describe
+            later.
+            Here we focus on how the normal distribution helps us summarize
+            data.
+        </p>
 
-    <me>
-      \mathrm{Pr}(a &lt; x \leq b) = \int_a^b \frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{1}{2}\left( \frac{x-\mu}{\sigma} \right)^2} \, dx
-    </me>
+        <p>
+            Rather than using data, the normal distribution is defined with a
+            mathematical formula — unlike the empirical distributions in the
+            previous chapter, the normal distribution is a <em>theoretical</em>
+            distribution (theoretical distributions will be discussed more in
+            <xref ref="random-variables"/> ).
+            For any interval <m>(a,b)</m>, the proportion of values in that
+            interval can be computed using this formula:
+        </p>
+        <me>
+            \mathrm{Pr}(a &lt; x \leq b) = \int_a^b \frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{1}{2}\left( \frac{x-\mu}{\sigma} \right)^2} \, dx
+        </me>
 
-    <p>
-      But you don't need to memorize the formula to use the normal distribution in practice. The most important characteristic is that it is completely defined by just two parameters: <m>\mu</m> and <m>\sigma</m>. The rest of the symbols in the formula represent the interval ends, <m>a</m> and <m>b</m>, and known mathematical constants <m>\pi</m> and <m>e</m>. These two parameters, <m>\mu</m> and <m>\sigma</m>, are referred to as the <em>mean</em> and the <em>standard deviation</em> (SD) of the distribution, respectively (<m>\mu</m> and <m>\sigma</m> are the Greek letters for <m>m</m> and <m>s</m>). In R the function <c>pnorm</c> lets us compute the <m>\mathrm{Pr}(x \leq a)</m> for any <m>a, \mu</m>, and <m>\sigma</m>:
-    </p>
+        <p>
+            But you don't need to memorize the formula to use the normal
+            distribution in practice.
+            The most important characteristic is that it is completely defined
+            by just two parameters: <m>\mu</m> and <m>\sigma</m>.
+            The rest of the symbols in the formula represent the interval ends,
+            <m>a</m> and <m>b</m>, and known mathematical constants <m>\pi</m>
+            and <m>e</m>.
+            These two parameters, <m>\mu</m> and <m>\sigma</m>, are referred to
+            as the <em>mean</em> and the <em>standard deviation</em> (SD) of the
+            distribution, respectively ( <m>\mu</m> and <m>\sigma</m> are the
+            Greek letters for <m>m</m> and <m>s</m> ).
+            In R the function <c>pnorm</c> lets us compute the
+            <m>\mathrm{Pr}(x \leq a)</m> for any <m>a, \mu</m>, and
+            <m>\sigma</m>:
+        </p>
 
-    <program language="r">
-      <input>
+        <program language="r">
+            <input>
 pnorm(a, mu, sigma)
-      </input>
-    </program>
+            </input>
+        </program>
 
-    <p>
-      The distribution is symmetric, centered at <m>\mu</m>, and most values (about 95%) are within <m>2\sigma</m> from <m>\mu</m>. Here is what the normal distribution looks like when the <m>\mu = 0</m> and <m>\sigma = 1</m>:
-    </p>
+        <p>
+            The distribution is symmetric, centered at <m>\mu</m>, and most
+            values (about 95%) are within <m>2\sigma</m> from <m>\mu</m>.
+            Here is what the normal distribution looks like when the
+            <m>\mu = 0</m> and <m>\sigma = 1</m>:
+        </p>
 
-    <program language="r">
-      <input>
-        tibble(x = seq(-4, 4, length.out = 1000)) |>
-          ggplot(aes(x, dnorm(x))) +
-          geom_line(linewidth = 1)
-      </input>
-    </program>
+        <figure xml:id="fig-normal-distribution-density">
+            <caption>
+                Normal distribution with mean 0 and standard deviation 1
+            </caption>
 
-    <figure xml:id="fig-normal-distribution-density">
-      <caption>Normal distribution with mean 0 and standard deviation 1</caption>
-      <image source="images/numerical-summaries-normal-distribution-density.png" width="70%">
-        <description>A smooth bell-shaped curve showing the standard normal distribution. The curve is symmetric around 0, with the peak at 0. The curve extends from approximately -4 to 4 on the x-axis, with most of the density concentrated between -2 and 2.</description>
-      </image>
-    </figure>
+            <image source="images/numerical-summaries-normal-distribution-density.png" width="70%">
+                <description>
+                    A smooth bell-shaped curve showing the standard normal
+                    distribution.
+                    The curve is symmetric around 0, with the peak at 0.
+                    The curve extends from approximately -4 to 4 on the x-axis,
+                    with most of the density concentrated between -2 and 2.
+                </description>
+            </image>
+        </figure>
 
-    <p>
-      The fact that the distribution is defined by just two parameters implies that if a dataset's distribution is approximated by the normal distribution, all the information needed to describe the distribution can be encoded in just two numbers: the mean and the standard deviation.
-    </p>
+        <p>
+            The fact that the distribution is defined by just two parameters
+            implies that if a dataset's distribution is approximated by the
+            normal distribution, all the information needed to describe the
+            distribution can be encoded in just two numbers: the mean and the
+            standard deviation.
+        </p>
 
-    <p>
-      Although introduced in the context of the normal distribution, the mean and standard deviation apply to any list of numbers. We will revisit these summaries for discrete distributions in <xref ref="random-variables"/>; for now, we focus on computing them from data.
-    </p>
-  </section>
+        <p>
+            Although introduced in the context of the normal distribution, the
+            mean and standard deviation apply to any list of numbers.
+            We will revisit these summaries for discrete distributions in
+            <xref ref="random-variables"/>; for now, we focus on computing them
+            from data.
+        </p>
+    </section>
 
-  <section xml:id="sec-average-and-sd-def">
-    <title>The mean and standard deviation</title>
-    
-    <p>
-      For a list of values <m>x_1, \dots, x_n</m> we define the <em>mean</em> and <em>standard deviation</em>. The mean, denoted <m>\mu_x</m>, is defined by
-    </p>
+    <section xml:id="sec-average-and-sd-def">
+        <title>The mean and standard deviation</title>
 
-    <me>
-      \mu_x = \frac{1}{n}\sum_{i=1}^n x_i
-    </me>
+        <p>
+            For a list of values <m>x_1, \dots, x_n</m> we define the
+            <em>mean</em> and <em>standard deviation</em>.
+            The mean, denoted <m>\mu_x</m>, is defined by
+        </p>
+        <me>
+            \mu_x = \frac{1}{n}\sum_{i=1}^n x_i
+        </me>
 
-    <p>
-      Note that this is equivalent to the average of the <m>x</m>s.
-    </p>
+        <p>
+            Note that this is equivalent to the average of the <m>x</m> s.
+        </p>
 
-    <p>
-      The standard deviation is defined with
-    </p>
+        <p>
+            The standard deviation is defined with
+        </p>
+        <me>
+            \sigma_x = \sqrt{\frac{1}{n}\sum_{i=1}^n (x_i - \mu_x)^2}
+        </me>
 
-    <me>
-      \sigma_x = \sqrt{\frac{1}{n}\sum_{i=1}^n (x_i - \mu_x)^2}
-    </me>
+        <p>
+            which can be thought of as the average distance of the points
+            <m>x_i</m> to the mean <m>\mu_x</m>.
+        </p>
 
-    <p>
-      which can be thought of as the average distance of the points <m>x_i</m> to the mean <m>\mu_x</m>.
-    </p>
+        <p>
+            Let's compute the mean and standard deviations for the height of
+            males:
+        </p>
 
-    <p>
-      Let's compute the mean and standard deviations for the height for males:
-    </p>
-
-    <program language="r">
-      <input>
+        <program language="r">
+            <input>
 library(tidyverse)
+library(rafalib)
 x &lt;- with(heights, height[sex == "Male"])
-      </input>
-    </program>
+            </input>
+        </program>
 
-    <p>
-      The pre-built functions <c>mean</c> and <c>sd</c> can be used here:
-    </p>
+        <p>
+            The pre-built functions <c>mean</c> and <c>sd</c> can be used here:
+        </p>
 
-    <program language="r">
-      <input>
+        <program language="r">
+            <input>
 m &lt;- mean(x)
 s &lt;- sd(x)
-      </input>
-    </program>
+            </input>
+        </program>
 
-    <warning>
-      <p>
-        For reasons explained in <xref ref="sec-population-sd"/>, <c>sd(x)</c> divides by <m>n-1</m> rather than <m>n</m>. When <m>n</m> is large, however, the difference is negligible:
-      </p>
-      <me>
-        \frac{1}{n}\sum_{i=1}^n (x_i - \mu_x)^2 \approx \frac{1}{n-1}\sum_{i=1}^n (x_i - \mu_x)^2.
-      </me>
-      <p>
-        We will explain why <m>n-1</m> is often preferred in <xref ref="sec-population-sd"/>. For now, we will use <c>sd(x)</c> to compute the standard deviation of the values in <c>x</c>.
-      </p>
-    </warning>
+        <warning>
+            <p>
+                For reasons explained in <xref ref="sec-population-sd"/>,
+                <c>sd(x)</c> divides by <m>n-1</m> rather than <m>n</m>.
+                When <m>n</m> is large, however, the difference is negligible:
+            </p>
+            <me>
+                \frac{1}{n}\sum_{i=1}^n (x_i - \mu_x)^2 \approx \frac{1}{n-1}\sum_{i=1}^n (x_i - \mu_x)^2.
+            </me>
 
-    <p>
-      If the distribution of the values stored in <c>x</c> is well approximated by a normal distribution, we can use <c>m &lt;- mean(x)</c> and <c>s &lt;- sd(x)</c> as estimates of the normal distribution's mean <m>\mu</m> and standard deviation <m>\sigma</m>. Then the entire distribution of <c>x</c> can be summarized with just these two numbers!
-    </p>
+            <p>
+                We will explain why <m>n-1</m> is often preferred in
+                <xref ref="sec-population-sd"/>.
+                For now, we will use <c>sd(x)</c> to compute the standard
+                deviation of the values in <c>x</c>.
+            </p>
+        </warning>
 
-    <p>
-      The plot below shows the smooth density of the observed data (blue) and the corresponding normal approximation (black line) with mean <m>\mu = 69.3</m> and SD <m>\sigma = 3.6</m>:
-    </p>
+        <p>
+            If the distribution of the values stored in <c>x</c> is well
+            approximated by a normal distribution, we can use
+            <c>m &lt;- mean(x)</c> and <c>s &lt;- sd(x)</c> as estimates of the
+            normal distribution's mean <m>\mu</m> and standard deviation
+            <m>\sigma</m>.
+            Then the entire distribution of <c>x</c> can be summarized with just
+            these two numbers!
+        </p>
 
-    <program language="r">
-      <input>
-        tibble(height = x) |>
-          ggplot(aes(height)) +
-          geom_density(fill = "#56B4E9", alpha = 0.45, color = "#56B4E9") +
-          stat_function(fun = dnorm, args = list(mean = m, sd = s), color = "black", linewidth = 1)
-      </input>
-    </program>
+        <p>
+            The plot below shows the smooth density of the observed data (blue)
+            and the corresponding normal approximation (black line) with mean
+            <m>\mu = 69.3</m> and SD <m>\sigma = 3.6</m>:
+        </p>
 
-    <figure xml:id="fig-data-and-normal-densities">
-      <caption>Observed height density (blue) and normal approximation (black)</caption>
-      <image source="images/numerical-summaries-data-and-normal-densities.png" width="70%">
-        <description>A density plot showing male height distribution. The blue filled area represents the actual data density, while the black line shows a normal distribution curve fitted to the data. The two curves closely overlap, indicating that the normal distribution provides a good approximation.</description>
-      </image>
-    </figure>
+        <figure xml:id="fig-data-and-normal-densities">
+            <image source="images/numerical-summaries-data-and-normal-densities.png" width="70%">
+                <description>
+                    A density plot showing male height distribution.
+                    The blue filled area represents the actual data density,
+                    while the black line shows a normal distribution curve
+                    fitted to the data.
+                    The two curves closely overlap, indicating that the normal
+                    distribution provides a good approximation.
+                </description>
+            </image>
+        </figure>
 
-    <p>
-      The normal distribution appears to be a good approximation. To check this, we can see if the probabilities computed using <c>pnorm</c> closely match those estimated directly from the data.
-    </p>
+        <p>
+            The normal distribution appears to be a good approximation.
+            To check this, we can see if the probabilities computed using
+            <c>pnorm</c> closely match those estimated directly from the data.
+        </p>
 
-    <p>
-      For example, we can compare the proportion of observations falling within a given interval, say <m>(a, b]</m>, as predicted by the normal model to the actual proportion observed in the data. The proportion of values in the interval <m>[a, b]</m> can be computed with:
-    </p>
+        <p>
+            For example, we can compare the proportion of observations falling
+            within a given interval, say <m>(a, b]</m>, as predicted by the
+            normal model to the actual proportion observed in the data.
+            The proportion of values in the interval <m>[a, b]</m> can be
+            computed with:
+        </p>
 
-    <program language="r">
-      <input>
+        <program language="r">
+            <input>
 mean(x &gt; a &amp; x &lt;= b)
-      </input>
-    </program>
+            </input>
+        </program>
 
-    <p>
-      Here, the logical expression <c>x &gt;= a &amp; x &lt;= b</c> returns <c>TRUE</c> for all values of <c>x</c> in the interval and <c>FALSE</c> otherwise. Because the <c>mean</c> function automatically converts <c>TRUE</c> to 1 and <c>FALSE</c> to 0, the average of this logical vector is simply the proportion of observations that fall within the interval. We will use this convenient approach throughout the book.
-    </p>
+        <p>
+            Here, the logical expression <c>x &gt; a &amp; x &lt;= b</c> returns
+            <c>TRUE</c> for all values of <c>x</c> in the interval and
+            <c>FALSE</c> otherwise.
+            Because the <c>mean</c> function automatically converts <c>TRUE</c>
+            to 1 and <c>FALSE</c> to 0, the average of this logical vector is
+            simply the proportion of observations that fall within the interval.
+            We will use this convenient approach throughout the book.
+        </p>
 
-    <p>
-      The following examples illustrate how closely the observed proportions match the theoretical probabilities from the normal distribution.
-    </p>
+        <p>
+            The following examples illustrate how closely the observed
+            proportions match the theoretical probabilities from the normal
+            distribution.
+        </p>
 
-    <p>
-      The probability of being shorter than the average student:
-    </p>
+        <p>
+            The probability of being shorter than the average student:
+        </p>
 
-    <console>
-      <input>
+        <program language="r">
+            <input>
 pnorm(m, m, s)
 mean(x &lt;= m)
-      </input>
-      <output>
-[1] 0.5
-[1] 0.5147783
-      </output>
-    </console>
-
-    <p>
-      The probability of being within two standard deviations of the mean:
-    </p>
-
-    <console>
-      <input>
-pnorm(76.5, m, s) - pnorm(62.1, m, s)
-mean(x &gt; 62.1 &amp; x &lt;= 76.5)
-      </input>
-      <output>
-[1] 0.9538346
-[1] 0.9495074
-      </output>
-    </console>
-
-    <note>
-      <p>
-        When using the normal approximation with discrete data (for example, when heights are rounded to the nearest inch), note that <c>mean(x &lt; a)</c> and <c>mean(x &lt;= a)</c> may differ. In such cases, it's common to apply a <em>continuity correction</em>, using <c>pnorm(a + delta/2, m, s)</c> to approximate <c>mean(x &lt;= a)</c>, where <c>delta</c> is the bin width (in our example, 1 inch). In our dataset, however, some students reported more precise measurements, so the degree of discretization varies. As a result, the normal approximation should be applied with care.
-      </p>
-    </note>
-  </section>
-
-  <section xml:id="sec-standard-units">
-    <title>Standard units</title>
-    
-    <p>
-      For data that is approximately normally distributed, it is convenient to think in terms of <em>standard units</em>. The standard unit of a value tells us how many standard deviations away from the average it is. Specifically, for a value <m>x_i</m> from a list <m>(x_1, \dots, x_n)</m>, we define the value of <m>x_i</m> in standard units as <m>z_i = (x_i - \mu_x)/\sigma_x</m> with <m>\mu_x</m> and <m>\sigma_x</m> the average and standard deviation of the list, respectively.
-    </p>
-
-    <p>
-      Why is this convenient? First, revisit the formula for the normal distribution and observe that what is being exponentiated is <m>-z^2/2</m> with <m>z</m> equivalent to <m>x</m> in standard units. Because the maximum of <m>e^{-z^2/2}</m> is at <m>z = 0</m>, this explains why the maximum of the distribution occurs at the mean. It also explains the symmetry since <m>- z^2/2</m> is symmetric around 0. Second, note that by converting the normally distributed data to standard units, we can quickly ascertain whether, for example, a person is about average (<m>z = 0</m>), one of the tallest (<m>z \approx 2</m>), one of the shortest (<m>z \approx -2</m>), or an extremely rare occurrence (<m>z &gt; 3</m> or <m>z &lt; -3</m>). Remember that it does not matter what the original units are, these rules apply to any data that is approximately normal.
-    </p>
-
-    <p>
-      In R, we can transform to standard units using the function <c>scale</c>:
-    </p>
-
-    <program language="r">
-      <input>
-z &lt;- scale(x)
-      </input>
-    </program>
-
-    <p>
-      To see how many males are within 2 SDs from the average, we simply type:
-    </p>
-
-    <console>
-      <input>
-mean(abs(z) &lt; 2)
-      </input>
-      <output>
-[1] 0.9495074
-      </output>
-    </console>
-
-    <p>
-      The proportion is about 95%, which is what the normal distribution predicts!
-    </p>
-
-    <note>
-      <p>
-        In statistics, the letter <m>z</m> is commonly used to denote values expressed in standard units. When referring to random outcomes rather than specific observed values, we use an uppercase <m>Z</m>.
-      </p>
-
-      <p>
-        Throughout this book, we use <m>z</m> and <m>Z</m> in this way whenever we describe quantities that have been standardized. This notation helps connect examples across different chapters.
-      </p>
-    </note>
-  </section>
-
-  <section xml:id="sec-robust-summaries">
-    <title>Robust summaries</title>
-    
-    <p>
-      Note that the heights we explored in <xref ref="distributions"/> are not the original heights reported by students. A second challenge involves exploring the <em>original</em> reported heights, which are also included in the <term>dslabs</term> package in the <c>reported_heights</c> object. We will see that due to errors in reporting, using <em>robust summaries</em> are necessary to produce useful summaries.
-    </p>
-
-    <subsection xml:id="sec-outliers">
-      <title>Outliers</title>
-      
-      <p>
-        Outliers are very common in real-world data analysis. Data recording can be complex and it is common to observe data points generated in error. For example, an old monitoring device may read out nonsensical measurements before completely failing. Human error is also a source of outliers, in particular when data entry is done manually. For example, an individual may mistakenly enter their height in centimeters instead of inches or put the decimal in the wrong place.
-      </p>
-
-      <p>
-        How do we distinguish an outlier from measurements that were too big or too small simply due to expected variability? This is not always an easy question to answer, but we try to provide some guidance. Let's begin with a simple case.
-      </p>
-
-      <p>
-        Suppose a colleague is charged with collecting demography data for a group of males. The data report height in feet and are stored in the object:
-      </p>
-
-      <console>
-        <input>
-library(dslabs)
-str(outlier_example)
-        </input>
-        <output>
- num [1:500] 5.59 5.8 5.54 6.15 5.83 5.54 5.87 5.93 5.89 5.67 ...
-        </output>
-      </console>
-
-      <p>
-        Our colleague uses the fact that heights are usually well approximated by a normal distribution and summarizes the data with average and standard deviation:
-      </p>
-
-      <console>
-        <input>
-mean(outlier_example)
-        </input>
-        <output>
-[1] 6.10382
-        </output>
-      </console>
-
-      <p>
-        Our colleague writes a report on the interesting fact that this group of males is much taller than usual. The average height is over six feet tall! However, using your data analysis skills you notice something else that is unexpected: the standard deviation is over 7 feet.
-      </p>
-
-      <console>
-        <input>
-sd(outlier_example)
-        </input>
-        <output>
-[1] 7.796558
-        </output>
-      </console>
-
-      <p>
-        Adding and subtracting two standard deviations, you note that 95% of this population will have heights between approximately -8 and 21 feet, which does not make sense. A quick plot reveals the problem:
-      </p>
-
-      <program language="r">
-        <input>
-          tibble(height = outlier_example) |>
-            ggplot(aes(x = "", y = height)) +
-            geom_boxplot(outlier.color = "red")
-        </input>
-      </program>
-
-      <figure xml:id="fig-boxplot-reveals-outliers">
-        <caption>Boxplot revealing an outlier in height data</caption>
-        <image source="images/numerical-summaries-boxplot-reveals-outliers.png" width="50%">
-          <description>A boxplot showing height measurements in feet. The box and whiskers show most data clustered around 5-7 feet, but there is a single point far above, around 180 feet, clearly visible as an outlier.</description>
-        </image>
-      </figure>
-
-      <p>
-        There appears to be at least one value that is nonsensical, since we know that a height of 180 feet is impossible. The boxplot detects this point as an outlier.
-      </p>
-    </subsection>
-
-    <subsection xml:id="sec-median">
-      <title>The Median</title>
-      
-      <p>
-        Outliers can make the average arbitrarily large. With a given number of data points, increasing a single observation by <m>\Delta \times n</m> raises the average by <m>\Delta</m>. In contrast, the <em>median</em> is <em>robust</em> to outliers: no matter how extreme one value becomes, the median remains unchanged as long as it does not cross the middle of the data.
-      </p>
-
-      <p>
-        The median of our example data is:
-      </p>
-
-      <console>
-        <input>
-median(outlier_example)
-        </input>
-        <output>
-[1] 5.74
-        </output>
-      </console>
-
-      <p>
-        which corresponds to about 5 feet and 10 inches. The median is often a better measure of <em>typical</em> value when the data contain outliers.
-      </p>
-    </subsection>
-
-    <subsection xml:id="sec-mad">
-      <title>Median Absolute Deviation</title>
-      
-      <p>
-        Just as outliers can distort the average, they can also make the standard deviation misleadingly large. A more <em>robust</em> measure of spread is the <em>median absolute deviation (MAD)</em>.
-      </p>
-
-      <p>
-        To compute the MAD, we first find the median, then calculate the absolute deviation of each value from the median, and finally take the median of those deviations. To make it comparable to the standard deviation when data are normally distributed, we multiply this value by 1.4826. (The <c>mad</c> function in R applies this correction automatically.)
-      </p>
-
-      <p>
-        For our height data, the MAD is:
-      </p>
-
-      <console>
-        <input>
-mad(outlier_example)
-        </input>
-        <output>
-[1] 0.237216
-        </output>
-      </console>
-
-      <p>
-        which corresponds to about 4 inches.
-      </p>
-
-      <p>
-        The MAD provides a more stable estimate of variability when data include outliers. In such cases, it offers a truer sense of the dataset's <em>typical</em> spread.
-      </p>
-    </subsection>
-
-    <subsection xml:id="sec-iqr">
-      <title>The Interquartile Range (IQR)</title>
-      
-      <p>
-        When data contain outliers or do not follow a normal distribution, the <em>interquartile range (IQR)</em> provides another way to summarize spread that is more robust than the standard deviation. The IQR represents the range that contains the <em>middle 50%</em> of the data, spanning from the 25th percentile (first quartile) to the 75th percentile (third quartile), and always includes the median.
-      </p>
-
-      <p>
-        Like the median and MAD, the IQR is resistant to extreme values: no matter how large or small an outlier becomes, the IQR remains largely unaffected. For normally distributed data, dividing the IQR by 1.349 gives an estimate of the standard deviation we would expect if no outliers were present.
-      </p>
-
-      <p>
-        In our example, this approximation works well. The IQR-based estimate of the standard deviation is:
-      </p>
-
-      <console>
-        <input>
-IQR(outlier_example)/1.349
-        </input>
-        <output>
-[1] 0.2446256
-        </output>
-      </console>
-
-      <p>
-        which corresponds to about 3 inches.
-      </p>
-
-      <p>
-        In addition to summarizing spread, the IQR allows us to formally define what we mean by an <em>outlier</em>, a concept we will introduce in the next section.
-      </p>
-    </subsection>
-
-    <subsection xml:id="sec-outlier-definition">
-      <title>A Data-Driven Definition of Outliers</title>
-      
-      <p>
-        A precise, data-driven definition of an <em>outlier</em> was introduced by John Tukey, who also developed the boxplot, a visualization we will introduce in the next section. To construct a boxplot, we first need a formal way to identify which data points count as outliers.
-      </p>
-
-      <p>
-        Let the first and third quartiles be denoted as <m>Q_1 = Q(0.25)</m> and <m>Q_3 = Q(0.75)</m>, respectively. Tukey defined an observation as an <em>outlier</em> if it falls outside the following range:
-      </p>
-
-      <me>
-        [Q_1 - 1.5 \times \text{IQR}, \; Q_3 + 1.5 \times \text{IQR}], \quad \text{where } \text{IQR} = Q_3 - Q_1
-      </me>
-
-      <p>
-        When the data follow a <term>standard normal distribution</term>, this range is:
-      </p>
-
-      <console>
-        <input>
-q3 &lt;- qnorm(0.75); q1 &lt;- qnorm(0.25); iqr &lt;- q3 - q1
-c(q1 - 1.5*iqr, q3 + 1.5*iqr)
-        </input>
-        <output>
-[1] -2.697959  2.697959
-        </output>
-      </console>
-
-      <p>
-        Using <c>pnorm</c>, we can compute the proportion of data expected to fall within this range:
-      </p>
-
-      <console>
-        <input>
-r &lt;- c(q1 - 1.5*iqr, q3 + 1.5*iqr)
-round((pnorm(r[2]) - pnorm(r[1]))*100, 3)
-        </input>
-        <output>
-[1] 99.302
-        </output>
-      </console>
-
-      <p>
-        Thus, about 99.3% of the data lie inside this interval for a normal distribution. In other words, we expect roughly 7 out of every 1,000 observations from a perfectly normal dataset to fall outside this range, not because they are erroneous, but simply due to random variation.
-      </p>
-
-      <p>
-        To identify <em>far-out outliers</em> more strictly, Tukey proposed using a wider multiplier, such as 3 instead of 1.5, to define the outlier boundaries. For normally distributed data, using a multiplier of 3 means the range <c>c(q1 - 3*iqr, q3 + 3*iqr)</c> contains approximately 99.9998% of all values. This means only about 2 in a million observations would be flagged as outliers. Any function that flags outliers must choose a multiplier; in <term>ggplot2</term>'s <c>geom_boxplot()</c> function, this is controlled via the <c>coef</c> argument, which defaults to 1.5.
-      </p>
-
-      <p>
-        Let's apply Tukey's rule to our height data. The extreme 180-foot measurement is well beyond the upper bound of this range defined by <m>Q_3 + 3 \times \text{IQR}</m>:
-      </p>
-
-      <console>
-        <input>
-max_height &lt;- quantile(outlier_example, 0.75) + 3*IQR(outlier_example)
-max_height
-        </input>
-        <output>
- 75% 
-6.91 
-        </output>
-      </console>
-
-      <p>
-        If we remove this value, the remaining data follow an approximately normal distribution, as expected:
-      </p>
-
-      <program language="r">
-        <input>
-          tibble(height = outlier_example[outlier_example &lt;= max_height]) |>
-            ggplot(aes(sample = height)) +
-            stat_qq() +
-            stat_qq_line()
-        </input>
-      </program>
-
-      <figure xml:id="fig-outlier-qqnorm">
-        <caption>Normal Q-Q plot after removing the extreme outlier</caption>
-        <image source="images/numerical-summaries-outlier-qqnorm.png" width="70%">
-          <description>A normal Q-Q plot of the height data after removing the 180-foot outlier. The points closely follow the reference line, showing that the remaining values are approximately normally distributed.</description>
-        </image>
-      </figure>
-
-      <p>
-        This demonstrates the usefulness of Tukey's approach: it provides an objective, reproducible way to detect unusual observations—one that adapts to the spread of the data itself.
-      </p>
-    </subsection>
-  </section>
-
-  <section xml:id="sec-boxplots">
-    <title>Boxplots</title>
-    
-    <p>
-      To introduce boxplots, we will use a dataset of U.S. murders by state. Suppose we want to summarize the distribution of murder rates. A histogram quickly reveals that the data are right-skewed, indicating that the normal approximation does not apply:
-    </p>
-
-    <program language="r">
-      <input>
-        murders |>
-          mutate(rate = total / population * 100000) |>
-          ggplot(aes(rate)) +
-          geom_histogram(binwidth = 1, color = "black", fill = "grey70", boundary = 0)
-      </input>
-    </program>
-
-    <figure xml:id="fig-hist-qqplot-non-normal-data">
-      <caption>Histogram of U.S. murder rates</caption>
-      <image source="images/numerical-summaries-hist-qqplot-non-normal-data.png" width="70%">
-        <description>A histogram showing the distribution of murder rates per 100,000 people across U.S. states. The distribution is right-skewed, with most states having rates between 1 and 4, but a long tail extending to higher values around 10-17.</description>
-      </image>
-    </figure>
-
-    <p>
-      While a histogram provides valuable detail, people often prefer a more concise numerical summary, one that highlights the main features of the distribution without showing every data point.
-    </p>
-
-    <p>
-      The <em>boxplot</em> offers such a summary. It condenses a dataset into five numbers: the minimum, first quartile (<m>Q_1</m>), median (<m>Q_2</m>), third quartile (<m>Q_3</m>), and maximum. Outliers, values that fall outside Tukey's range, defined in the previous section, are not included in the computation of the range, but are instead plotted as individual points.
-    </p>
-
-    <p>
-      Here's the boxplot for the murder rate data:
-    </p>
-
-    <program language="r">
-      <input>
-        murders |>
-          mutate(rate = total / population * 100000) |>
-          ggplot(aes(x = "", y = rate)) +
-          geom_boxplot(outlier.color = "red")
-      </input>
-    </program>
-
-    <figure xml:id="fig-first-boxplot">
-      <caption>Boxplot of U.S. murder rates</caption>
-      <image source="images/numerical-summaries-first-boxplot.png" width="70%">
-        <description>A boxplot showing the five-number summary of murder rates. The box extends from Q1 to Q3, with a line at the median. Whiskers extend to the minimum and maximum non-outlier values. Several points beyond the upper whisker are shown as individual outlier points.</description>
-      </image>
-    </figure>
-
-    <p>
-      The box spans from <m>Q_1</m> to <m>Q_3</m>, with a horizontal line marking the median. The whiskers extend to the smallest and largest observations that are not outliers, while outliers are shown as separate points. The height of the box corresponds to the IQR, representing the middle 50% of the data.
-    </p>
-
-    <p>
-      Boxplots are especially useful when comparing distributions across groups, for example, comparing murder rates across regions or male and female height distributions. They provide a quick visual summary of differences in center, spread, and the presence of outliers. In the next chapter, we will use boxplots in exactly this way to compare distributions between groups.
-    </p>
-  </section>
-
-  <exercises xml:id="exercises-numerical-summaries">
-    <title>Exercises</title>
-    
-    <exercise>
-      <statement>
-        <p>
-          Load the height dataset and create a vector <c>x</c> with just the male heights:
-        </p>
-
-        <program language="r">
-          <input>
-library(dslabs)
-x &lt;- heights$height[heights$sex=="Male"]
-          </input>
+            </input>
         </program>
-
-        <p>
-          What proportion of the data is between 69 and 72 inches (taller than 69, but shorter or equal to 72)? Hint: use a logical operator and <c>mean</c>.
-        </p>
-      </statement>
-    </exercise>
-
-    <exercise>
-      <statement>
-        <p>
-          Suppose all you know about the data is the average and the standard deviation. Use the normal approximation to estimate the proportion you just calculated. Hint: start by computing the average and standard deviation. Then use the <c>pnorm</c> function to predict the proportions.
-        </p>
-      </statement>
-    </exercise>
-
-    <exercise>
-      <statement>
-        <p>
-          Notice that the approximation calculated in question 1 is very close to the exact calculation in question 2. Now perform the same task for more extreme values. Compare the exact calculation and the normal approximation for the interval (79,81]. How many times larger is the actual proportion than the approximation?
-        </p>
-      </statement>
-    </exercise>
-
-    <exercise>
-      <statement>
-        <p>
-          Approximate the distribution of adult men in the world as normally distributed with an average of 69 inches and a standard deviation of 3 inches. Using this approximation, estimate the proportion of adult men that are 7 feet tall or taller, referred to as <em>seven-footers</em>. Hint: use the <c>pnorm</c> function.
-        </p>
-      </statement>
-    </exercise>
-
-    <exercise>
-      <statement>
-        <p>
-          There are about 1 billion men between the ages of 18 and 40 in the world. Use your answer to the previous question to estimate how many of these men (18-40 year olds) are seven feet tall or taller in the world?
-        </p>
-      </statement>
-    </exercise>
-
-    <exercise>
-      <statement>
-        <p>
-          There are about 10 National Basketball Association (NBA) players that are 7 feet tall or higher. Using the answer to the previous two questions, what proportion of the world's 18-to-40-year-old <em>seven-footers</em> are in the NBA?
-        </p>
-      </statement>
-    </exercise>
-
-    <exercise>
-      <statement>
-        <p>
-          Repeat the calculations performed in the previous question for Lebron James' height: 6 feet 8 inches. There are about 150 players that are at least that tall.
-        </p>
-      </statement>
-    </exercise>
-
-    <exercise>
-      <statement>
-        <p>
-          In answering the previous questions, we found that it is not uncommon for a seven-footer to become an NBA player. What would be a fair critique of our calculations:
-        </p>
-
-        <p>
-          <ol marker="a.">
-            <li>Practice and talent are what make a great basketball player, not height.</li>
-            <li>The normal approximation is not appropriate for heights.</li>
-            <li>The normal approximation tends to underestimate the extreme values. It's possible that there are more seven-footers than we predicted.</li>
-            <li>The normal approximation tends to overestimate the extreme values. It's possible that there are fewer seven-footers than we predicted.</li>
-          </ol>
-        </p>
-      </statement>
-    </exercise>
-
-    <p>
-      We are going to use the <term>HistData</term> package. Load the <c>Galton</c> data and create a vector <c>x</c>, consisting solely of the child heights:
-    </p>
-
-    <program language="r">
-      <input>
-library(HistData)
-x &lt;- Galton$child
-      </input>
-    </program>
-
-    <exercise>
-      <statement>
-        <p>
-          Compute the average and SD of these data.
-        </p>
-      </statement>
-    </exercise>
-
-    <exercise>
-      <statement>
-        <p>
-          Compute the median and median absolute deviation of these data.
-        </p>
-      </statement>
-    </exercise>
-
-    <exercise>
-      <statement>
-        <p>
-          Now suppose Galton made a mistake when entering the first value and forgot to use the decimal point. You can imitate this error by typing:
-        </p>
-
-        <program language="r">
-          <input>
-x_with_error &lt;- x
-x_with_error[1] &lt;- x_with_error[1]*10
-          </input>
-        </program>
-
-        <p>
-          How many inches does the average grow after this mistake?
-        </p>
-      </statement>
-    </exercise>
-
-    <exercise>
-      <statement>
-        <p>
-          How many inches does the SD grow after this mistake?
-        </p>
-      </statement>
-    </exercise>
-
-    <exercise>
-      <statement>
-        <p>
-          How many inches does the median grow after this mistake?
-        </p>
-      </statement>
-    </exercise>
-
-    <exercise>
-      <statement>
-        <p>
-          How many inches does the MAD grow after this mistake?
-        </p>
-      </statement>
-    </exercise>
-
-    <exercise>
-      <statement>
-        <p>
-          How could you use exploratory data analysis to detect that an error was made?
-        </p>
-
-        <p>
-          <ol marker="a.">
-            <li>Since it is only one value out of many, we will not be able to detect this.</li>
-            <li>We would see an obvious shift in the distribution.</li>
-            <li>A boxplot, histogram, or qqplot would reveal a clear outlier.</li>
-            <li>A scatterplot would show high levels of measurement error.</li>
-          </ol>
-        </p>
-      </statement>
-    </exercise>
-
-    <exercise>
-      <statement>
-        <p>
-          How much can the average accidentally grow with mistakes like this? Write a function called <c>error_avg</c> that takes a value <c>k</c> and returns the average of the vector <c>x</c> after the first entry changed to <c>k</c>. Show the results for <c>k=10000</c> and <c>k=-10000</c>.
-        </p>
-      </statement>
-    </exercise>
-
-    <exercise>
-      <statement>
-        <p>
-          Using the <c>murders</c> dataset in the <term>dslabs</term> package. Compute the murder rate for each state. Make a boxplot comparing the murder rates for each region of the United States.
-        </p>
-      </statement>
-    </exercise>
-
-    <exercise>
-      <statement>
-        <p>
-          For the same dataset, compute the median and IQR murder rate for each region.
-        </p>
-      </statement>
-    </exercise>
-
-    <exercise>
-      <statement>
-        <p>
-          The heights we have been looking at in the <c>heights</c> data frame are not the original heights reported by students. The original reported heights are also included in the <term>dslabs</term> package in the object <c>reported_heights</c>. Note that the <c>height</c> column in this data frame is a character, and if we try to create a new column with the numeric version:
-        </p>
 
         <console>
-          <input>
+            <output>
+[1] 0.5
+[1] 0.515
+            </output>
+        </console>
+
+        <p>
+            The probability of being within two standard deviations of the mean:
+        </p>
+
+        <program language="r">
+            <input>
+pnorm(76.5, m, s) - pnorm(62.1, m, s)
+mean(x &gt; 62.1 &amp; x &lt;= 76.5)
+            </input>
+        </program>
+
+        <console>
+            <output>
+[1] 0.954
+[1] 0.95
+            </output>
+        </console>
+
+        <note>
+            <p>
+                When using the normal approximation with discrete data (for
+                example, when heights are rounded to the nearest inch), note
+                that <c>mean(x &lt; a)</c> and <c>mean(x &lt;= a)</c> may
+                differ.
+                In such cases, it's common to apply a
+                <em>continuity correction</em>, using
+                <c>pnorm(a + delta/2, m, s)</c> to approximate
+                <c>mean(x &lt;= a)</c>, where <c>delta</c> is the bin width (in
+                our example, 1 inch).
+                In our dataset, however, some students reported more precise
+                measurements, so the degree of discretization varies.
+                As a result, the normal approximation should be applied with
+                care.
+            </p>
+        </note>
+    </section>
+
+    <section xml:id="sec-standard-units">
+        <title>Standard units</title>
+
+        <p>
+            For data that is approximately normally distributed, it is
+            convenient to think in terms of <em>standard units</em>.
+            The standard unit of a value tells us how many standard deviations
+            away from the average it is.
+            Specifically, for a value <m>x_i</m> from a list
+            <m>(x_1, \dots, x_n)</m>, we define the value of <m>x_i</m> in
+            standard units as <m>z_i = (x_i - \mu_x)/\sigma_x</m> with
+            <m>\mu_x</m> and <m>\sigma_x</m> the average and standard deviation
+            of the list, respectively.
+        </p>
+
+        <p>
+            Why is this convenient?
+            First, revisit the formula for the normal distribution and observe
+            that what is being exponentiated is <m>-z^2/2</m> with <m>z</m>
+            equivalent to <m>x</m> in standard units.
+            Because the maximum of <m>e^{-z^2/2}</m> is at <m>z = 0</m>, this
+            explains why the maximum of the distribution occurs at the mean.
+            It also explains the symmetry since <m>- z^2/2</m> is symmetric
+            around 0.
+            Second, note that by converting the normally distributed data to
+            standard units, we can quickly ascertain whether, for example, a
+            person is about average ( <m>z = 0</m> ), one of the tallest (
+            <m>z \approx 2</m> ), one of the shortest ( <m>z \approx -2</m> ),
+            or an extremely rare occurrence ( <m>z &gt; 3</m> or
+            <m>z &lt; -3</m> ).
+            Remember that it does not matter what the original units are, these
+            rules apply to any data that is approximately normal.
+        </p>
+
+        <p>
+            In R, we can transform to standard units using the function
+            <c>scale</c>:
+        </p>
+
+        <program language="r">
+            <input>
+z &lt;- scale(x)
+            </input>
+        </program>
+
+        <p>
+            To see how many males are within 2 SDs from the average, we simply
+            type:
+        </p>
+
+        <program language="r">
+            <input>
+mean(abs(z) &lt; 2)
+            </input>
+        </program>
+
+        <console>
+            <output>
+[1] 0.95
+            </output>
+        </console>
+
+        <p>
+            The proportion is about 95%, which is what the normal distribution
+            predicts!
+        </p>
+
+        <note>
+            <p>
+                In statistics, the letter <m>z</m> is commonly used to denote
+                values expressed in standard units.
+                When referring to random outcomes rather than specific observed
+                values, we use an uppercase <m>Z</m>.
+            </p>
+
+            <p>
+                Throughout this book, we use <m>z</m> and <m>Z</m> in this way
+                whenever we describe quantities that have been standardized.
+                This notation helps connect examples across different chapters.
+            </p>
+        </note>
+    </section>
+
+    <section xml:id="sec-robust-summaries">
+        <title>Robust summaries</title>
+
+        <p>
+            Note that the heights we explored in <xref ref="distributions"/> are
+            not the original heights reported by students.
+            A second challenge involves exploring the <em>original</em> reported
+            heights, which are also included in the <term>dslabs</term> package
+            in the <c>reported_heights</c> object.
+            We will see that due to errors in reporting, using
+            <em>robust summaries</em> are necessary to produce useful summaries.
+        </p>
+
+        <subsection xml:id="sec-outliers">
+            <title>Outliers</title>
+
+            <p>
+                Outliers are very common in real-world data analysis.
+                Data recording can be complex and it is common to observe data
+                points generated in error.
+                For example, an old monitoring device may read out nonsensical
+                measurements before completely failing.
+                Human error is also a source of outliers, in particular when
+                data entry is done manually.
+                For example, an individual may mistakenly enter their height in
+                centimeters instead of inches or put the decimal in the wrong
+                place.
+            </p>
+
+            <p>
+                How do we distinguish an outlier from measurements that were too
+                big or too small simply due to expected variability?
+                This is not always an easy question to answer, but we try to
+                provide some guidance.
+                Let's begin with a simple case.
+            </p>
+
+            <p>
+                Suppose a colleague is charged with collecting demography data
+                for a group of males.
+                The data report height in feet and are stored in the object:
+            </p>
+
+            <program language="r">
+                <input>
+library(dslabs)
+str(outlier_example)
+                </input>
+            </program>
+
+            <console>
+                <output>
+ num [1:500] 5.59 5.8 5.54 6.15 5.83 5.54 5.87 5.93 5.89 5.67 ...
+                </output>
+            </console>
+
+            <p>
+                Our colleague uses the fact that heights are usually well
+                approximated by a normal distribution and summarizes the data
+                with average and standard deviation:
+            </p>
+
+            <program language="r">
+                <input>
+mean(outlier_example)
+                </input>
+            </program>
+
+            <console>
+                <output>
+[1] 6.10382
+                </output>
+            </console>
+
+            <p>
+                Our colleague writes a report on the interesting fact that this
+                group of males is much taller than usual.
+                The average height is over six feet tall!
+                However, using your data analysis skills you notice something
+                else that is unexpected: the standard deviation is over 7 feet.
+            </p>
+
+            <program language="r">
+                <input>
+sd(outlier_example)
+                </input>
+            </program>
+
+            <console>
+                <output>
+[1] 7.796558
+                </output>
+            </console>
+
+            <p>
+                Adding and subtracting two standard deviations, you note that
+                95% of this population will have heights between approximately
+                -9.5, 21.7 feet, which does not make sense.
+                A quick plot reveals the problem:
+            </p>
+
+            <program language="r">
+                <input>
+          tibble(height = outlier_example) |&gt;
+            ggplot(aes(x = "", y = height)) +
+            geom_boxplot(outlier.color = "red")
+                </input>
+            </program>
+
+            <figure xml:id="fig-boxplot-reveals-outliers">
+                <caption>Boxplot revealing an outlier in height data</caption>
+                <image source="images/numerical-summaries-boxplot-reveals-outliers.png" width="50%">
+                    <description>
+                        A boxplot showing height measurements in feet.
+                        The box and whiskers show most data clustered around 5-7
+                        feet, but there is a single point far above, around 180
+                        feet, clearly visible as an outlier.
+                    </description>
+                </image>
+            </figure>
+
+            <p>
+                There appears to be at least one value that is nonsensical,
+                since we know that a height of 180 feet is impossible.
+            </p>
+        </subsection>
+
+        <subsection xml:id="sec-median">
+            <title>The Median</title>
+
+            <p>
+                Outliers can make the average arbitrarily large.
+                With a given number of data points, increasing a single
+                observation by <m>\Delta \times n</m> raises the average by
+                <m>\Delta</m>.
+                In contrast, the <em>median</em> is <em>robust</em> to outliers:
+                no matter how extreme one value becomes, the median remains
+                unchanged as long as it does not cross the middle of the data.
+            </p>
+
+            <p>
+                The median of our example data is:
+            </p>
+
+            <program language="r">
+                <input>
+median(outlier_example)
+                </input>
+            </program>
+
+            <console>
+                <output>
+[1] 5.74
+                </output>
+            </console>
+
+            <p>
+                which corresponds to about 5 feet and 10 inches.
+                The median is often a better measure of <em>typical</em> value
+                when the data contain outliers.
+            </p>
+        </subsection>
+
+        <subsection xml:id="sec-mad">
+            <title>Median Absolute Deviation</title>
+
+            <p>
+                Just as outliers can distort the average, they can also make the
+                standard deviation misleadingly large.
+                A more <em>robust</em> measure of spread is the
+                <em>median absolute deviation (MAD)</em>.
+            </p>
+
+            <p>
+                To compute the MAD, we first find the median, then calculate the
+                absolute deviation of each value from the median, and finally
+                take the median of those deviations.
+                To make it comparable to the standard deviation when data are
+                normally distributed, we multiply this value by 1.4826.
+                (The <c>mad</c> function in R applies this correction
+                automatically.)
+            </p>
+
+            <p>
+                For our height data, the MAD is:
+            </p>
+
+            <program language="r">
+                <input>
+mad(outlier_example)
+                </input>
+            </program>
+
+            <console>
+                <output>
+[1] 0.237216
+                </output>
+            </console>
+
+            <p>
+                which corresponds to about 4 inches.
+            </p>
+
+            <p>
+                The MAD provides a more stable estimate of variability when data
+                include outliers.
+                In such cases, it offers a truer sense of the dataset's
+                <em>typical</em> spread.
+            </p>
+        </subsection>
+
+        <subsection xml:id="sec-iqr">
+            <title>The Interquartile Range (IQR)</title>
+
+            <p>
+                When data contain outliers or do not follow a normal
+                distribution, the <em>interquartile range (IQR)</em> provides
+                another way to summarize spread that is more robust than the
+                standard deviation.
+                The IQR represents the range that contains the
+                <em>middle 50%</em> of the data, spanning from the 25th
+                percentile (first quartile) to the 75th percentile (third
+                quartile), and always includes the median.
+            </p>
+
+            <p>
+                Like the median and MAD, the IQR is resistant to extreme values:
+                no matter how large or small an outlier becomes, the IQR remains
+                largely unaffected.
+                For normally distributed data, dividing the IQR by 1.349 gives
+                an estimate of the standard deviation we would expect if no
+                outliers were present.
+            </p>
+
+            <p>
+                In our example, this approximation works well.
+                The IQR-based estimate of the standard deviation is:
+            </p>
+
+            <program language="r">
+                <input>
+IQR(outlier_example)/1.349
+                </input>
+            </program>
+
+            <console>
+                <output>
+[1] 0.2446256
+                </output>
+            </console>
+
+            <p>
+                which corresponds to about 3 inches.
+            </p>
+
+            <p>
+                In addition to summarizing spread, the IQR allows us to formally
+                define what we mean by an <em>outlier</em>, a concept we will
+                introduce in the next section.
+            </p>
+        </subsection>
+
+        <subsection xml:id="sec-outlier-definition">
+            <title>A Data-Driven Definition of Outliers</title>
+
+            <p>
+                A precise, data-driven definition of an <em>outlier</em> was
+                introduced by John Tukey, who also developed the boxplot, a
+                visualization we will introduce in the next section.
+                To construct a boxplot, we first need a formal way to identify
+                which data points count as outliers.
+            </p>
+
+            <p>
+                Let the first and third quartiles be denoted as
+                <m>Q_1 = Q(0.25)</m> and <m>Q_3 = Q(0.75)</m>, respectively.
+                Tukey defined an observation as an <em>outlier</em> if it falls
+                outside the following range:
+            </p>
+            <me>
+                [Q_1 - 1.5 \times \text{IQR}, \; Q_3 + 1.5 \times \text{IQR}], \quad \text{where } \text{IQR} = Q_3 - Q_1
+            </me>
+
+            <p>
+                When the data follow a
+                <term>standard normal distribution</term>, this range is:
+            </p>
+
+            <program language="r">
+                <input>
+q3 &lt;- qnorm(0.75); q1 &lt;- qnorm(0.25); iqr &lt;- q3 - q1
+c(q1 - 1.5*iqr, q3 + 1.5*iqr)
+                </input>
+            </program>
+
+            <console>
+                <output>
+[1] -2.697959  2.697959
+                </output>
+            </console>
+
+            <p>
+                Using <c>pnorm</c>, we can compute the proportion of data
+                expected to fall within this range:
+            </p>
+
+            <program language="r">
+                <input>
+r &lt;- c(q1 - 1.5*iqr, q3 + 1.5*iqr)
+round((pnorm(r[2]) - pnorm(r[1]))*100, 3)
+                </input>
+            </program>
+
+            <console>
+                <output>
+[1] 99.302
+                </output>
+            </console>
+
+            <p>
+                Thus, about 99.3% of the data lie inside this interval for a
+                normal distribution.
+                In other words, we expect roughly 7 out of every 1,000
+                observations from a perfectly normal dataset to fall outside
+                this range, not because they are erroneous, but simply due to
+                random variation.
+            </p>
+
+            <p>
+                To identify <em>far-out outliers</em> more strictly, Tukey
+                proposed using a wider multiplier, such as 3 instead of 1.5, to
+                define the outlier boundaries.
+                For normally distributed data, using a multiplier of 3 means the
+                range <c>c(q1 - 3*iqr, q3 + 3*iqr)</c> contains approximately
+                99.9998% of all values.
+                This means only about 2 in a million observations would be
+                flagged as outliers.
+                Any function that flags outliers must choose a multiplier; in
+                <term>ggplot2</term> 's <c>geom_boxplot()</c> function, this is
+                controlled via the <c>coef</c> argument, which defaults to 1.5.
+            </p>
+
+            <p>
+                Let's apply Tukey's rule to our height data.
+                The extreme 180-foot measurement is well beyond the upper bound
+                of this range defined by <m>Q_3 + 3 \times \text{IQR}</m>:
+            </p>
+
+            <program language="r">
+                <input>
+max_height &lt;- quantile(outlier_example, 0.75) + 3*IQR(outlier_example)
+max_height
+                </input>
+            </program>
+
+            <console>
+                <output>
+ 75% 
+6.91 
+                </output>
+            </console>
+
+            <p>
+                If we remove this value, the remaining data follow an
+                approximately normal distribution, as expected:
+            </p>
+
+            <program language="r">
+                <input>
+x &lt;- outlier_example[outlier_example &lt; max_height]
+hist(x, breaks = seq(5, 7, 2/12))
+                </input>
+            </program>
+
+            <figure xml:id="fig-outlier-qqnorm">
+                <caption>
+                    Normal Q-Q plot after removing the extreme outlier
+                </caption>
+
+                <image source="images/numerical-summaries-outlier-qqnorm.png" width="70%">
+                    <description>
+                        A normal Q-Q plot of the height data after removing the
+                        180-foot outlier.
+                        The points closely follow the reference line, showing
+                        that the remaining values are approximately normally
+                        distributed.
+                    </description>
+                </image>
+            </figure>
+
+            <p>
+                This demonstrates the usefulness of Tukey's approach: it
+                provides an objective, reproducible way to detect unusual
+                observations—one that adapts to the spread of the data itself.
+            </p>
+        </subsection>
+    </section>
+
+    <section xml:id="sec-boxplots">
+        <title>Boxplots</title>
+
+        <p>
+            To introduce boxplots, we will use a dataset of U.S.
+            murders by state.
+            Suppose we want to summarize the distribution of murder rates.
+            A histogram quickly reveals that the data are right-skewed,
+            indicating that the normal approximation does not apply:
+        </p>
+
+        <figure xml:id="fig-hist-qqplot-non-normal-data">
+            <caption>Histogram of U.S. murder rates</caption>
+            <image source="images/numerical-summaries-hist-qqplot-non-normal-data.png" width="70%">
+                <description>
+                    A histogram showing the distribution of murder rates per
+                    100,000 people across U.S.
+                    states.
+                    The distribution is right-skewed, with most states having
+                    rates between 1 and 4, but a long tail extending to higher
+                    values around 10-17.
+                </description>
+            </image>
+        </figure>
+
+        <p>
+            While a histogram provides valuable detail, people often prefer a
+            more concise numerical summary, one that highlights the main
+            features of the distribution without showing every data point.
+        </p>
+
+        <p>
+            The <em>boxplot</em> offers such a summary.
+            It condenses a dataset into five numbers: the minimum, first
+            quartile ( <m>Q_1</m> ), median ( <m>Q_2</m> ), third quartile (
+            <m>Q_3</m> ), and maximum.
+            Outliers, values that fall outside Tukey's range, defined in the
+            previous section, are not included in the computation of the range,
+            but are instead plotted as individual points.
+        </p>
+
+        <p>
+            Here's the boxplot for the murder rate data:
+        </p>
+
+        <figure xml:id="fig-first-boxplot">
+            <caption>Boxplot of U.S. murder rates</caption>
+            <image source="images/numerical-summaries-first-boxplot.png" width="70%">
+                <description>
+                    A boxplot showing the five-number summary of murder rates.
+                    The box extends from Q1 to Q3, with a line at the median.
+                    Whiskers extend to the minimum and maximum non-outlier
+                    values.
+                    Several points beyond the upper whisker are shown as
+                    individual outlier points.
+                </description>
+            </image>
+        </figure>
+
+        <p>
+            The box spans from <m>Q_1</m> to <m>Q_3</m>, with a horizontal line
+            marking the median.
+            The whiskers extend to the smallest and largest observations that
+            are not outliers, while outliers are shown as separate points.
+            The height of the box corresponds to the IQR, representing the
+            middle 50% of the data.
+        </p>
+
+        <p>
+            Boxplots are especially useful when comparing distributions across
+            groups, for example, comparing murder rates across regions or height
+            distributions between males and females.
+            They provide a quick visual summary of differences in center,
+            spread, and the presence of outliers.
+            In the next chapter, we will use boxplots in exactly this way to
+            compare distributions between groups.
+        </p>
+    </section>
+    <exercises xml:id="exercises-numerical-summaries">
+        <title>Exercises</title>
+
+        <exercise>
+            <statement>
+                <p>
+                    Load the height dataset and create a vector <c>x</c> with
+                    just the male heights:
+                </p>
+
+                <program language="r">
+                    <input>
+library(dslabs)
+x &lt;- heights$height[heights$sex=="Male"]
+                    </input>
+                </program>
+
+                <p>
+                    What proportion of the data is between 69 and 72 inches
+                    (taller than 69, but shorter or equal to 72)?
+                    Hint: use a logical operator and <c>mean</c>.
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise>
+            <statement>
+                <p>
+                    Suppose all you know about the data is the average and the
+                    standard deviation.
+                    Use the normal approximation to estimate the proportion you
+                    just calculated.
+                    Hint: start by computing the average and standard deviation.
+                    Then use the <c>pnorm</c> function to predict the
+                    proportions.
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise>
+            <statement>
+                <p>
+                    Notice that the approximation calculated in question 1 is
+                    very close to the exact calculation in question 2.
+                    Now perform the same task for more extreme values.
+                    Compare the exact calculation and the normal approximation
+                    for the interval (79,81].
+                    How many times larger is the actual proportion than the
+                    approximation?
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise>
+            <statement>
+                <p>
+                    Approximate the distribution of adult men in the world as
+                    normally distributed with an average of 69 inches and a
+                    standard deviation of 3 inches.
+                    Using this approximation, estimate the proportion of adult
+                    men that are 7 feet tall or taller, referred to as
+                    <em>seven-footers</em>.
+                    Hint: use the <c>pnorm</c> function.
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise>
+            <statement>
+                <p>
+                    There are about 1 billion men between the ages of 18 and 40
+                    in the world.
+                    Use your answer to the previous question to estimate how
+                    many of these men (18-40 year olds) are seven feet tall or
+                    taller in the world?
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise>
+            <statement>
+                <p>
+                    There are about 10 National Basketball Association (NBA)
+                    players that are 7 feet tall or higher.
+                    Using the answer to the previous two questions, what
+                    proportion of the world's 18-to-40-year-old
+                    <em>seven-footers</em> are in the NBA?
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise>
+            <statement>
+                <p>
+                    Repeat the calculations performed in the previous question
+                    for Lebron James' height: 6 feet 8 inches.
+                    There are about 150 players that are at least that tall.
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise>
+            <statement>
+                <p>
+                    In answering the previous questions, we found that it is not
+                    uncommon for a seven-footer to become an NBA player.
+                    What would be a fair critique of our calculations:
+                </p>
+
+                <p>
+                    <ol marker="a.">
+                        <li>
+                            Practice and talent are what make a great basketball
+                            player, not height.
+                        </li>
+
+                        <li>
+                            The normal approximation is not appropriate for
+                            heights.
+                        </li>
+
+                        <li>
+                            The normal approximation tends to underestimate the
+                            extreme values.
+                            It's possible that there are more seven-footers than
+                            we predicted.
+                        </li>
+
+                        <li>
+                            The normal approximation tends to overestimate the
+                            extreme values.
+                            It's possible that there are fewer seven-footers
+                            than we predicted.
+                        </li>
+                    </ol>
+                </p>
+            </statement>
+        </exercise>
+
+        <p>
+            We are going to use the <term>HistData</term> package.
+            Load the <c>Galton</c> data and create a vector <c>x</c>, consisting
+            solely of the child heights:
+        </p>
+
+        <program language="r">
+            <input>
+library(HistData)
+x &lt;- Galton$child
+            </input>
+        </program>
+
+        <exercise>
+            <statement>
+                <p>
+                    Compute the average and SD of these data.
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise>
+            <statement>
+                <p>
+                    Compute the median and median absolute deviation of these
+                    data.
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise>
+            <statement>
+                <p>
+                    Now suppose Galton made a mistake when entering the first
+                    value and forgot to use the decimal point.
+                    You can imitate this error by typing:
+                </p>
+
+                <program language="r">
+                    <input>
+x_with_error &lt;- x
+x_with_error[1] &lt;- x_with_error[1]*10
+                    </input>
+                </program>
+
+                <p>
+                    How many inches does the average grow after this mistake?
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise>
+            <statement>
+                <p>
+                    How many inches does the SD grow after this mistake?
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise>
+            <statement>
+                <p>
+                    How many inches does the median grow after this mistake?
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise>
+            <statement>
+                <p>
+                    How many inches does the MAD grow after this mistake?
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise>
+            <statement>
+                <p>
+                    How could you use exploratory data analysis to detect that
+                    an error was made?
+                </p>
+
+                <p>
+                    <ol marker="a.">
+                        <li>
+                            Since it is only one value out of many, we will not
+                            be able to detect this.
+                        </li>
+
+                        <li>
+                            We would see an obvious shift in the distribution.
+                        </li>
+
+                        <li>
+                            A boxplot, histogram, or qqplot would reveal a clear
+                            outlier.
+                        </li>
+
+                        <li>
+                            A scatterplot would show high levels of measurement
+                            error.
+                        </li>
+                    </ol>
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise>
+            <statement>
+                <p>
+                    How much can the average accidentally grow with mistakes
+                    like this?
+                    Write a function called <c>error_avg</c> that takes a value
+                    <c>k</c> and returns the average of the vector <c>x</c>
+                    after the first entry changed to <c>k</c>.
+                    Show the results for <c>k=10000</c> and <c>k=-10000</c>.
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise>
+            <statement>
+                <p>
+                    Using the <c>murders</c> dataset in the <term>dslabs</term>
+                    package.
+                    Compute the murder rate for each state.
+                    Make a boxplot comparing the murder rates for each region of
+                    the United States.
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise>
+            <statement>
+                <p>
+                    For the same dataset, compute the median and IQR murder rate
+                    for each region.
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise>
+            <statement>
+                <p>
+                    The heights we have been looking at in the <c>heights</c>
+                    data frame are not the original heights reported by
+                    students.
+                    The original reported heights are also included in the
+                    <term>dslabs</term> package in the object
+                    <c>reported_heights</c>.
+                    Note that the <c>height</c> column in this data frame is a
+                    character, and if we try to create a new column with the
+                    numeric version, we get warnings about NAs.
+                </p>
+
+                <program language="r">
+                    <input>
 library(tidyverse)  
 reported_heights &lt;- reported_heights |&gt;
   mutate(original_heights = height, height = as.numeric(height))
-          </input>
-          <output>
+                    </input>
+                </program>
+
+                <console>
+                    <output>
 Warning message:
 There was 1 warning in `mutate()`.
 ℹ In argument: `height = as.numeric(height)`.
 Caused by warning:
 ! NAs introduced by coercion
-          </output>
-        </console>
+                    </output>
+                </console>
 
-        <p>
-          we get a warnings about NAs. Examine the rows that result in NAs and describe why this is happening.
-        </p>
-      </statement>
-    </exercise>
+                <p>
+                    we get a warnings about NAs.
+                    Examine the rows that result in NAs and describe why this is
+                    happening.
+                </p>
+            </statement>
+        </exercise>
 
-    <exercise>
-      <statement>
-        <p>
-          Add a column to the <c>reported_heights</c> with the year the height was entered. You can use the <c>year</c> function in the <term>lubridate</term> package to extract the year from <c>reported_heights$time_stamp</c>. Change the <c>height</c> column from characters to numbers using <c>as.numeric</c>. Some of the heights will be converted to <c>NA</c> because they were incorrectly entered and include characters, for example <c>165cm</c>. These heights were supposed to be reported in inches, but many clearly did not. Convert any entry with highly unlikely heights, below 54 or above 72, to <c>NA</c> using the <c>na_if</c> function from <term>dplyr</term>. Once you do this, stratify by sex and year and report the percentage of incorrectly entered heights, represented by the <c>NA</c>.
-        </p>
-      </statement>
-    </exercise>
+        <exercise>
+            <statement>
+                <p>
+                    Add a column to the <c>reported_heights</c> with the year
+                    the height was entered.
+                    You can use the <c>year</c> function in the
+                    <term>lubridate</term> package to extract the year from
+                    <c>reported_heights$time_stamp</c>.
+                    Change the <c>height</c> column from characters to numbers
+                    using <c>as.numeric</c>.
+                    Some of the heights will be converted to <c>NA</c> because
+                    they were incorrectly entered and include characters, for
+                    example <c>165cm</c>.
+                    These heights were supposed to be reported in inches, but
+                    many clearly did not.
+                    Convert any entry with highly unlikely heights, below 54 or
+                    above 72, to <c>NA</c> using the <c>na_if</c> function from
+                    <term>dplyr</term>.
+                    Once you do this, stratify by sex and year and report the
+                    percentage of incorrectly entered heights, represented by
+                    the <c>NA</c>.
+                </p>
+            </statement>
+        </exercise>
 
-    <exercise>
-      <statement>
-        <p>
-          Remove the entries that result in NAs when attempting to convert heights to numbers. Compute the mean, standard deviation, median, and MAD by sex. What do you notice?
-        </p>
-      </statement>
-    </exercise>
+        <exercise>
+            <statement>
+                <p>
+                    Remove the entries that result in NAs when attempting to
+                    convert heights to numbers.
+                    Compute the mean, standard deviation, median, and MAD by
+                    sex.
+                    What do you notice?
+                </p>
+            </statement>
+        </exercise>
 
-    <exercise>
-      <statement>
-        <p>
-          Generate boxplots summarizing the heights for males and females and describe what you see.
-        </p>
-      </statement>
-    </exercise>
+        <exercise>
+            <statement>
+                <p>
+                    Generate boxplots summarizing the heights for males and
+                    females and describe what you see.
+                </p>
+            </statement>
+        </exercise>
 
-    <exercise>
-      <statement>
-        <p>
-          Look at the largest 10 heights and provide a hypothesis for what you think is happening.
-        </p>
-      </statement>
-    </exercise>
+        <exercise>
+            <statement>
+                <p>
+                    Look at the largest 10 heights and provide a hypothesis for
+                    what you think is happening.
+                </p>
+            </statement>
+        </exercise>
 
-    <exercise>
-      <statement>
-        <p>
-          Review all the nonsensical answers by looking at the data considered to be <em>far out</em> by Tukey and comment on the type of errors you see.
-        </p>
-      </statement>
-    </exercise>
-  </exercises>
-
+        <exercise>
+            <statement>
+                <p>
+                    Review all the nonsensical answers by looking at the data
+                    considered to be <em>far out</em> by Tukey and comment on
+                    the type of errors you see.
+                </p>
+            </statement>
+        </exercise>
+    </exercises>
 </chapter>
