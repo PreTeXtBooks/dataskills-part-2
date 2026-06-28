@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-
-<!--
-    Introduction to Data Science
-    Statistics and Prediction Algorithms Through Case Studies
--->
 <pretext xmlns:xi="http://www.w3.org/2001/XInclude" xml:lang="en-US">
     <docinfo>
         <macros>
@@ -75,69 +70,27 @@
 
             <introduction>
                 <p>
-                    The first part of the book focused on describing data we
-                    have already collected.
-                    But in most data analysis projects, what we observe is only
-                    one possible outcome among many.
-                    If we were to collect the same data again, another survey,
-                    another experiment, we would not obtain exactly the same
-                    results.
-                    This variation is not to be ignored as it reflects the
-                    fundamental uncertainty that accompanies all real data.
+                    The first part of the book focused on describing the data we have already collected. But in most data analysis projects, what we observe is only one possible outcome among many. If we were to collect the same data again through another survey or experiment, we would not obtain exactly the same results. This variation is not to be ignored, as it reflects the fundamental uncertainty that accompanies all real data.
                 </p>
 
                 <p>
-                    Probability is the mathematical language we use to describe
-                    that uncertainty.
-                    It provides the foundation for reasoning about variation,
-                    quantifying how likely different outcomes are, and
-                    ultimately, for drawing conclusions from data.
-                    Every inferential method we will learn, from confidence
-                    intervals to regression and machine learning, rests on these
-                    ideas.
+                    Probability is the mathematical language we use to describe that uncertainty. It provides the foundation for reasoning about variation, quantifying how likely different outcomes are, and ultimately, for drawing conclusions from data. Every inferential method we will learn, from confidence intervals to regression and machine learning, rests on these ideas.
                 </p>
 
                 <p>
-                    The study of probability began with games of chance, where
-                    uncertainty is both concrete and controlled: tossing coins,
-                    drawing cards, or betting on outcomes.
-                    Mathematicians such as Cardano, Fermat, and Pascal developed
-                    the first formal methods for computing odds in these
-                    settings, laying the groundwork for what would become modern
-                    probability theory.
+The study of probability began with <em>games of chance</em>, where uncertainty is both concrete and controlled: tossing coins, drawing cards, or betting on outcomes. Mathematicians such as Cardano, Fermat, and Pascal developed the first formal methods for computing odds in these settings, laying the groundwork for what would become modern probability theory.
                 </p>
 
                 <p>
-                    In this part of the book, we use these games of chance as a
-                    pedagogical tool.
-                    They provide clear, well-defined examples that make abstract
-                    ideas intuitive.
-                    By working with them, we can focus on the logic of
-                    probability without the complications of real-world data
-                    collection In later parts of the book, we return to data
-                    analysis and show how these same principles apply to
-                    real-world uncertainty, polls, experiments, and prediction
-                    problems.
+                    In this part of the book, we use these games of chance as a pedagogical tool. They provide clear, well-defined examples that make abstract ideas intuitive. By working with them, we can focus on the logic of probability without the complications of real-world data collection. In later parts of the book, we return to data analysis and show how these same principles apply to real-world uncertainty, polls, experiments, and prediction problems.
                 </p>
 
                 <p>
-                    We will introduce the essential concepts of probability
-                    through simple, concrete examples: defining events,
-                    computing probabilities, and describing random variables and
-                    their distributions.
-                    Our emphasis is on intuition and computation rather than
-                    mathematical derivation.
+We will introduce the essential concepts of probability through simple, concrete examples: defining events, computing probabilities, and describing random variables and their distributions. Our emphasis is on intuition and computation rather than mathematical derivation.
                 </p>
 
                 <p>
-                    Throughout this part of the book, we also connect
-                    probability theory to computer simulations.
-                    Using R code and Monte Carlo methods, we will learn how to
-                    estimate probabilities, explore random behavior, and develop
-                    intuition for uncertainty through simulation.
-                    This practical, code-based approach will prepare you to see
-                    how probability connects directly to real data in the
-                    chapters that follow.
+Throughout this part of the book, we also connect probability theory to computer simulations. Using R code and Monte Carlo methods, we will learn how to estimate probabilities, explore random behavior, and develop intuition for uncertainty through simulation. This practical, code-based approach will prepare you to see how probability connects directly to real data in the chapters that follow.
                 </p>
             </introduction>
 
@@ -154,22 +107,11 @@
 
             <introduction>
                 <p>
-                    Statistical Inference is the branch of statistics dedicated
-                    to distinguishing patterns arising from signal versus those
-                    arising from chance.
-                    It is a broad topic and, in this section, we review the
-                    basics using polls as a motivating example.
-                    To illustrate the concepts, we supplement mathematical
-                    formulas with Monte Carlo simulations and R code.
-                    We demonstrate the practical value of these concepts by
-                    using election forecasting as a case study.
-                    Readers already familiar with statistical inference theory
-                    and interested in the case study can focus on
-                    <xref ref="sec-election-forecasting"/>.
+                    Statistical Inference is the branch of statistics dedicated to distinguishing patterns arising from signal versus those arising from chance. It is a broad topic and, in this section, we review the basics using polls as a motivating example. To illustrate the concepts, we supplement mathematical formulas with Monte Carlo simulations and R code. We demonstrate the practical value of these concepts by using election forecasting as a case study. Readers already familiar with statistical inference theory and interested in the case study you can focus on <xref ref="sec-election-forecasting">Hierarchical Models</xref>.
                 </p>
 
                 <p>
-                    The day before the 2008 presidential election, Nate Silver’s
+                    The day before the 2008 presidential election, Nate Silver's
                     FiveThirtyEight stated that “Barack Obama appears poised for
                     a decisive electoral victory”.
                     They went further and predicted that Obama would win the
@@ -185,17 +127,17 @@
                     FiveThirtyEight to the attention of political pundits and TV
                     personalities.
                     Four years later, the week before the 2012 presidential
-                    election, FiveThirtyEight’s Nate Silver was giving Obama a
+                    election, FiveThirtyEight's Nate Silver was giving Obama a
                     90% chance of winning despite many of the experts thinking
                     the final results would be closer.
                     Political commentator Joe Scarborough said during his
-                    show1:.
+                    show<fn><url href = "https://www.youtube.com/watch?v=TbKkjm-gheY">https://www.youtube.com/watch?v=TbKkjm-gheY</url></fn>.
                 </p>
 
                 <p>
                     "Anybody that thinks that this race is anything but a
                     toss-up right now is such an ideologue ...
-                    they’re jokes.".
+                    they're jokes.".
                 </p>
 
                 <p>
@@ -203,7 +145,7 @@
                 </p>
 
                 <p>
-                    "If you think it’s a toss-up, let’s bet.
+                    "If you think it's a toss-up, let's bet.
                     If Obama wins, you donate $1,000 to the American Red Cross.
                     If Romney wins, I do.
                     Deal?"
@@ -214,54 +156,19 @@
                 </p>
 
                 <p>
-                    In 2016, Silver was not as certain and gave Hillary Clinton
-                    only a 71% of winning.
-                    In contrast, many other forecasters were almost certain she
-                    would win.
-                    She lost.
-                    But 71% is still more than 50%, so was Mr.
-                    Silver wrong?
-                    And what does probability mean in this context anyway?
+                    In 2016, Silver was not as certain and gave Hillary Clinton only a 71% chance of winning. In contrast, many other forecasters were almost certain she would win. She lost. But 71% is still more than 50%, so was Mr. Silver wrong? And what does probability mean in this context anyway?
                 </p>
 
                 <p>
-                    In this part of the book, we show how the probability
-                    concepts from the previous part can be applied to develop
-                    statistical methods that make polls effective tools for
-                    understanding public opinion.
-                    Although in the United States the popular vote does not
-                    determine the presidential outcome, we use it as a simple
-                    and illustrative example to introduce the core ideas of
-                    statistical inference.
+                  In this part of the book, we show how the probability concepts from the previous part can be applied to develop statistical methods that make polls effective tools for understanding public opinion. Although in the United States the popular vote does not determine the presidential outcome, we use it as a simple and illustrative example to introduce the core ideas of statistical inference.
                 </p>
 
                 <p>
-                    We begin by learning how to define estimates and margins of
-                    error for the popular vote and how these lead naturally to
-                    <xref ref="sec-parameters-and-estimates"/>.
-                    We then extend this framework by aggregating data from
-                    multiple pollsters to examine the limitations of traditional
-                    models and explore improvements.
-                    To interpret probabilistic statements about the likelihood
-                    of a candidate winning, we introduce
-                    <xref ref="sec-bayesian-statistics"/>, and finally, we
-                    combine these ideas through
-                    <xref ref="sec-election-forecasting"/> to build a simplified
-                    version of the FiveThirtyEight election model and apply it
-                    to the 2016 election.
+                  We begin by learning how to define estimates and margins of error for the popular vote and how these lead naturally to confidence intervals. We then extend this framework by aggregating data from multiple pollsters to examine the limitations of traditional models and explore improvements. To interpret probabilistic statements about the likelihood of a candidate winning, we introduce Bayesian modeling, and finally, we combine these ideas through hierarchical models to build a simplified version of the FiveThirtyEight election model and apply it to the 2016 election.
                 </p>
 
                 <p>
-                    We conclude with two widely taught topics that, while not
-                    required for the case study, are central to statistical
-                    practice: statistical power and p-values.
-                    The part ends with a brief introduction to
-                    <xref ref="sec-bootstrap"/>, an inferential method we will
-                    revisit in the machine learning part.
-                </p>
-
-                <p>
-                    https://www.youtube.com/watch?v=TbKkjm-gheY.
+                  We conclude with two widely taught topics that, while not required for the case study, are central to statistical practice: statistical power and p-values. This part of the book ends with a brief introduction to the bootstrap, an inferential method we will revisit in the machine learning part.
                 </p>
             </introduction>
 
@@ -279,7 +186,7 @@
 
             <introduction>
                 <p>
-                    Up to this point, the book has focused mainly on datasets
+                    Up to this point, this book has focused mainly on datasets
                     with a single variable.
                     In real data analysis, however, we are often interested in
                     the relationship between two or more variables.
@@ -289,16 +196,18 @@
                     multivariable regression, treatment effect models,
                     association tests, and generalized linear models.
                     We will use several case studies to illustrate these ideas.
-                    We will examine whether height is hereditary (
-                    <xref ref="sec-regression"/> ), whether a high-fat diet
-                    makes mice heavier (
-                    <xref ref="sec-treatment-effect-models"/> ), whether there
-                    is gender bias in research funding in the Netherlands (
-                    <xref ref="sec-association-tests"/> ), and how to build a
+                    We will examine whether height is hereditary
+                    (<xref ref="sec-regression">Introduction to Regression</xref>),
+                    whether a high-fat diet makes mice heavier
+                    (<xref ref="sec-treatment-effect-models">Treatment Effect
+                    Models</xref>), whether there is gender bias in research
+                    funding in the Netherlands (
+                    <xref ref="sec-association-tests">Association Tests</xref>),
+                    and how to build a
                     baseball team on a budget (
-                    <xref ref="sec-multivariable-regression"/> ).
+                    <xref ref="sec-multivariable-regression">Multivariable Regression</xref>).
                     We also include a chapter on the important concept that
-                    association is not causation, with a detailed discussion and
+                    association is not causation (<xref ref = "sec-association-not-causation">Association Is Not Causation</xref>), with a detailed discussion and
                     examples of the challenges that arise when interpreting
                     relationships between variables.
                 </p>
@@ -329,10 +238,10 @@
                     In this part of the book, we introduce ideas that are useful
                     in the analysis of these high-dimensional datasets.
                     Specifically, we provide brief introductions to
-                    <xref ref="matrices-in-R"/>, <xref ref="linear-algebra"/>,
-                    <xref ref="dimension-reduction"/>,
-                    <xref ref="sec-latent-factor-models"/>, and
-                    <xref ref="sec-regularization"/>.
+                    <xref ref="linear-algebra">linear algebra</xref>,
+                    <xref ref="dimension-reduction">dimension reduction</xref>,
+                    <xref ref="matrices-in-R">matrix factorization</xref>, and 
+                    <xref ref="sec-regularization">regularization<xref>.
                     As motivating examples, we use handwritten digit recognition
                     and movie recommendation systems, both of which involve
                     high-dimensional datasets with hundreds or thousands of
@@ -400,43 +309,39 @@
 
             <introduction>
                 <p>
-                    Machine learning has achieved remarkable successes in a
-                    variety of applications.
-                    These range from the postal service’s use of machine
-                    learning for reading handwritten zip codes to the
-                    development of voice recognition systems like Apple’s Siri.
-                    Other significant advances include spam and malware
-                    detection, housing price prediction algorithms, and the
-                    ongoing development of autonomous vehicles.
+                  Machine learning has achieved remarkable successes
+                  in a variety of applications. These range from
+                  the postal service's use of machine learning for
+                  reading handwritten zip codes to the development
+                  of voice recognition systems like Apple's Siri.
+                  Other significant advances include spam and malware
+                  detection, housing price prediction algorithms, the
+                  ongoing development of autonomous vehicles, and more
+                  recently, the emergence of generative systems such
+                  as large language models that can produce text,
+                  images, and other complex outputs.
                 </p>
 
                 <p>
-                    The field of Artificial Intelligence (AI) has been evolving
-                    for several decades.
-                    Traditional AI systems, including some chess-playing
-                    machines, often relied on decision-making based on preset
-                    rules and knowledge representation.
-                    However, with the advent of data availability, machine
-                    learning has gained prominence.
-                    It focuses on decision-making through algorithms trained
-                    with data.
-                    In recent years, the terms AI and Machine Learning have been
-                    used interchangeably in many contexts, though they have
-                    distinct meanings.
-                    AI broadly refers to systems or applications that exhibit
-                    intelligent behavior, encompassing both rule-based
-                    approaches and machine learning.
-                    Machine Learning specifically involves learning from data to
-                    make decisions or predictions.
+                  In this part of the book, we introduce the concepts,
+                  ideas, and methodologies of machine learning. We also
+                  demonstrate their practical application using the
+                  example of recognizing handwritten digits, a classic
+                  problem that exemplifies the power and utility of
+                  machine learning techniques.
                 </p>
 
                 <p>
-                    In this part of the book, we will delve into the concepts,
-                    ideas, and methodologies of machine learning.
-                    We will also demonstrate their practical application, using
-                    the example of recognizing handwritten digits, a classic
-                    problem that exemplifies the power and utility of machine
-                    learning techniques.
+                  One important note: this part of the book focuses on
+                  methods rooted in statistical thinking, emphasizing how
+                  models learn from data through the lens of probability.
+                  While modern machine learning includes deep learning and
+                  generative models (such as large language models), these
+                  topics are beyond our scope. Instead, we focus on the
+                  statistical principles underlying supervised and
+                  unsupervised learning. These foundations are essential
+                  for understanding and effectively applying a wide range
+                  of machine learning methods.
                 </p>
             </introduction>
 
