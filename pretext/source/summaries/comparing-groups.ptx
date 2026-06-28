@@ -143,11 +143,6 @@ abline(0,1)
             </program>
 
             <figure xml:id="fig-comparing-groups-female-male-qqplot">
-                <caption>
-                    QQ plot comparing centered female and male height
-                    distributions
-                </caption>
-
                 <image source="images/comparing-groups-female-male-qqplot.png" width="70%">
                     <description>
                         A quantile-quantile plot comparing centered female and
@@ -301,7 +296,6 @@ quantile(x, c(0.25, 0.50, 0.75))
 
         <program language="r">
             <input>
-par(mfrow = c(1, 1))
 p &lt;- seq(0.05, 0.95, 0.05)
 sample_quantiles &lt;- quantile(x, p)
 theoretical_quantiles &lt;- qnorm(p, mean = mean(x), sd = sd(x))
@@ -311,7 +305,6 @@ abline(0, 1)
         </program>
 
         <figure xml:id="fig-comparing-groups-manual-normal-qqplot">
-            <caption>QQ plot of male heights against normal quantiles</caption>
             <image source="images/comparing-groups-manual-normal-qqplot.png" width="70%">
                 <description>
                     A quantile-quantile plot comparing male height quantiles
@@ -322,6 +315,10 @@ abline(0, 1)
                 </description>
             </image>
         </figure>
+
+       <p>
+           Recall that the qqplot in <xref ref = "quantile-quantile-plots"</xref> compared quantiles from two sets of observations, where points along the identity line indicated similar distributions. In this case, the theoretical quantiles along the x-axis are computed using the sample mean and standard deviation. Here, the identity line marks where we expect points to lie if the data really came from this theoretical distribution.
+       </p>
 
         <p>
             Because the points fall close to the identity line, we conclude that
@@ -336,20 +333,22 @@ abline(0, 1)
         <program language="r">
             <input>
 plot(quantile(scale(x), p), qnorm(p))
+abline(a = 0, b = 1)
             </input>
         </program>
 
-        <figure xml:id="fig-comparing-groups-standardized-qqplot">
-            <caption>QQ plot of standardized male heights</caption>
-            <image source="images/comparing-groups-standardized-qqplot.png" width="70%">
-                <description>
-                    A QQ plot comparing standardized male heights to standard
-                    normal quantiles.
-                    The points align closely with a straight line, showing that
-                    the standardized data are near normal.
-                </description>
-            </image>
-        </figure>
+<p>And similarly with ggplot2, which uses a different vector of probabilities than our p:
+</p>
+
+        <program language="r">
+            <input>
+library(ggplot2)
+heights |&gt; filter(sex == "Male") |&gt;
+  ggplot(aes(sample = scale(height))) + 
+  geom_qq() +
+  geom_abline()
+</input>
+</program>
 
         <p>
             R provides built-in functions for generating qqplots that compare
@@ -364,8 +363,7 @@ qqline(x)
         </program>
 
         <figure xml:id="fig-comparing-groups-base-qqnorm">
-            <caption>Base R QQ plot for male heights</caption>
-            <image source="images/comparing-groups-base-qqnorm.png" width="70%">
+            <image source="images/normal-qq-plot.png" width="70%">
                 <description>
                     A base R normal QQ plot for male heights with a reference
                     line.
@@ -376,41 +374,8 @@ qqline(x)
         </figure>
 
         <p>
-            These functions use the average and standard deviation of the data
-            <c>x</c> to define the theoretical normal distribution used for the
-            x-axis values.
-            In other words, the plotted line represents what we would expect if
-            the data were normally distributed with the same mean and spread as
-            the observed sample.
+            The function <c>qqnorm()</c> plots the sample quantiles of the data <c>x</c> against theoretical quantiles from a standard normal distribution. The function <c>qqline()</c> adds a reference line representing where we would expect points to lie if the data were normally distributed with the same mean and standard deviation as the observed sample. Because the sample and theoretical quantiles are not on the same scale, this reference is no longer the identity line.
         </p>
-
-        <p>
-            And equivalently with <c>ggplot2</c>:
-        </p>
-
-        <program language="r">
-            <input>
-library(ggplot2)
-library(dplyr)
-library(dslabs)
-heights |&gt; filter(sex == "Male") |&gt;
-  ggplot(aes(sample = scale(height))) + 
-  geom_qq() +
-  geom_abline()
-            </input>
-        </program>
-
-        <figure xml:id="fig-comparing-groups-ggplot-qqnorm">
-            <caption>ggplot2 QQ plot for standardized male heights</caption>
-            <image source="images/comparing-groups-ggplot-qqnorm.png" width="70%">
-                <description>
-                    A ggplot2 QQ plot of standardized male heights with a
-                    diagonal reference line.
-                    The points cluster near the line, again indicating an
-                    approximately normal distribution.
-                </description>
-            </image>
-        </figure>
 
         <note>
             <p>
@@ -458,7 +423,7 @@ heights |&gt; filter(sex == "Male") |&gt;
         </p>
 
         <p>
-            We learned that boxplots are useful when we want to quickly compare
+            Boxplots are useful when we want to quickly compare
             two or more distributions.
             Here are the heights for females and males:
         </p>
@@ -472,7 +437,6 @@ heights |&gt; ggplot(aes(sex, height, fill = sex)) + geom_boxplot()
         </program>
 
         <figure xml:id="fig-comparing-groups-height-boxplots">
-            <caption>Boxplots of student heights by sex</caption>
             <image source="images/comparing-groups-height-boxplots.png" width="70%">
                 <description>
                     Side-by-side boxplots comparing female and male student
@@ -495,20 +459,7 @@ heights |&gt; ggplot(aes(sex, height, fill = sex)) + geom_boxplot()
             useful:
         </p>
 
-        <program language="r">
-            <input>
-p1 &lt;- heights |&gt; filter(sex == "Female") |&gt;
-  ggplot(aes(height)) +
-  geom_density(fill = "#F8766D") 
-p2 &lt;- heights |&gt; filter(sex == "Female") |&gt; 
-  ggplot(aes(sample = scale(height))) +
-  geom_qq() + geom_abline() + ylab("Standard Units")
-gridExtra::grid.arrange(p1, p2, ncol = 2)
-            </input>
-        </program>
-
         <figure xml:id="fig-comparing-groups-female-density-qq">
-            <caption>Female height density plot and QQ plot</caption>
             <image source="images/comparing-groups-female-density-qq.png" width="100%">
                 <description>
                     Two panels for female heights: a density plot with a visible
@@ -577,7 +528,6 @@ heights |&gt; filter(sex == "Female") |&gt;
                 </p>
 
                 <figure>
-                    <caption>Population sizes by continent</caption>
                     <image source="images/boxplot-exercise-comparing-groups.png" width="70%">
                         <description>
                             Boxplots showing population sizes by continent with
