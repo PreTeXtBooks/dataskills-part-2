@@ -316,9 +316,9 @@ abline(0, 1)
             </image>
         </figure>
 
-       <p>
-           Recall that the qqplot in <xref ref = "quantile-quantile-plots"</xref> compared quantiles from two sets of observations, where points along the identity line indicated similar distributions. In this case, the theoretical quantiles along the x-axis are computed using the sample mean and standard deviation. Here, the identity line marks where we expect points to lie if the data really came from this theoretical distribution.
-       </p>
+        <p>
+            Recall that the qqplot in <xref ref="quantile-quantile-plots" /> compared quantiles from two sets of observations, where points along the identity line indicated similar distributions. In this case, the theoretical quantiles along the x-axis are computed using the sample mean and standard deviation. Here, the identity line marks where we expect points to lie if the data really came from this theoretical distribution.
+        </p>
 
         <p>
             Because the points fall close to the identity line, we conclude that
