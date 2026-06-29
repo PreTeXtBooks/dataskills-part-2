@@ -114,7 +114,7 @@ y_hat &lt;- factor(sample(c("Female", "Male"), nrow(test_set), replace = TRUE))
       <code>
 mean(y_hat == test_set$y)
       </code>
-    <program>
+    </program>
 
       <pre>
 [1] 0.482
@@ -143,7 +143,7 @@ y_hat &lt;- factor(ifelse(test_set$x &lt;= cutoff, "Female", "Male"))
       <code>
 mean(test_set$y == y_hat)
       </code>
-    <program>
+    </program>
 
       <pre>
 [1] 0.771
@@ -188,7 +188,7 @@ accuracy &lt;- sapply(cutoffs, function(cutoff){
       <code>
 max(accuracy)
       </code>
-    <program>
+    </program>
       <pre>
 [1] 0.832
       </pre>
@@ -202,7 +202,7 @@ max(accuracy)
 best_cutoff &lt;- cutoffs[which.max(accuracy)]
 best_cutoff
       </code>
-    <program>
+    </program>
       <pre>
 [1] 64
       </pre>
@@ -216,7 +216,7 @@ best_cutoff
 y_hat &lt;- factor(ifelse(test_set$x &lt;= best_cutoff, "Female", "Male"))
 mean(y_hat == test_set$y)
       </code>
-    <program>
+    </program>
       <pre>
 [1] 0.821
       </pre>
@@ -243,7 +243,7 @@ However, our cutoff-based approach is still better than guessing. And by testing
 cm &lt;- confusionMatrix(data = y_hat, reference = test_set$y)
 cm$table
       </code>
-    <program>
+    </program>
       <pre>
           Reference
 Prediction Female Male
@@ -259,7 +259,7 @@ Prediction Female Male
       <code>
 cm$byClass[c("Sensitivity", "Specificity")]
       </code>
-    <program>
+    </program>
       <pre>
 Sensitivity Specificity 
       0.454       0.929
@@ -273,7 +273,7 @@ Sensitivity Specificity
       <code>
 cm$byClass["Prevalence"]
       </code>
-    <program>
+    </program>
       <pre>
 Prevalence 
      0.227
@@ -423,7 +423,7 @@ print(cm)
 cm$overall["Accuracy"]
 cm$byClass[c("Sensitivity","Specificity", "Prevalence", "Pos Pred Value")]
       </code>
-    <program>
+    </program>
       <pre>
  Accuracy 
    0.821
@@ -504,7 +504,7 @@ F_1 &lt;- sapply(cutoffs, function(cutoff){
       <code>
 max(F_1)
       </code>
-    <program>
+    </program>
       <pre>
 [1] 0.617
       </pre>
@@ -518,7 +518,7 @@ max(F_1)
 best_cutoff &lt;- cutoffs[which.max(F_1)]
 best_cutoff
       </code>
-    <program>
+    </program>
 
       <pre>
 [1] 66
@@ -534,7 +534,7 @@ y_hat &lt;- factor(ifelse(test_set$x &lt;= best_cutoff, "Female", "Male"))
 sensitivity(y_hat, test_set$y)
 specificity(y_hat, test_set$y)
       </code>
-    <program>
+    </program>
 
       <pre>
 [1] 0.672
