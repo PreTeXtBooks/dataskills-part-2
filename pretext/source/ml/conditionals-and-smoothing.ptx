@@ -532,7 +532,17 @@ CC-BY 2.0 license<fn><url href = "https://creativecommons.org/licenses/by/2.0/">
           <description>GIF showing the loess fit as the center moves across the polling data and the fitted curve is built up progressively.</description>
         </image>
       </figure>
-      
+
+<p>We can write this code to apply loess to the entire dataset:</p>
+
+<program language = "r">
+<code>
+total_days &lt;- diff(range(polls_2008$day))
+span &lt;- 21/total_days
+fit &lt;- loess(margin ~ day, degree = 1, span = span, data = polls_2008)
+</code>
+</program>
+
       <p>
         The final result is a smoother fit than the bin smoother since we use larger sample sizes to estimate our local parameters:
       </p>
@@ -545,7 +555,7 @@ CC-BY 2.0 license<fn><url href = "https://creativecommons.org/licenses/by/2.0/">
       </figure>
       
       <p>
-        Different spans give us different estimates. We can see how different window sizes lead to different estimates.
+        Different spans give us different estimates. We can see how different window sizes lead to different estimates:
       </p>
 
       <figure xml:id="fig-conditionals-loess-multi-span-gif">
@@ -689,7 +699,7 @@ polls_2008 |&gt; ggplot(aes(day, margin)) +
     </p>
   </section>
 
-  <section xml:id="sec-conditionals-exercises">
+  <exercises xml:id="sec-conditionals-exercises">
     <title>Exercises</title>
     
     <exercise>
@@ -789,6 +799,5 @@ with(mnist_27$train, plot(x_2, y))
         </p>
       </statement>
     </exercise>
-  </section>
-
+  </exercises>
 </chapter>
