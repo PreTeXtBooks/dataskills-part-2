@@ -31,9 +31,9 @@
       </p>
       
       <program language="r">
-        <input>
+        <code>
 color &lt;- rep(c("Black", "Red", "Green"), times = c(18, 18, 2))
-        </input>
+        </code>
       </program>
       
       <p>
@@ -41,10 +41,10 @@ color &lt;- rep(c("Black", "Red", "Green"), times = c(18, 18, 2))
       </p>
       
       <program language="r">
-        <input>
+        <code>
 n &lt;- 1000
 x &lt;- sample(ifelse(color == "Black", -1, 1), n, replace = TRUE)
-        </input>
+        </code>
       </program>
       
       <p>
@@ -52,9 +52,9 @@ x &lt;- sample(ifelse(color == "Black", -1, 1), n, replace = TRUE)
       </p>
       
       <program language="r">
-        <input>
+        <code>
 x &lt;- sample(c(-1, 1), n, replace = TRUE, prob = c(9/19, 10/19))
-        </input>
+        </code>
       </program>
       
       <p>
@@ -62,9 +62,9 @@ x &lt;- sample(c(-1, 1), n, replace = TRUE, prob = c(9/19, 10/19))
       </p>
       
       <program language="r">
-        <input>
+        <code>
 s &lt;- sum(x)
-        </input>
+        </code>
       </program>
       
       <p>
@@ -105,14 +105,14 @@ s &lt;- sum(x)
     </p>
     
     <program language="r">
-      <input>
+      <code>
 n &lt;- 1000
 roulette_winnings &lt;- function(n){
   x &lt;- sample(c(-1, 1), n, replace = TRUE, prob = c(9/19, 10/19))
   sum(x)
 }
 s &lt;- replicate(100000, roulette_winnings(n))
-      </input>
+      </code>
     </program>
     
     <p>
@@ -120,23 +120,23 @@ s &lt;- replicate(100000, roulette_winnings(n))
     </p>
     
     <program language="r">
-      <input>
+      <code>
 mean(s &lt;= a)
-      </input>
+      </code>
     </program>
     
     <p>
       For instance, the probability of losing money is:
     </p>
     
-    <console>
-      <input>
+    <program language = "r">
+      <code>
 mean(s &lt; 0)
-      </input>
-      <output>
+      </code>
+    </program>
+      <pre>
 [1] 0.04432
-      </output>
-    </console>
+      </pre>
     
     <p>
       A histogram and qqplot of <m>S_n</m> show that the distribution is approximately normal, an observation that the <term>Central Limit Theorem</term> will soon explain.
@@ -197,14 +197,15 @@ mean(s &lt; 0)
       In the roulette example we obtain:
     </p>
     
-    <console>
-      <input>
+    <program language = "r">
+      <code>
 2*sqrt(90)/19
-      </input>
-      <output>
+      </code>
+    </program>
+      <pre>
 [1] 0.998614
-      </output>
-    </console>
+      </pre>
+    
     
     <p>
       Thus, the standard error of the sum is:
@@ -218,69 +219,74 @@ mean(s &lt; 0)
       which in this case is:
     </p>
     
-    <console>
-      <input>
+    <program language = "r">
+      <code>
 sqrt(n)*2*sqrt(90)/19
-      </input>
-      <output>
+      </code>
+    </program>
+      <pre>
 [1] 31.57895
-      </output>
-    </console>
+      </pre>
+    
     
     <p>
       These theoretical values agree closely with the Monte Carlo results:
     </p>
     
-    <console>
-      <input>
+    <program language = "r">
+      <code>
 mean(s)
 sd(s)
-      </input>
-      <output>
+      </code>
+    </program>
+      <pre>
 [1] 52.6455
 [1] 31.53624
-      </output>
-    </console>
+      </pre>
+    
     
     <p>
       Using the CLT, we can now compute the probability that the casino loses money without simulation:
     </p>
     
-    <console>
-      <input>
+    <program language = "r">
+      <code>
 pnorm(0, n*(20 - 18)/38, sqrt(n)*2*sqrt(90)/19)
-      </input>
-      <output>
+      </code>
+    </program>
+      <pre>
 [1] 0.04779035
-      </output>
-    </console>
+      </pre>
+    
     
     <p>
       which matches our earlier estimate:
     </p>
     
-    <console>
-      <input>
+    <program language = "r">
+      <code>
 mean(s &lt; 0)
-      </input>
-      <output>
+      </code>
+    </program>
+      <pre>
 [1] 0.04432
-      </output>
-    </console>
+      </pre>
+    
     
     <note>
       <p>
         The quantity <m>(S_n + n)/2</m> represents the number of wins for the casino and follows a <em>binomial distribution</em>. Thus, the probability <m>\mathrm{Pr}(S_n &lt; 0)</m> can also be computed directly:
       </p>
       
-      <console>
-        <input>
+      <program language = "r">
+        <code>
 pbinom(n/2 - 1, size = n, prob = 10/19)
-        </input>
-        <output>
+        </code>
+    </program>
+        <pre>
 [1] 0.04479591
-        </output>
-      </console>
+        </pre>
+      
       
       <p>
         However, the binomial result applies only to Bernoulli trials. In many real-world settings, data are not binomial, yet we still want to approximate the distribution of sums or averages. For those cases, the CLT provides a general framework that extends far beyond Bernoulli trials.
