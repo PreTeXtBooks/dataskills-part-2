@@ -55,7 +55,7 @@ names(heights) &lt;- c("y", "x")
     </p>
     
     <p>
-      A standard way of generating the training and test sets is by randomly splitting the data. The <term>caret</term> package includes the function <c>createDataPartition</c> that helps us generate indexes for randomly splitting the data into training and test sets:
+      A standard way of generating the training and test sets is by randomly splitting the data. The <term>caret</term> package includes the function <c>createDataPartition</c> that helps us generate indices for randomly splitting the data into training and test sets:
     </p>
     
     <program language="r">
