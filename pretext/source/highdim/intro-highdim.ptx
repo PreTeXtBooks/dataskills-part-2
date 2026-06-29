@@ -1,51 +1,68 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="intro-highdim">
-  <title>Introduction to High Dimensional Data</title>
-  
-  <introduction>
-    <p>
-      High-dimensional datasets are increasingly common in modern data analysis, especially in fields like
-      genomics, image processing, natural language processing, and recommender systems. There is a variety of
-      computational techniques and statistical concepts that are useful for analyzing datasets in which each
-      observation is associated with a large number of numerical variables. In this part of the book, we
-      introduce ideas that are useful in the analysis of these high-dimensional datasets. Specifically, we
-      provide brief introductions to <xref ref="matrices-in-R"/>, <xref ref="linear-algebra"/>,
-      <xref ref="dimension-reduction"/>, <xref ref="sec-latent-factor-models"/>, and
-      <xref ref="sec-regularization"/>. As motivating examples, we use handwritten digit recognition and movie
-      recommendation systems, both of which involve high-dimensional datasets with hundreds or thousands of
-      variables per observation. We start this part of the book by demonstrating how to work with matrices in R.
-    </p>
-    <p>
-      One specific task we use to motivate linear algebra is measuring the similarity between two handwritten
-      digits. Because each digit is represented by $28 \times 28 = 784$ pixel values, we cannot simply subtract
-      two vectors as we would in a one-dimensional setting. Instead, we treat each observation as a
-      <em>point</em> in a <em>high-dimensional</em> space and use a mathematical definition of <em>distance</em>
-      to quantify similarity. Many machine learning techniques introduced later in the book rely on this
-      geometric interpretation.
-    </p>
-    <p>
-      We also use this high-dimensional concept of distance to motivate dimension reduction, a set of techniques
-      that summarize high-dimensional data in lower-dimensional representations that are easier to visualize and
-      analyze, while preserving the essential <em>information</em>. Distance between observations provides a
-      concrete example: we aim to reduce the number of variables while preserving the pairwise distances between
-      observations as much as possible. This leads naturally to matrix factorization methods, which arise from
-      the mathematical structure underlying these techniques.
-    </p>
-    <p>
-      Finally, we introduce the concept of regularization, which is useful when analyzing high-dimensional
-      data. In many applications, the large number of variables increases the risk of overfitting or
-      cherry-picking results that appear significant by chance. Regularization provides a mathematically
-      principled way to constrain models, improve generalization, and avoid misleading conclusions.
-    </p>
-    <p>
-      Together, these topics lay the groundwork for understanding and implementing many of the machine learning
-      techniques we cover in the next part of the book.
-    </p>
-    <p>
-      For background on the linear algebra and matrix factorization used here, see
-      <fn><url href="http://joshua.smcvt.edu/linearalgebra/">Hefferon's Linear Algebra</url></fn> and the BellKor
-      <fn><url href="https://www.netflixprize.com/assets/GrandPrize2009_BPC_BellKor.pdf">Netflix Prize paper</url></fn>.
-    </p>
-  </introduction>
 
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="intro-highdim">
+    <title>Introduction to High Dimensional Data</title>
+
+    <introduction>
+        <p>
+            High-dimensional datasets are increasingly common in modern data
+            analysis, especially in fields like genomics, image processing,
+            natural language processing, and recommender systems.
+            There is a variety of computational techniques and statistical
+            concepts that are useful for analyzing datasets in which each
+            observation is associated with a large number of numerical
+            variables.
+            In this part of the book, we introduce ideas that are useful in the
+            analysis of these high-dimensional datasets.
+            Specifically, we provide brief introductions to linear algebra,
+            dimension reduction, matrix factorization, and regularization.
+            As motivating examples, we use handwritten digit recognition and
+            movie recommendation systems, both of which involve high-dimensional
+            datasets with hundreds or thousands of variables per observation.
+            We start this part of the book by demonstrating how to work with
+            matrices in R.
+        </p>
+
+        <p>
+            One specific task we use to motivate linear algebra is measuring the
+            similarity between two handwritten digits.
+            Because each digit is represented by $28 \times 28 = 784$ pixel
+            values, we cannot simply subtract two vectors as we would in a
+            one-dimensional setting.
+            Instead, we treat each observation as a <em>point</em> in a
+            <em>high-dimensional</em> space and use a mathematical definition of
+            <em>distance</em> to quantify similarity.
+            Many machine learning techniques introduced later in the book rely
+            on this geometric interpretation.
+        </p>
+
+        <p>
+            We also use this high-dimensional concept of distance to motivate
+            dimension reduction, a set of techniques that summarize
+            high-dimensional data in lower-dimensional representations that are
+            easier to visualize and analyze, while preserving the essential
+            <em>information</em>.
+            Distance between observations provides a concrete example: we aim to
+            reduce the number of variables while preserving the pairwise
+            distances between observations as much as possible.
+            This leads naturally to matrix factorization methods, which arise
+            from the mathematical structure underlying these techniques.
+        </p>
+
+        <p>
+            Finally, we introduce the concept of regularization, which is useful
+            when analyzing high-dimensional data.
+            In many applications, the large number of variables increases the
+            risk of overfitting or cherry-picking results that appear
+            significant by chance.
+            Regularization provides a mathematically principled way to constrain
+            models, improve generalization, and avoid misleading conclusions.
+        </p>
+
+        <p>
+            Together, these topics lay the groundwork for understanding and
+            implementing many of the machine learning techniques we cover in the
+            next part of the book.
+        </p>
+    </introduction>
 </chapter>
