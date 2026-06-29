@@ -620,23 +620,7 @@ mean(x)
             <title>Misinterpretation of the law of averages</title>
 
             <p>
-                The law of averages is sometimes misinterpreted.
-                For example, if you toss a coin 5 times and see a head each
-                time, you might hear someone argue that the next toss is
-                probably a tail because of the law of averages: on average we
-                should see 50% heads and 50% tails.
-                A similar argument would be to say that red "is due" on the
-                roulette wheel after seeing black come up five times in a row.
-                Yet these events are independent so the chance of a coin landing
-                heads is 50%, regardless of the previous 5.
-                The same principle applies to the roulette outcome.
-                The law of averages applies only when the number of draws is
-                very large and not in small samples.
-                After a million tosses, you will definitely see about 50% heads
-                regardless of the outcome of the first five tosses.
-                Another funny misuse of the law of averages is in sports when TV
-                sportscasters predict a player is about to succeed because they
-                have failed a few times in a row.
+                The law of averages is sometimes misinterpreted. For example, if you toss a coin five times and see a head each time, you might hear someone argue that the next toss is probably a tail because of the law of averages: on average, we should see 50% heads and 50% tails. A similar argument would be to say that red “is due” on the roulette wheel after seeing black come up five times in a row. Yet these events are independent, so the chance of a coin landing heads is 50%, regardless of the previous five. The same principle applies to the roulette outcome. The law of averages applies only when the number of draws is very large and not in small samples. After a million tosses, you will definitely see about 50% heads regardless of the outcome of the first five tosses. Another funny misuse of the law of averages is in sports when TV sportscasters predict a player is about to succeed because they have failed a few times in a row.
             </p>
         </warning>
     </section>
@@ -645,16 +629,17 @@ mean(x)
         <title>Data distributions versus probability distributions</title>
 
         <p>
-            Before moving on, it is important to distinguish between the
-            <term>distribution of a dataset</term> and a
+            Before moving on, it is important to reiterate the distinguish between
+            the <term>distribution of a dataset</term> and a
             <term>probability distribution</term>.
         </p>
 
         <p>
             Any list of numbers <m>x_1, \dots, x_n</m>, or any dataset, has a
             distribution that describes how the observed values are spread out.
-            We can summarize it with simple statistics such as the mean and
-            standard deviation:
+            This was the topic of <xref ref = "sec-numeric-summaries"/>. For
+            example, we can summarize it with simple statistics such as the mean
+            and standard deviation:
         </p>
 
         <program language="r">
@@ -677,8 +662,8 @@ s &lt;- sd(x)
             relative frequencies define the probability distribution of
             <m>X</m>.
             The average and standard deviation of the numbers in the urn
-            correspond to the <term>expected value</term> and
-            <term>standard deviation</term> of the random variable.
+            correspond to the <term>expected value</term> <m>E[X] = \mu</m> and
+            <term>standard deviation</term> <m>SD[X] = \sigma</m> of the random variable.
         </p>
 
         <p>
