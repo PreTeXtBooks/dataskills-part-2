@@ -148,18 +148,6 @@ mean(s &lt;= 40)
       We can visualize the distribution of <m>S_n</m> with a histogram, overlaying the corresponding normal density curve for comparison:
     </p>
     
-    <program language="r">
-      <input>
-library(tidyverse)
-normal_density &lt;- data.frame(x = seq(min(s), max(s), length = 100)) |&gt; 
-  mutate(f = dnorm(x, mean(s), sd(s)))
-data.frame(S_n = s) |&gt; ggplot(aes(S_n, after_stat(density))) +
-  geom_histogram(color = "black", binwidth = 1)  +
-  ylab("Probability") + 
-  geom_line(data = normal_density, mapping = aes(x, f), color = "blue")
-      </input>
-    </program>
-    
     <figure xml:id="fig-random-variables-binomial-histogram">
       <caption>Distribution of the number of heads in 100 fair coin tosses</caption>
       <image source="images/random-variables-binomial-histogram.png" width="70%">
@@ -203,7 +191,7 @@ rbinom(100000, n, 1/2)
   </section>
 
   <section xml:id="sec-mean-var-eqs">
-    <title>The expected value and standard error</title>
+    <title>The expected value and standard deviation</title>
     
     <p>
       In statistics textbooks, the expected value of a random variable <m>X</m> is commonly denoted as <m>\mu_X</m> or <m>\mathrm{E}[X]</m>, both meaning "the expected value of <m>X</m>."
@@ -261,11 +249,11 @@ mean(x)
     </console>
     
     <p>
-      The <em>standard error</em> (SE) describes the typical deviation of <m>X</m> from its expected value. It is defined as:
+      The <em>standard deviation</em> (SD) describes the typical deviation of <m>X</m> from its expected value. It is defined as:
     </p>
     
     <me>
-      \mathrm{SE}[X] = \sqrt{\sum_{i=1}^n (x_i - \mathrm{E}[X])^2 ,\mathrm{Pr}(X = x_i)}.
+      \mathrm{SD}[X] = \sqrt{\sum_{i=1}^n (x_i - \mathrm{E}[X])^2 ,\mathrm{Pr}(X = x_i)}.
     </me>
     
     <p>
@@ -273,27 +261,27 @@ mean(x)
     </p>
     
     <me>
-      \mathrm{SE}[X] = \sqrt{\int_a^b (x - \mathrm{E}[X])^2 f(x), dx}.
+      \mathrm{SD}[X] = \sqrt{\int_a^b (x - \mathrm{E}[X])^2 f(x), dx}.
     </me>
     
     <note>
       <p>
-        Many textbooks introduce the <em>variance</em> before the standard error. The variance is simply the square of the standard error:
+        Many textbooks introduce the <em>variance</em> before the standard deviation. The variance is simply the square of the standard deviation:
       </p>
       <me>
-        \mathrm{Var}[X] = \mathrm{SE}[X]^2.
+        \mathrm{Var}[X] = \mathrm{SD}[X]^2.
       </me>
       <p>
-        Variance is useful in derivations because it avoids square roots, but the standard error is easier to interpret, since it uses the same units as the data.
+        Variance is useful in derivations because it avoids square roots, but the standard deviation is easier to interpret, since it uses the same units as the data.
       </p>
     </note>
     
     <p>
-      When all outcomes <m>x_i</m> are equally likely, the standard error reduces to the standard deviation:
+      When all outcomes <m>x_i</m> are equally likely, the standard deviation reduces to the standard deviation:
     </p>
     
     <me>
-      \mathrm{SE}[X] = \sqrt{\frac{1}{n}\sum_{i=1}^n (x_i - \mathrm{E}[X])^2}, \quad \mathrm{E}[X] = \frac{1}{n}\sum_{i=1}^n x_i.
+      \mathrm{SD}[X] = \sqrt{\frac{1}{n}\sum_{i=1}^n (x_i - \mathrm{E}[X])^2}, \quad \mathrm{E}[X] = \frac{1}{n}\sum_{i=1}^n x_i.
     </me>
     
     <p>
@@ -301,16 +289,16 @@ mean(x)
     </p>
     
     <me>
-      \mathrm{SE}[X] = \sqrt{(1-0.5)^2 \times 0.5 + (0-0.5)^2 \times 0.5} = 0.5.
+      \mathrm{SD}[X] = \sqrt{(1-0.5)^2 \times 0.5 + (0-0.5)^2 \times 0.5} = 0.5.
     </me>
     
     <p>
-      Thus, one coin has an expected value of 0.5 and a standard error of 0.5—reasonable, since the possible outcomes are 0 or 1.
+      Thus, one coin has an expected value of 0.5 and a standard deviation of 0.5—reasonable, since the possible outcomes are 0 or 1.
     </p>
     
     <note>
       <p>
-        We use the Greek letters <m>\mu</m> and <m>\sigma</m> to denote the expected value and standard error, respectively. This convention reflects their connection to the <em>mean</em> (<m>m</m>) and <em>standard deviation</em> (<m>s</m>). However, we often prefer <m>\mathrm{E}[X]</m> and <m>\mathrm{SE}[X]</m> notation because it generalizes more clearly to mathematical expressions involving sums or transformations of random variables.
+        We use the Greek letters <m>\mu</m> and <m>\sigma</m> to denote the expected value and standard deviation, respectively. However, we often prefer <m>\mathrm{E}[X]</m> and <m>\mathrm{SD}[X]</m> notation because it generalizes more clearly to mathematical expressions involving sums or transformations of random variables.
       </p>
     </note>
   </section>
@@ -371,11 +359,11 @@ mean(x)
     </me>
     
     <p>
-      This implies that the following property for the standard error of the sum of <term>independent</term> random variables:
+      This implies that the following property for the standard deviation of the sum of <term>independent</term> random variables:
     </p>
     
     <me>
-      \mathrm{SE}[X_1+X_2+\dots+X_n] = \sqrt{\mathrm{SE}[X_1]^2 + \mathrm{SE}[X_2]^2+\dots+\mathrm{SE}[X_n]^2  }
+      \mathrm{SD}[X_1+X_2+\dots+X_n] = \sqrt{\mathrm{SD}[X_1]^2 + \mathrm{SD}[X_2]^2+\dots+\mathrm{SD}[X_n]^2  }
     </me>
     
     <p>
@@ -383,11 +371,11 @@ mean(x)
     </p>
     
     <p>
-      4. The standard error of a non-random constant times a random variable is the non-random constant times the random variable's standard error. As with the expectation:
+      4. The standard deviation of a non-random constant times a random variable is the non-random constant times the random variable's standard deviation. As with the expectation:
     </p>
     
     <me>
-      \mathrm{SE}[aX] =  a \times \mathrm{SE}[X]
+      \mathrm{SD}[aX] =  a \times \mathrm{SD}[X]
     </me>
     
     <p>
@@ -395,20 +383,20 @@ mean(x)
     </p>
     
     <p>
-      If we shift the random variable by a constant the variability does not change. So it has no effect on the standard error:
+      If we shift the random variable by a constant the variability does not change. So it has no effect on the standard deviation:
     </p>
     
     <me>
-      \mathrm{SE}[aX+b] =  a \times \mathrm{SE}[X]
+      \mathrm{SD}[aX+b] =  a \times \mathrm{SD}[X]
     </me>
     
     <p>
-      A consequence of 3 and 4 is that the standard error of the average of independent draws from the same urn is the standard deviation of the urn divided by the square root of <m>n</m> (the number of draws), call it <m>\sigma_X</m>:
+      A consequence of 3 and 4 is that the standard deviation of the average of independent draws from the same urn is the standard deviation of the urn divided by the square root of <m>n</m> (the number of draws), call it <m>\sigma_X</m>:
     </p>
     
     <md>
-      <mrow>\mathrm{SE}[\bar{X}] = \mathrm{SE}[(X_1+X_2+\dots+X_n) / n] &amp;=   \mathrm{SE}[X_1+X_2+\dots+X_n]/n</mrow>
-      <mrow>&amp;= \sqrt{\mathrm{SE}[X_1]^2+\mathrm{SE}[X_2]^2+\dots+\mathrm{SE}[X_n]^2}/n</mrow>
+      <mrow>\mathrm{SD}[\bar{X}] = \mathrm{SD}[(X_1+X_2+\dots+X_n) / n] &amp;=   \mathrm{SD}[X_1+X_2+\dots+X_n]/n</mrow>
+      <mrow>&amp;= \sqrt{\mathrm{SD}[X_1]^2+\mathrm{SD}[X_2]^2+\dots+\mathrm{SD}[X_n]^2}/n</mrow>
       <mrow>&amp;= \sqrt{\sigma_X^2+\sigma_X^2+\dots+\sigma_X^2}/n</mrow>
       <mrow>&amp;= \sqrt{n\sigma_X^2}/n</mrow>
       <mrow>&amp;= \sigma_X / \sqrt{n}</mrow>
@@ -417,16 +405,16 @@ mean(x)
     <warning>
       <title>The assumption of independence is important</title>
       <p>
-        The given equation reveals crucial insights for practical scenarios. Specifically, it suggests that the standard error can be minimized by increasing the sample size, <m>n</m>, and we can quantify this reduction. However, this principle holds true only when the variables <m>X_1, X_2, ... X_n</m> are independent. If they are not, the estimated standard error can be significantly off.
+        The given equation reveals crucial insights for practical scenarios. Specifically, it suggests that the standard deviation can be minimized by increasing the sample size, <m>n</m>, and we can quantify this reduction. However, this principle holds true only when the variables <m>X_1, X_2, ... X_n</m> are independent. If they are not, the estimated standard deviation can be significantly off.
       </p>
       <p>
-        In <xref ref="sec-corr-coef"/>, we introduce the concept of correlation, which quantifies the degree to which variables are interdependent. If the correlation coefficient among the <m>X</m> variables is <m>\rho</m>, the standard error of their average is:
+        In <xref ref="sec-corr-coef"/>, we introduce the concept of correlation, which quantifies the degree to which variables are interdependent. If the correlation coefficient among the <m>X</m> variables is <m>\rho</m>, the standard deviation of their average is:
       </p>
       <me>
-        \mathrm{SE}\left[\bar{X}\right] = \sigma_X \sqrt{\frac{1 + (n-1) \rho}{n}}
+        \mathrm{SD}\left[\bar{X}\right] = \sigma_X \sqrt{\frac{1 + (n-1) \rho}{n}}
       </me>
       <p>
-        The key observation here is that as <m>\rho</m> approaches its upper limit of 1, the standard error increases. Notably, in the situation where <m>\rho = 1</m>, the standard error, <m>\mathrm{SE}[\bar{X}]</m>, equals <m>\sigma_X</m>, and it becomes unaffected by the sample size <m>n</m>.
+        The key observation here is that as <m>\rho</m> approaches its upper limit of 1, the standard deviation increases. Notably, in the situation where <m>\rho = 1</m>, the standard deviation, <m>\mathrm{SD}[\bar{X}]</m>, equals <m>\sigma_X</m>, and it becomes unaffected by the sample size <m>n</m>.
       </p>
     </warning>
     
@@ -439,7 +427,7 @@ mean(x)
     <title>Law of Large Numbers</title>
     
     <p>
-      An important implication of result 4 above is that the standard error of the average becomes smaller and smaller as <m>n</m> grows larger. When <m>n</m> is very large, then the standard error is practically 0 and the average of the draws converges to the average of the urn. This is known in statistical textbooks as the law of large numbers or the law of averages.
+      An important implication of result 4 above is that the standard deviation of the average becomes smaller and smaller as <m>n</m> grows larger. When <m>n</m> is very large, then the standard deviation is practically 0 and the average of the draws converges to the average of the urn. This is known in statistical textbooks as the law of large numbers or the law of averages.
     </p>
     
     <warning>
@@ -473,11 +461,11 @@ s &lt;- sd(x)
     </p>
     
     <p>
-      When <m>X</m> represents drawing a number at random from an urn, the list of numbers in the urn defines the possible outcomes, and their relative frequencies define the probability distribution of <m>X</m>. The average and standard deviation of the numbers in the urn correspond to the <term>expected value</term> and <term>standard error</term> of the random variable.
+      When <m>X</m> represents drawing a number at random from an urn, the list of numbers in the urn defines the possible outcomes, and their relative frequencies define the probability distribution of <m>X</m>. The average and standard deviation of the numbers in the urn correspond to the <term>expected value</term> and <term>standard deviation</term> of the random variable.
     </p>
     
     <p>
-      This connection can cause confusion: every list of numbers has a standard deviation, and every random variable has a standard error, but the standard error of a random variable is the <em>standard deviation of its probability distribution</em>, not of a particular dataset.
+      This connection can cause confusion: every list of numbers has a standard deviation, and every random variable has a standard deviation, but the standard deviation of a random variable is the <em>standard deviation of its probability distribution</em>, not of a particular dataset.
     </p>
   </section>
 
@@ -511,7 +499,7 @@ s &lt;- sd(x)
     <exercise>
       <statement>
         <p>
-          Compute the standard error of <m>X</m>.
+          Compute the standard deviation of <m>X</m>.
         </p>
       </statement>
     </exercise>
@@ -535,7 +523,7 @@ s &lt;- sd(x)
     <exercise>
       <statement>
         <p>
-          What is the standard error of <m>S_n</m>?
+          What is the standard deviation of <m>S_n</m>?
         </p>
       </statement>
     </exercise>
@@ -575,7 +563,7 @@ s &lt;- sd(x)
     <exercise>
       <statement>
         <p>
-          Compute the standard error of <m>X</m>.
+          Compute the standard deviation of <m>X</m>.
         </p>
       </statement>
     </exercise>
@@ -599,7 +587,7 @@ s &lt;- sd(x)
     <exercise>
       <statement>
         <p>
-          What is the standard error of <m>S_n</m>?
+          What is the standard deviation of <m>S_n</m>?
         </p>
       </statement>
     </exercise>
