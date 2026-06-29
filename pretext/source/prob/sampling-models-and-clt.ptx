@@ -141,30 +141,6 @@ mean(s &lt; 0)
     <p>
       A histogram and qqplot of <m>S_n</m> show that the distribution is approximately normal, an observation that the <term>Central Limit Theorem</term> will soon explain.
     </p>
-    
-    <program language="r">
-      <input>
-library(tidyverse)
-normal_density &lt;- data.frame(x = seq(min(s), max(s), length = 100)) |&gt; 
-  mutate(f = dnorm(x, mean(s), sd(s)))
-p1 &lt;- data.frame(S_n = s) |&gt; ggplot(aes(S_n, after_stat(density))) +
-  geom_histogram(color = "black", binwidth = 10) +
-  ylab("Probability") +
-  geom_line(data = normal_density, mapping = aes(x, f), color = "blue") +
-  labs(y = "Probability ", title = "Histogram of S_n") 
-
-
-qq_sample &lt;- sample(s, 1000)  # take a subset of 1,000 values
-
-p2 &lt;- data.frame(S_n = qq_sample) |&gt;
-  ggplot(aes(sample = S_n)) +
-  stat_qq(distribution = qnorm) +
-  stat_qq_line(distribution = qnorm, color = "blue") +
-  labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
-  ggtitle("QQ Plot of S_n")
-gridExtra::grid.arrange(p1, p2, ncol = 2)
-      </input>
-    </program>
 
     <figure xml:id="fig-sampling-models-clt-hist-qq">
       <caption>Histogram and QQ plot of simulated roulette winnings</caption>
@@ -210,7 +186,7 @@ gridExtra::grid.arrange(p1, p2, ncol = 2)
     </p>
     
     <p>
-      To quantify uncertainty, we compute the standard error, which measures how much <m>S_n</m> varies around its expected value. For an urn with two outcomes <m>a</m> and <m>b</m>, the standard deviation can be shown to be:
+      To quantify uncertainty, we compute the standard error, which measures how much <m>S_n</m> varies around its expected value. For an urn with two outcomes <m>a</m> and <m>b</m> with probabilities <m>p</m> and <m>(1-p)</m>, the standard deviation can be shown to be:
     </p>
     
     <me>
@@ -316,7 +292,7 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     <title>How large is large?</title>
     
     <p>
-      The CLT applies when the number of draws is "large", but <em>large</em> depends on context. In many cases, 30 draws are enough for a good approximation, sometimes even fewer. In the roulette example, when the probabilities of success are very small, much larger samples may be required.
+      The CLT applies when the number of draws is <em>large</em>, but <em>large</em> depends on context. In many cases, 30 draws are enough for a good approximation, sometimes even fewer. In the roulette example, when the probability of success is very small, much larger samples may be required.
     </p>
     
     <p>
@@ -324,7 +300,7 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     </p>
     
     <p>
-      In summary, the CLT explains why the normal distribution appears so often in statistics and why many methods work well in practice. But it has limits: when probabilities are extremely small or distributions are highly skewed, other models, such as the Poisson or binomial, are more appropriate. Developing intuition for when the CLT applies is essential for principled, thoughtful data analysis.
+In summary, the CLT explains why the normal distribution appears so often in statistics and why many methods work well in practice. But it has limits: when probabilities are extremely small, or distributions are highly skewed, other models, such as the Poisson or binomial, are more appropriate. Developing intuition for when the CLT applies is essential for principled, thoughtful data analysis.
     </p>
   </section>
 
