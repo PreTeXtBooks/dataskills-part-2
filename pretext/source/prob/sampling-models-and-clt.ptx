@@ -4,7 +4,7 @@
   
   <introduction>
     <p>
-      In the previous chapter, we introduced random variables and saw how their distributions, expected values, and standard errors describe uncertainty. In this chapter, we build on those ideas by introducing <em>sampling models</em>, which are mathematical abstractions of how data are generated. We then use the Central Limit Theorem (CLT) to approximate the distribution of sums and averages of independent draws. Through a concrete example based on playing roulette in a casino, we show how the CLT can be used to answer practical questions such as "What is the chance of losing money?"
+      In the previous chapter, we introduced random variables and saw how their distributions, expected values, and standard deviations describe uncertainty. In this chapter, we build on those ideas by introducing <em>sampling models</em>, which are mathematical abstractions of how data are generated. We then use the Central Limit Theorem (CLT) to approximate the distribution of sums and averages of independent draws. Through a concrete example based on playing roulette in a casino, we show how the CLT can be used to answer practical questions such as "What is the chance of losing money?"
     </p>
   </introduction>
 
@@ -23,7 +23,7 @@
       <title>Roulette example</title>
       
       <p>
-        Suppose a small casino hires you to decide whether it should install roulette wheels. To keep things simple, imagine 1,000 people each place a single bet on black. The casino wants you to estimate how much money it can expect to make, or lose, and, most importantly, the probability of losing money. If that probability is too high, they'll skip installing the wheels.
+        Suppose a small casino hires you to decide whether it should install roulette wheels. To keep things simple, imagine 1,000 independent players, each placing a single bet on black on separate spins of the wheel. The casino wants you to estimate how much money it can expect to make, or lose, and, most importantly, the probability of losing money. If that probability is too high, they will decide not to install the wheels.
       </p>
       
       <p>
@@ -58,7 +58,7 @@ x &lt;- sample(c(-1, 1), n, replace = TRUE, prob = c(9/19, 10/19))
       </program>
       
       <p>
-        We call this a <em>sampling model</em> because it represents random behavior through repeated sampling from an urn. The casino's total winnings, define it as <m>S_n</m>, are simply the sum of these independent draws:
+        We call this a <em>sampling model</em> because it represents random behavior through repeated sampling from an urn. The casino's total winnings, defined as <m>S_n</m>, are simply the sum of these independent draws:
       </p>
       
       <program language="r">
@@ -76,7 +76,7 @@ s &lt;- sum(x)
       <title>Connecting sampling models to real data</title>
       
       <p>
-        Thinking in terms of a sampling model is central to data analysis under uncertainty. It connects the random variables we study in probability to the datasets we analyze in practice. By imagining data as random draws, from an urn, a population, or a randomization procedure, we clarify what our models represent and what assumptions they rely on.
+        Thinking in terms of a sampling model is central to data analysis under uncertainty. It connects the random variables we study in probability to the datasets we analyze in practice. By imagining data as random draws from an urn, a population, or a randomization procedure, we clarify what our models represent and what assumptions they rely on.
       </p>
       
       <p>
@@ -139,7 +139,7 @@ mean(s &lt; 0)
     </console>
     
     <p>
-      A histogram and qqplot of <m>S_n</m> shows that the distribution is approximately normal, an observation that the <term>Central Limit Theorem</term> will soon explain.
+      A histogram and qqplot of <m>S_n</m> show that the distribution is approximately normal, an observation that the <term>Central Limit Theorem</term> will soon explain.
     </p>
     
     <program language="r">
