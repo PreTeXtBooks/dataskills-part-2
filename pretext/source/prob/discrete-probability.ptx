@@ -4,7 +4,7 @@
   
   <introduction>
     <p>
-      We begin by covering some basic principles related to categorical data. The specific area of probability which deals with categorical data is referred to as <em>discrete probability</em>. Understanding this topic, will help us comprehend the probability theory we will later introduce for numeric and continuous data, which is much more common in data analysis. Since discrete probability is invaluable in card games, we will use these as illustrative examples.
+We begin by covering some basic principles related to categorical data. The specific area of probability that deals with categorical data is referred to as <em>discrete probability</em>. Understanding this topic will help us comprehend the probability theory we will later introduce for numeric and continuous data, which is much more common in data analysis. Since discrete probability is invaluable in card games, we will use these as illustrative examples.
     </p>
   </introduction>
 
@@ -14,8 +14,9 @@
       The term <em>probability</em> is used in everyday language. Yet answering questions about probability is often hard, if not impossible. In this section, we discuss a mathematical definition of <em>probability</em> that allows us to give precise answers to certain questions.
     </p>
     <p>
-      For example, if I have 2 red beads and 3 blue beads inside an urn<fn>https://en.wikipedia.org/wiki/Urn_problem</fn> (most probability books use this archaic term, so we do too) and I pick one at random, what is the probability of picking a red one? Our intuition tells us that the answer is 2/5 or 40%. A precise definition can be given by noting that there are five possible outcomes, of which two satisfy the condition necessary for the event "pick a red bead". Since each of the five outcomes has an equal chance of occurring, we conclude that the probability is .4 for red and .6 for blue.
-    </p>
+      For example, if I have 2 red beads and 3 blue beads inside an urn<fn>https://en.wikipedia.org/wiki/Urn_problem</fn> 
+(most probability books use this archaic term, so we do too) and I pick one at random, what is the probability of picking a red one? Our intuition tells us that the answer is 2/5 or 40%—this is the proportion of beads in the urn that are red, referred to as the relative frequency of that category. A precise definition can be given by noting that there are five possible outcomes, of which two satisfy the condition necessary for the event pick a red bead. Since each of the five outcomes has an equal chance of occurring, we conclude that the probability is 0.4 for red and 0.6 for blue.
+</p>
     <p>
       A more intuitive way to think about the probability of an event is as the long-run proportion of times the event occurs when an experiment is repeated independently and under identical conditions, an infinite number of times. This interpretation naturally leads to one of the most powerful techniques in data science, Monte Carlo simulations, which we will explore later in this chapter.
     </p>
@@ -27,7 +28,7 @@
       Probability distributions are the foundation of most statistical models. They describe how likely different outcomes are, providing a mathematical summary of uncertainty. Every model we use in data analysis, from simple polling examples to complex multivariate models, is built on assumptions about underlying probability distributions. As we move to continuous and multidimensional settings, these distributions become more complex and abstract. For discrete cases, however, the idea is quite intuitive: each possible outcome, or category, is assigned a probability based on its relative frequency.
     </p>
     <p>
-      If we know the relative frequency of the different categories, defining a distribution for categorical outcomes is relatively straightforward. We simply assign a probability to each category. In cases analogous to beads in an urn, for each bead type, their proportion defines the distribution.
+If we know the true relative frequencies of the different categories—that is, the actual proportions in the population, not the proportions observed in a particular sample—then defining a distribution for categorical outcomes is relatively straightforward. We simply assign each relative frequency as the probability of its respective category. In cases analogous to beads in an urn, for each bead type, its proportion defines the distribution.
     </p>
     <p>
       For example, if we are randomly calling likely voters from a population that is 44% Democrat, 44% Republican, 10% Undecided, and 2% Green Party, these proportions define the probability for each group in any given call. The probability distribution for each call is defined by four numbers: Pr(calling a Republican) =  0.44, Pr(calling a Democrat) = 0.44, Pr(calling an Undecided) = 10%, and  Pr(calling a Green) = 0.02.
@@ -37,7 +38,7 @@
   <section xml:id="sec-monte-carlo">
     <title>Monte Carlo</title>
     <p>
-      Computers provide a way to actually perform the simple random long-run experiment described above: pick a bead at random from a bag that contains three blue beads and two red ones. Random number generators permit us to mimic the process of picking at random.
+Computers provide a way to actually perform the simple random long-run experiment described earlier: for many independent and identical trials, pick a bead at random from an urn that contains three blue beads and two red ones. Random number generators permit us to mimic the process of picking at random.
     </p>
     <p>
       An example is the <c>sample</c> function in R. We demonstrate its use in the code below. First, we use the function <c>rep</c> to generate the urn:
@@ -62,7 +63,7 @@ sample(beads, 1)
       This line of code produces a single random outcome. We want to repeat this experiment an infinite number of times, but it is impossible to repeat indefinitely. Instead, we repeat the experiment a large enough number of times to make the results <em>practically equivalent</em> to repeating indefinitely. This is an example of a <em>Monte Carlo</em> simulation.
     </p>
     <p>
-      Much of what mathematical and theoretical statisticians study, topics that we do not cover in this book, relates to providing rigorous definitions of "practically equivalent". Additionally, they explore how close a large number of experiments brings us to what happens in the limit. Later in this chapter, we provide a practical approach to determining what is "large enough".
+Much of what mathematical and theoretical statisticians study relates to providing rigorous definitions of <em>practically equivalent</em> (topics that we do not cover in this book). Additionally, they explore how close a large number of experiments brings us to what happens in the limit. Later in this chapter, we provide a practical approach to determining what is <em>large enough</em>.
     </p>
     <p>
       To perform our first Monte Carlo simulation, we use the <c>replicate</c> function, which allows us to repeat the same task any number of times. Here, we repeat the random event 10,000 times:
@@ -117,7 +118,8 @@ set.seed(1986)
         </input>
       </program>
       <p>
-        Throughout this book, we use random number generators. This implies that many of the results presented can potentially change by chance, indicating that a static version of the book may show a different result than what you obtain when following the code as presented. This is actually fine, given that the results are random and change by chance. However, if you want to ensure that results are consistent with each run, you can set R's random number generation seed to a specific number. Above we set it to 1986. We want to avoid using the same seed every time and we used a popular way to pick the seed which is year - month - day. For example, we chose 1986 on December 20, 2018: <m>2018 - 12 - 20 = 1986</m>.
+        Throughout this book, we use random number generators. This implies that many of the results presented can potentially change by chance, indicating that a static version of the book may show a different result than what you obtain when 
+you run the presented code. This is actually fine, given that the results are random and should change by chance. However, if you want to ensure that results are the same with each run, you can set R’s random number generation seed to a specific number. Above, we set it to 1986. We want to avoid using the same seed every time and used a popular way to pick the seed which is to use the date we write the code to compute one number: year - month - day. For example, we chose 1986 based on the date December 20, 2018: <m>2018 - 12 - 20 = 1986</m>.
       </p>
       <p>
         You can learn more about setting the seed by looking at the documentation:
@@ -135,7 +137,7 @@ set.seed(1986)
     <subsection xml:id="with-and-without-replacement">
       <title>With and without replacement</title>
       <p>
-        The function <c>sample</c> has an argument that allows us to pick more than one element from the urn. However, by default, this selection occurs <em>without replacement</em>: after a bead is selected, it is not returned to the bag. Notice what happens when we ask to randomly select five beads:
+        The function <c>sample</c> has an argument that allows us to pick more than one element from the urn. However, by default, this selection occurs <em>without replacement</em>: after a bead is selected, it is not returned to the urn. Notice what happens when we ask to randomly select five beads:
       </p>
       <console>
         <input>
@@ -151,7 +153,7 @@ sample(beads, 5)
         This results in rearrangements that consistently comprise three blue and two red beads. If we ask that six beads be selected, we get an error.
       </p>
       <p>
-        However, the <c>sample</c> function can be used directly, without the use of <c>replicate</c>, to repeat the same experiment of picking 1 out of the 5 beads, continually, under the same conditions. To do this, we sample <em>with replacement</em>: return the bead back to the urn after selecting it. We can tell <c>sample</c> to do this by changing the <c>replace</c> argument, which defaults to <c>FALSE</c>, to <c>replace = TRUE</c>:
+        However, the <c>sample</c> function can be used directly, without the use of <c>replicate</c>, to repeat the same experiment of picking 1 out of the 5 beads, continually, under the same conditions. To do this, we sample <em>with replacement</em>: return the bead back to the urn after selecting it. We can tell <c>sample</c> to do this by changing the <c>replace</c> argument, which defaults to <c>TRUE</c>:
       </p>
       <program language="r">
         <input>
@@ -234,7 +236,8 @@ combinations(3, 2)
       Now (1,2) and (2,1) are treated as the same outcome.
     </p>
     <p>
-      Let's use these tools to compute the probability of a <em>Natural 21</em> in Blackjack, which occurs when a player's first two cards are an Ace and a face card (Jack, Queen, King, or Ten). Since order does not matter, we use <c>combinations()</c>:
+      Let's use these tools to compute the probability of a <em>Natural 21</em> in Blackjack, which occurs when a player's first two cards are an Ace and a face card (Jack, Queen, King, or Ten). Since order does not matter, we use <c>combinations()</c>,
+and pass our deck of cards in as the values corresponding to numbers 1 through 52 using the parameter <c>v</c>:
     </p>
     <console>
       <input>
@@ -266,7 +269,7 @@ results &lt;- replicate(10000, blackjack())
 mean(results)
         </input>
         <output>
-[1] 0.0468
+[1] 0.0453
         </output>
       </console>
       <p>
@@ -274,6 +277,10 @@ mean(results)
       </p>
     </subsection>
   </section>
+
+  <section xml:id="examples">
+
+</section>
 
   <section xml:id="examples">
     <title>Examples</title>
@@ -284,7 +291,7 @@ mean(results)
     <subsection xml:id="monty-hall-problem">
       <title>Monty Hall problem</title>
       <p>
-        In the 1970s, there was a game show called "Let's Make a Deal," with Monty Hall as the host. At some point in the game, contestants were asked to pick one of three doors. Behind one door, there was a prize, while the other doors had a goat behind them to show the contestant had lost. After the contestant picked a door, before revealing whether the chosen door contained a prize, Monty Hall would open one of the two remaining doors and reveal to the contestant that there was no prize behind that door. Then, he would ask, "Do you want to switch doors?" What would you do?
+In the 1970s, there was a game show called “Let’s Make a Deal,” with Monty Hall as the host. At some point in the game, contestants were asked to pick one of three doors. Behind one door, there was a prize, while the other two doors had goats behind them to show the contestant had lost. After the contestant picked a door, before revealing whether the chosen door contained a prize, Monty Hall would open one of the two remaining doors to reveal a goat. Then, he would ask, “Do you want to switch doors?” What would you do?
       </p>
       <p>
         We can use probability to demonstrate that if you stick with the original door choice, your chances of winning a prize remain 1 in 3. However, if you switch to the other door, your chances of winning double to 2 in 3! This might seem counterintuitive. Many people incorrectly think both chances are 1 in 2 since you are choosing between 2 options. You can watch a detailed mathematical explanation on Khan Academy<fn>https://www.khanacademy.org/math/precalculus/prob-comb/dependent-events-precalc/v/monty-hall-problem</fn> or read one on Wikipedia<fn>https://en.wikipedia.org/wiki/Monty_Hall_problem</fn>. Below, we use a Monte Carlo simulation to see which strategy is better. Note that this code is written longer than it should be for pedagogical purposes.
