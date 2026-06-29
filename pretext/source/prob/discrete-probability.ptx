@@ -88,7 +88,7 @@ sample(beads, 10000, replace = TRUE)
       </p>
     </note>
     <p>
-      We can now verify if our definition actually is in agreement with this Monte Carlo simulation approximation. We use <c>table</c> to count the outcomes and and <c>prop.table</c> gives us the proportions:
+      We can now verify if our definition actually is in agreement with this Monte Carlo simulation approximation. We use <c>table</c> to count the outcomes and <c>prop.table</c> gives us the proportions:
     </p>
     <console>
       <input>
@@ -101,10 +101,10 @@ events
       </output>
     </console>
     <p>
-      The numbers above represent the estimated probabilities obtained by this Monte Carlo simulation. Statistical theory tells us that as <m>B</m> gets larger, the estimates get closer to 3/5=.6 and 2/5=.4.
+      The numbers above represent the estimated probabilities obtained by this Monte Carlo simulation. Statistical theory tells us that as the number of repetitions the number of experiments gets larger, the estimates get closer to 3/5=0.6 and 2/5=0.4.
     </p>
     <p>
-      This is a simple and not very useful example, since we can easily compute the probabilities mathematically. Monte Carlo simulations are useful when it is hard, or impossible, to compute the exact probabilities mathematically. Before delving into more complex examples, we use simple ones to demonstrate the computing tools available in R.
+      This is a simple and not very useful example, since we can easily compute the probabilities mathematically. Monte Carlo simulations are useful when it is hard or impossible to compute the exact probabilities mathematically. Before delving into more complex examples, we use simple ones to demonstrate the computing tools available in R.
     </p>
 
     <subsection xml:id="setting-the-random-seed">
@@ -130,7 +130,7 @@ you run the presented code. This is actually fine, given that the results are ra
         </input>
       </program>
       <p>
-        In the exercises, we may ask you to set the seed to assure that the results you obtain are exactly what we expect them to be.
+        In the exercises, we may ask you to set the seed to ensure that the results you obtain are exactly what we expect them to be.
       </p>
     </subsection>
 
@@ -153,7 +153,7 @@ sample(beads, 5)
         This results in rearrangements that consistently comprise three blue and two red beads. If we ask that six beads be selected, we get an error.
       </p>
       <p>
-        However, the <c>sample</c> function can be used directly, without the use of <c>replicate</c>, to repeat the same experiment of picking 1 out of the 5 beads, continually, under the same conditions. To do this, we sample <em>with replacement</em>: return the bead back to the urn after selecting it. We can tell <c>sample</c> to do this by changing the <c>replace</c> argument, which defaults to <c>TRUE</c>:
+        However, the <c>sample</c> function can be used directly, without the use of <c>replicate</c>, to repeat the same experiment of picking 1 out of the 5 beads, continually, under the same conditions. To do this, we sample <em>with replacement</em>: return the bead back to the urn after selecting it. We can tell <c>sample</c> to do this by changing the <c>replace</c> argument, which defaults to <c>FALSE</c>:
       </p>
       <program language="r">
         <input>
@@ -278,9 +278,40 @@ mean(results)
     </subsection>
   </section>
 
-  <section xml:id="examples">
+  <section xml:id="sec-conditional-probability">
+    <title>Conditional probability</title>
+    <p>
+      So far, we have discussed the probability of events without taking into account any additional information from other events. In many applications, however, we want to update probabilities after learning that some other event has occurred. This leads to the idea of <em>conditional probability</em>, a concept that is fundamental to probability theory and statistics.
+    </p>
 
-</section>
+    <p>
+      If <m>A</m> and <m>B</m> are events and <m>\Pr(B) &gt; 0</m>, the conditional probability of <m>A</m> given <m>B</m> is defined as:
+    </p>
+
+    <p>
+      <me>\Pr(A \mid B) = \frac{\Pr(A \cap B)}{\Pr(B)}</me>
+    </p>
+
+    <p>
+      This quantity tells us how likely <m>A</m> is when we restrict attention to outcomes for which <m>B</m> occurs.
+    </p>
+
+    <p>
+      Conditional probability is a important probability theorytopic. Readers interested in a rigorous treatment of this concept should consult the probability textbooks listed in the Recommended Reading section. In this book, conditional probability becomes particularly important when we analyze relationships between two or more variables in the regression and linear models chapters, and when we work with multiple predictors in the machine learning chapters. In those sections, we provide detailed explanations and examples in context.
+    </p>
+
+    <p>
+      A related concept that will be important later in this book is the <em>law of total probability</em>. This law provides a way to break down probabilities into parts by conditioning on different events. Intuitively, if you want to know the probability of an event, you can condition on different scenarios and then combine those conditional probabilities, weighted by how likely each scenario is. Mathematically, if <m>B_1, B_2, \ldots, B_k</m> are mutually exclusive and exhaustive events, then:
+    </p>
+
+    <p>
+      <me>\Pr(A) = \sum_{i=1}^{k} \Pr(A \mid B_i) \Pr(B_i)</me>
+    </p>
+
+    <p>
+      For a rigorous treatment, consult the probability textbooks listed in the Recommended Reading section.
+    </p>
+  </section>
 
   <section xml:id="examples">
     <title>Examples</title>
@@ -423,13 +454,10 @@ lines(n, eprob, col = "red")
   <section xml:id="infinity-in-practice">
     <title>Infinity in practice</title>
     <p>
-      The theory described here requires repeating experiments over and over indefinitely. In practice, we can't do this. In the examples above, we used <m>B=10,000</m> Monte Carlo experiments, yielding accurate estimates. The larger this number, the more accurate the estimate becomes, until the approximation is so good that your computer can't tell the difference. However, in more complex calculations, 10,000 may not be nearly enough. Moreover, for some calculations, 10,000 experiments might not be computationally feasible.
+      Theoretically, obtaining a Monte Carlo estimate that equals the exact probability requires repeating experiments over and over indefinitely. In practice, we can't do this. In the examples above, we used 10,000 Monte Carlo experiments, yielding accurate estimates. The larger this number, the more accurate the estimate becomes, until the approximation is so good that your computer can't tell the difference. However, in more complex calculations, 10,000 may not be nearly enough. Horeover, for some calculations, 10,000 experiments might not be computationally feasible.
     </p>
     <p>
-      Although in this case we know the exact probability is <c>eprob[25]</c>, in practical scenarios, we won't know what the answer is beforehand, so we won't know if our Monte Carlo estimate is accurate. We know that the larger the <m>B</m>, the better the approximation. But how large do we need it to be? This is actually a challenging question, and answering it often requires advanced theoretical statistics training.
-    </p>
-    <p>
-      One practical approach is to check for the stability of the estimate. The following example illustrates the birthday problem for a group of 25 people.
+      We know that the larger the number of replicates, the better the approximation. But how large do we need it to be? This is actually a challenging question, and answering it often requires advanced theoretical statistics training. One practical approach that does not requiere theory is to check the stability of the estimate as the number of experiments increases. The following example illustrates the birthday problem for a group of 25 people.
     </p>
     <program language="r" xml:id="monte-carlo-convergence">
       <input>
@@ -448,7 +476,10 @@ abline(h = eprob[25], lty = 2)
       </image>
     </figure>
     <p>
-      In this plot, we can see that the values start to stabilize at around 1,000.
+      Although in this case we know the exact probability is <c>eprob[25]</c>, in practical scenarios, we won't know what the answer is beforehand, so we won't know if our Monte Carlo estimate is accurate. However, we can explore when it starts stabilizing.
+    </p>
+    <p>
+      In this plot, we can see that the values start to stabilize at around <m>10^{3.5} \approx 3000</m>.
     </p>
   </section>
 

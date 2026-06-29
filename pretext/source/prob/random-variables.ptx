@@ -16,7 +16,7 @@
     </p>
     
     <p>
-      In this chapter, we focus on cases in which the probability distribution of the random variable is completely known. These are idealized settings, such as games of chance, where probabilities are determined by the rules of the game rather than by data. Working with these simple, controlled examples allows us to understand the mathematical foundations of probability, expected values, standard errors, and sampling distributions.
+      In this chapter, we focus on cases in which the probability distribution of the random variable is completely known. These are idealized settings, such as games of chance, where probabilities are determined by the rules of the game. Working with these simple, controlled examples allows us to understand the mathematical foundations of probability, expected values, standard deviations, and sampling distributions.
     </p>
     
     <p>
@@ -47,11 +47,11 @@ x &lt;- ifelse(sample(beads, 1) == "blue", 1, 0)
     </program>
     
     <p>
-      Each time we draw a bead, the value of <m>X</m> may change because the outcome is random. A variable like this, which takes only the values 0 and 1, is called a <em>Bernoulli random variable</em> in statistical textbooks. Bernoulli trials are the building blocks for many statistical models, since many outcomes, such as success/failure, yes/no, or heads/tails, can be represented this way.
+      Each time we draw a bead, the value of <m>X</m> may change because the outcome is random. A variable like this, which takes only the values 0 and 1, is called a <em>Bernoulli random variable</em>. Bernoulli trials are the building blocks for many statistical models, since many outcomes, such as success/failure or yes/no can be represented this way.
     </p>
     
     <p>
-      A classic example is the number of heads, call it <m>S_n</m>, observed when tossing <m>n</m> fair coins. We can generate one observation of this random variable using a simulation:
+      A classic example is the number of heads observed when tossing <m>n</m> fair coins, call it <m>S_n</m>. We can generate one observation of this random variable using a simulation:
     </p>
     
     <program language="r">
@@ -65,7 +65,7 @@ s &lt;- sum(sample(c(0,1), n, replace = TRUE))
     </p>
     
     <p>
-      Not all random variables are discrete. Some can take on a continuum of values. For example, the height of a randomly selected person or the result of a physical measurement can be viewed as a <em>continuous random variable</em>. As an example, we simulate such a variable using the normal distribution:
+      Not all random variables are discrete. Some can take on a continuum of values, as in <xref ref="continuous-probability" />. For example, the height of a randomly selected person or the result of a physical measurement can be viewed as a <em>continuous random variable</em>. As an example, we simulate such a variable using the normal distribution:
     </p>
     
     <program language="r">
@@ -79,7 +79,7 @@ x &lt;- rnorm(10, mean = 70, sd = 3)
     </p>
     
     <p>
-      These examples, discrete Bernoulli variables and a continuous normal variable, illustrate the main types of random variables we will study in this chapter. Understanding their behavior and summarizing their distributions are the key steps that lead us toward the ideas of expected value, variability, and, ultimately, statistical inference.
+      These examples<mdash/>a discrete Bernoulli variable and a continuous normal variable<mdash/>illustrate the main types of random variables we will study in this chapter. Understanding their behavior and summarizing their distributions are the key steps that lead us toward the ideas of expected value, variability, and, ultimately, statistical inference.
     </p>
   </section>
 
@@ -95,7 +95,7 @@ x &lt;- rnorm(10, mean = 70, sd = 3)
     </me>
     
     <p>
-      This notation is convenient because it lets us express probability statements compactly. It may seem odd at first, since <m>X</m> represents an outcome not yet observed, we can discuss the likelihood of its possible values, but not its realized value. Once data are collected, we observe one realization of <m>X</m>, and then reason about what <em>could</em> have occurred, given what <em>did</em> occur.
+      This notation is convenient because it lets us express probability statements compactly. It may seem odd at first: since <m>X</m> represents an outcome not yet observed, we can discuss the likelihood of its possible values but not of its realized value. Once data are collected, we observe a realization of <m>X</m>. From that point on, statistical inference uses the observed value to reason about the underlying random process and the other outcomes that could have occurred.
     </p>
   </section>
 
@@ -103,7 +103,7 @@ x &lt;- rnorm(10, mean = 70, sd = 3)
     <title>The probability distribution of a random variable</title>
     
     <p>
-      The <em>probability distribution</em> of a random variable tells us how likely each possible outcome is. For example, if we toss <m>n</m> fair coins, we might ask for the probability of observing 40 or fewer heads. This is equivalent to asking for <m>\mathrm{Pr}(S_n \leq 40)</m>.
+      The <em>probability distribution</em> of a random variable tells us how likely each possible outcome is. For example, if we toss <m>n</m> fair coins, we might ask for the probability of observing 40 or fewer heads. Using the notation from above, this is equivalent to asking for <m>\mathrm{Pr}(S_n \leq 40)</m>.
     </p>
     
     <p>
@@ -169,11 +169,11 @@ data.frame(S_n = s) |&gt; ggplot(aes(S_n, after_stat(density))) +
     
     <p>
       We see that the distribution is approximately normal. A qqplot will confirm that the normal approximation provides an excellent fit.
-      In the next chapter (<xref ref="sec-clt-prob"/>), we will learn the theory that explains why this approximation works so well. In fact, this result extends far beyond coin flips, it applies broadly to averages and sums of many kinds of random variables.
+      In the next chapter (<xref ref="sec-clt-prob"/>), we will learn the theory that explains why this approximation works so well. In fact, normal approximations extend far beyond coin flips<mdash/>they apply broadly to averages and sums of many kinds of random variables.
     </p>
     
     <p>
-      If the distribution is normal, it is fully characterized by its average and standard deviation. These two quantities have special names in probability theory: the <em>expected value</em> and the <em>standard error</em> of the random variable. We discuss these next.
+      If the distribution is normal, it is fully characterized by its average and standard deviation. In probability theory, these are called the <em>expected value</em> and the <em>standard deviation</em> of the random variable. We discuss these next.
     </p>
     
     <note>

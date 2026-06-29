@@ -45,12 +45,12 @@
         </p>
 
         <p>
-            It is important to keep this in mind: when our probability model is
+            It is important to keep in mind that when our probability model is
             wrong, our conclusions may be wrong as well.
         </p>
 
         <p>
-            Below we go over the five main ways we connect probability to data.
+            Below, we go over the five main ways we connect probability to data.
         </p>
 
         <subsection xml:id="random-sampling">
@@ -83,7 +83,7 @@
 
             <p>
                 A second setting where probability connects directly to data is
-                randomized experiments.
+                <em>randomized experiments</em>.
                 In clinical trials, for instance, patients are assigned to a
                 treatment or control group by chance, often by flipping a coin.
                 This ensures that, on average, the groups are comparable and
@@ -96,7 +96,7 @@
                 on the same fundamental idea: random assignment creates
                 conditions where probability can be used to infer causation.
                 In these examples, as in coin or urn examples (described in
-                Chapter 5), the link between probability and data is clear.
+                <xref ref="discrete-probability"/>), the link between probability and data is clear.
             </p>
         </subsection>
 
@@ -141,7 +141,7 @@
                 well and have provided valuable insights.
                 For example, studies using observational data have convincingly
                 shown that smoking harms health and that regular exercise and
-                good diet extend life.
+                a good diet extend life.
                 But when data come from convenience samples, extra care is
                 needed.
                 The assumptions behind our probability models become especially
@@ -156,7 +156,7 @@
                 Understanding what those assumptions are, and thinking
                 critically about whether they are reasonable, is essential for
                 sound data analysis.
-                In <xref ref="sec-association-not-causation"/> ), we will
+                In <xref ref="sec-association-not-causation"/> we will
                 revisit this topic and show concrete examples of how unexamined
                 assumptions about randomness can distort results.
             </p>

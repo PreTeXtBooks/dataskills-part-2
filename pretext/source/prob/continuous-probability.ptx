@@ -6,6 +6,9 @@
     <p>
       In <xref ref="sec-ecdf-intro"/>, we discussed why it is not practical to assign a frequency to every possible continuous outcome, such as an exact height, since there are infinitely many possible values. The same idea extends to random outcomes that take values on a continuous scale: each individual value has probability zero. Instead, we describe their behavior through probability density functions, which let us compute probabilities for intervals of values rather than single points.
     </p>
+    <p>
+      In this chapter, we introduce the mathematical framework for continuous probability distributions and present several useful approximations that frequently appear in data analysis.
+    </p>
   </introduction>
 
   <section xml:id="sec-cdf-intro">
@@ -43,7 +46,7 @@ F &lt;- function(a) mean(x &lt;= a)
       </output>
     </console>
     <p>
-      The cumulative distribution function (CDF) is the theoretical counterpart of the eCDF. Rather than relying on observed data, it assigns probabilities to ranges of values for a random outcome <m>X</m>. Specifically, the CDF gives, for any number <m>a</m>, the probability that <m>X</m> is less than or equal to <m>a</m>:
+      The cumulative distribution function (CDF) is the theoretical counterpart of the eCDF. Rather than relying on observed data to compute proportions, it directly assigns probabilities to ranges of values for a random outcome <m>X</m>. Specifically, the CDF gives, for any number <m>a</m>, the probability that <m>X</m> is less than or equal to <m>a</m>:
     </p>
     <me>
       F(a) = \Pr(X \leq a)
@@ -115,7 +118,7 @@ ggplot(mapping = aes(x, y)) +
       f(x) = \frac{1}{\sqrt{2\pi}\,\sigma} \exp\left(-\frac{1}{2}\left(\frac{x - \mu}{\sigma}\right)^2\right)
     </me>
     <p>
-      and as we previous saw has a bell shaped centered at <m>\mu</m> and 95% of the area with <m>2\sigma</m> from <m>\mu</m>:
+      and, as we previously saw, has a bell shape centered at <m>\mu</m>, with 95% of the area within <m>2\sigma</m> from <m>\mu</m>
     </p>
     <program language="r">
       <input>
@@ -163,7 +166,7 @@ ggplot(df, aes(x, f)) +
       </image>
     </figure>
     <p>
-      In R, this function this PDF is given by <c>dnorm</c> and the corresponding CDF by <c>pnorm</c>.
+      In R, this PDF is given by <c>dnorm</c> and the corresponding CDF by <c>pnorm</c>.
     </p>
     <p>
       A random outcome is said to be <em>normally distributed</em> with mean <c>m</c> and standard deviation <c>s</c> if its CDF is defined by
@@ -174,7 +177,7 @@ F(a) &lt;- pnorm(a, mean = m, sd = s)
       </input>
     </program>
     <p>
-      This is particularly useful in practice. If we are willing to assume that a variable, such as height follows a normal distribution, we can answer probability questions without needing the full dataset. For example, to find the probability that a randomly selected student is taller than 70.5 inches, we only need the sample mean and standard deviation:
+      This is useful in many data applications. If we are willing to assume that a variable, such as height, follows a normal distribution, we can answer probability questions without needing the full dataset. For example, to find the probability that a randomly selected student is taller than 70.5 inches, we only need the sample mean and standard deviation:
     </p>
     <console>
       <input>
@@ -194,20 +197,20 @@ s &lt;- sd(x)
       Theoretical distributions, such as the normal distribution, are defined mathematically rather than derived directly from data. In practice, we use them to <em>approximate</em> the behavior of real data that arise from complex or unknown processes. Almost all datasets we analyze consist of discrete observations, yet many of these quantities, such as height, weight, or blood pressure, are better understood as measurements of underlying continuous variables.
     </p>
     <p>
-      For example, our height data appear discrete because values are typically rounded to the nearest inch. A few individuals report more precise metric measurements, while most round to whole inches. It is therefore more realistic to think of height as a continuous variable whose apparent discreteness comes from rounding.
+      For example, our height data appear discrete because values are typically rounded to the nearest inch. A few individuals report more precise metric measurements, while most round to whole inches. Therefore, it is more realistic to think of height as a continuous variable whose apparent discreteness comes from rounding.
     </p>
     <p>
-      When using a continuous distribution such as the normal, we no longer assign probabilities to individual points, each exact value has probability zero, but rather to <em>intervals</em>. In <xref ref="sec-numeric-summaries"/> we showed how this theoretical distributions can approximate.
+      When using a continuous distribution such as the normal, we no longer assign probabilities to individual points<mdash/>each exact value has probability zero<mdash/>but rather to intervals. In <xref ref="sec-numeric-summaries"/>, we showed how theoretical normal distributions can approximate the distribution of height data.
     </p>
     <p>
-      The key idea is that theoretical distributions serve as <em>useful approximation</em>. They provide smooth mathematical descriptions that let us compute probabilities and reason about uncertainty. Even though real measurements are discrete, the continuous approximations that apply, such as the normal distribution, allow us to work with data analytically and build models that generalize well beyond a specific dataset.
+      The key idea is that theoretical distributions serve as useful approximations. They provide smooth mathematical descriptions that let us compute probabilities and reason about uncertainty. Even though real measurements are discrete, the continuous approximations that apply, such as the normal distribution, allow us to work with data analytically and build models that generalize well beyond a specific dataset.
     </p>
   </section>
 
   <section xml:id="monte-carlo-simulations">
     <title>Monte Carlo simulations</title>
     <p>
-      Simulation is a powerful way to understand randomness, approximate probabilities, and explore how theoretical models behave in practice. Many of the probability models used in data analysis are continuous distributions, which describe outcomes that can take any value within a range. In R, all random-number–generating functions that produce simulated data from a continuous distribution, begin with the letter <c>r</c>. These functions form part of a consistent family that allows us to simulate from nearly any probability distribution. In this section, we illustrate Monte Carlo techniques using continuous distributions, starting with the normal distribution and extending to other commonly used models.
+      Simulation is a powerful way to understand randomness, approximate probabilities, and explore how theoretical models behave in practice. Many of the probability models used in data analysis are continuous distributions, which describe outcomes that can take any value within a range. In R, all random-number–generating functions that produce simulated data from a distribution begin with the letter <c>r</c>. These functions form part of a consistent family that allows us to simulate from nearly any probability distribution. In this section, we illustrate Monte Carlo techniques using continuous distributions, starting with the normal distribution and extending to other commonly used models.
     </p>
 
     <subsection xml:id="normal-distribution">
@@ -250,7 +253,7 @@ data.frame(simulated_heights = simulated_heights) |&gt;
     <subsection xml:id="example-extreme-values">
       <title>Example: extreme values</title>
       <p>
-        How rare is it to find a seven-footer among 800 men? Suppose we repeatedly sample 800 male students at random and record the tallest in each group. What does the distribution of these tallest height look like? The following Monte Carlo simulation helps us find out:
+        How rare is it to find a seven-footer among 800 men? Suppose we repeatedly sample 800 male students at random and record the tallest in each group. What does the distribution of these tallest heights look like? The following Monte Carlo simulation helps us find out:
       </p>
       <program language="r">
         <input>
