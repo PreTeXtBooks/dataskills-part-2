@@ -436,11 +436,11 @@ mean(x)
     </section>
 
     <section xml:id="sec-key-properties">
-        <title>Key properties of expectations and standard errors</title>
+        <title>Key properties of expectations and standard deviations</title>
 
         <p>
             There are several mathematical properties of expectations and
-            standard errors that we will use frequently when working with data.
+            standard deviations that we will use frequently when working with data.
         </p>
 
         <p>
@@ -454,7 +454,7 @@ mean(x)
         </me>
 
         <p>
-            If <m>X</m> represents independent draws from the urn, then they all
+            If <m>X_i</m> represent independent draws from the urn, then they all
             have the same expected value.
             Let's denote the expected value with <m>\mu_X</m> and rewrite the
             equation as:
@@ -473,7 +473,7 @@ mean(x)
             The expected value of a non-random constant times a random variable
             is the non-random constant times the expected value of a random
             variable.
-            If we shift the random variable, the expected value shifts by that
+            If we shift the random variable by adding or subtracting, the expected value shifts by that
             amount.
             This is easier to explain with symbols:
         </p>
@@ -499,7 +499,7 @@ mean(x)
         <p>
             3.
             The variance of the sum of <term>independent</term> random variables
-            is the sum of variances of each random variable:
+            is the sum of the variances of each random variable:
         </p>
         <me>
             \mathrm{Var}[X_1+X_2+\dots+X_n] =\mathrm{Var}[X_1] + \mathrm{Var}[X_2]+\dots+\mathrm{Var}[X_n]
@@ -514,16 +514,16 @@ mean(x)
         </me>
 
         <p>
-            Note that this particular property is not as intuitive as the
-            previous three and more in depth explanations can be found in
+            This particular property is not as intuitive as the
+            previous three and more in-depth explanations can be found in
             statistics textbooks.
         </p>
 
         <p>
             4.
             The standard deviation of a non-random constant times a random
-            variable is the non-random constant times the random variable's
-            standard deviation.
+            variable is the absolute value of the non-random constant times
+            the random variable’s standard deviation. As with the expectation:
             As with the expectation:
         </p>
         <me>
@@ -535,7 +535,7 @@ mean(x)
         </p>
 
         <p>
-            If we shift the random variable by a constant the variability does
+            If we shift the random variable by a constant, the variability does
             not change.
             So it has no effect on the standard deviation:
         </p>
@@ -546,8 +546,8 @@ mean(x)
         <p>
             A consequence of 3 and 4 is that the standard deviation of the
             average of independent draws from the same urn is the standard
-            deviation of the urn divided by the square root of <m>n</m> (the
-            number of draws), call it <m>\sigma_X</m>:
+            deviation of the urn, call it <m>\sigma_X</m> divided by the
+            square root of <m>n</m> (the number of draws):
         </p>
         <md>
             <mrow>\mathrm{SD}[\bar{X}] = \mathrm{SD}[(X_1+X_2+\dots+X_n) / n] &amp;=   \mathrm{SD}[X_1+X_2+\dots+X_n]/n</mrow>
@@ -561,12 +561,8 @@ mean(x)
             <title>The assumption of independence is important</title>
 
             <p>
-                The given equation reveals crucial insights for practical
-                scenarios.
-                Specifically, it suggests that the standard deviation can be
-                minimized by increasing the sample size, <m>n</m>, and we can
-                quantify this reduction.
-                However, this principle holds true only when the variables
+                The given equation reveals crucial insights for practical scenarios. Specifically, it suggests that the standard deviation of the average of independent draws can be minimized by increasing the number of observations <m>n</m>,
+nd we can quantify this reduction. However, this principle holds true only when the variables
                 <m>X_1, X_2, ... X_n</m> are independent.
                 If they are not, the estimated standard deviation can be
                 significantly off.
@@ -576,7 +572,7 @@ mean(x)
                 In <xref ref="sec-corr-coef"/>, we introduce the concept of
                 correlation, which quantifies the degree to which variables are
                 interdependent.
-                If the correlation coefficient among the <m>X</m> variables is
+                If the correlation coefficient between each pair of variables <m>X_i</m>, <m>X_j</m> is
                 <m>\rho</m>, the standard deviation of their average is:
             </p>
             <me>
@@ -590,6 +586,14 @@ mean(x)
                 deviation, <m>\mathrm{SD}[\bar{X}]</m>, equals <m>\sigma_X</m>,
                 and it becomes unaffected by the sample size <m>n</m>.
             </p>
+<p>
+Specifically, properties 2 and 4 tell us that if <m>X</m> is normally distributed with mean <m>/mu</m>
+ and standard deviation <m>/sigma</m> then <m>aX + b</m> is normally distributed with mean
+<m>a \mu + b</m> and standard deviation <m>|a|\sigma</m>.
+</p>
+<p>
+While multiplication and addition always have this effect on the expected value and standard deviation, they do not in general preserve the form of the distribution. Property 5 is specific to the normal distribution.
+</p>
         </warning>
 
         <p>
