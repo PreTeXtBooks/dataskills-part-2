@@ -16,10 +16,10 @@
     </p>
     
     <program language="r">
-      <input>
+      <code>
 library(caret)
 library(dslabs)
-      </input>
+      </code>
     </program>
     
     <p>
@@ -27,9 +27,9 @@ library(dslabs)
     </p>
     
     <program language="r">
-      <input>
+      <code>
 names(heights) &lt;- c("y", "x")
-      </input>
+      </code>
     </program>
     
     <p>
@@ -59,10 +59,10 @@ names(heights) &lt;- c("y", "x")
     </p>
     
     <program language="r">
-      <input>
+      <code>
 set.seed(2010)
 train_ind &lt;- createDataPartition(heights$y, p = 0.5, list = FALSE)
-      </input>
+      </code>
     </program>
     
     <p>
@@ -74,10 +74,10 @@ train_ind &lt;- createDataPartition(heights$y, p = 0.5, list = FALSE)
     </p>
     
     <program language="r">
-      <input>
+      <code>
 train_set &lt;- heights[train_ind, ]
 test_set &lt;- heights[-train_ind, ]
-      </input>
+      </code>
     </program>
     
     <p>
@@ -97,9 +97,9 @@ test_set &lt;- heights[-train_ind, ]
     </p>
     
     <program language="r">
-      <input>
+      <code>
 y_hat &lt;- factor(sample(c("Female", "Male"), nrow(test_set), replace = TRUE))
-      </input>
+      </code>
     </program>
     
     <p>
@@ -110,14 +110,15 @@ y_hat &lt;- factor(sample(c("Female", "Male"), nrow(test_set), replace = TRUE))
       The <term>overall accuracy</term> is simply defined as the overall proportion that is predicted correctly:
     </p>
     
-    <console>
-      <input>
+    <program language="r">
+      <code>
 mean(y_hat == test_set$y)
-      </input>
-      <output>
+      </code>
+    </program>
+
+      <pre>
 [1] 0.482
-      </output>
-    </console>
+      </pre>
     
     <p>
       Not surprisingly, our accuracy is about 50%. We are guessing!
@@ -128,24 +129,25 @@ mean(y_hat == test_set$y)
     </p>
     
     <program language="r">
-      <input>
+      <code>
 cutoff &lt;- with(train_set, mean(x) - 2*sd(x))
 y_hat &lt;- factor(ifelse(test_set$x &lt;= cutoff, "Female", "Male"))
-      </input>
+      </code>
     </program>
     
     <p>
       The accuracy goes up from 0.5 to about 0.8:
     </p>
     
-    <console>
-      <input>
+    <program language="r">
+      <code>
 mean(test_set$y == y_hat)
-      </input>
-      <output>
+      </code>
+    </program>
+
+      <pre>
 [1] 0.771
-      </output>
-    </console>
+      </pre>
     
     <p>
       But can we do even better? In the example above, we used a cutoff of 62, but we can examine the accuracy obtained for other cutoffs and then pick the value that provides the best results. But remember, <term>it is important that we optimize the cutoff using only the training set</term>: the test set is only for evaluation.
@@ -158,27 +160,18 @@ mean(test_set$y == y_hat)
     </p>
     
     <program language="r">
-      <input>
+      <code>
 cutoffs &lt;- seq(61, 70)
 accuracy &lt;- sapply(cutoffs, function(cutoff){
   y_hat &lt;- factor(ifelse(train_set$x &lt;= cutoff, "Female", "Male"))
   mean(y_hat == train_set$y)
 })
-      </input>
+      </code>
     </program>
     
     <p>
       We can make a plot showing the accuracy obtained on the training set for males and females:
     </p>
-    
-    <program language="r">
-      <input>
-data.frame(cutoff = cutoffs, accuracy) |&gt; 
-  ggplot(aes(cutoff, accuracy)) + 
-  geom_point() + 
-  geom_line()
-      </input>
-    </program>
     
     <figure xml:id="fig-evaluation-metrics-accuracy-vs-cutoff">
       <caption>Training accuracy as a function of the height cutoff</caption>
@@ -191,42 +184,42 @@ data.frame(cutoff = cutoffs, accuracy) |&gt;
       We see that the maximum value is:
     </p>
     
-    <console>
-      <input>
+    <program language="r">
+      <code>
 max(accuracy)
-      </input>
-      <output>
+      </code>
+    </program>
+      <pre>
 [1] 0.832
-      </output>
-    </console>
+      </pre>
     
     <p>
       which is much higher than 0.5. The cutoff resulting in this accuracy is:
     </p>
     
-    <console>
-      <input>
+    <program language="r">
+      <code>
 best_cutoff &lt;- cutoffs[which.max(accuracy)]
 best_cutoff
-      </input>
-      <output>
+      </code>
+    </program>
+      <pre>
 [1] 64
-      </output>
-    </console>
+      </pre>
     
     <p>
       We can now test this cutoff on our test set to make sure our accuracy is not overly optimistic:
     </p>
     
-    <console>
-      <input>
+    <program language="r">
+      <code>
 y_hat &lt;- factor(ifelse(test_set$x &lt;= best_cutoff, "Female", "Male"))
 mean(y_hat == test_set$y)
-      </input>
-      <output>
+      </code>
+    </program>
+      <pre>
 [1] 0.821
-      </output>
-    </console>
+      </pre>
     
     <p>
       We see that it is a bit lower than the accuracy observed for the training set. This is because we used the training set to select the cutoff, so there is some overfitting.
@@ -245,46 +238,46 @@ However, our cutoff-based approach is still better than guessing. And by testing
       Generally speaking, overall accuracy can be misleading. To understand why, we begin by constructing a <term>confusion matrix</term>, a table that counts how often each combination of prediction and true outcome occurs. In R, we could create this table with <c>table</c>, but the <term>caret</term> package provides a convenient function, <c>confusionMatrix</c>, that not only computes the confusion matrix but also reports several additional performance metrics that we will use later:
     </p>
     
-    <console>
-      <input>
+    <program language="r">
+      <code>
 cm &lt;- confusionMatrix(data = y_hat, reference = test_set$y)
 cm$table
-      </input>
-      <output>
+      </code>
+    </program>
+      <pre>
           Reference
 Prediction Female Male
     Female     54   29
     Male       65  377
-      </output>
-    </console>
+      </pre>
     
     <p>
       If we study this table closely, it reveals a problem. If we compute the accuracy separately for each sex (in the next section, we explain that, in this context, <term>sensitivity</term> and <term>specificity</term> are equivalent to accuracy for females and males, respectively) we get:
     </p>
     
-    <console>
-      <input>
+    <program language="r">
+      <code>
 cm$byClass[c("Sensitivity", "Specificity")]
-      </input>
-      <output>
+      </code>
+    </program>
+      <pre>
 Sensitivity Specificity 
       0.454       0.929
-      </output>
-    </console>
+      </pre>
     
     <p>
       We notice an imbalance: too many females are predicted to be male. We are calling almost half of the females male! How can our overall accuracy be so high then? This is because the <term>prevalence</term>, defined as the proportion of <m>Y=1</m> in our data, is substantially lower than 0.5. These heights were collected from three data sciences courses, two of which had higher male enrollment:
     </p>
     
-    <console>
-      <input>
+    <program language="r">
+      <code>
 cm$byClass["Prevalence"]
-      </input>
-      <output>
+      </code>
+    </program>
+      <pre>
 Prevalence 
      0.227
-      </output>
-    </console>
+      </pre>
     
     <p>
       So when computing overall accuracy, the high percentage of mistakes made for females is outweighed by the gains in correct calls for men.
@@ -411,10 +404,10 @@ Prevalence
     </p>
     
     <program language="r">
-      <input>
+      <code>
 cm &lt;- confusionMatrix(data = y_hat, reference = test_set$y)
 print(cm)
-      </input>
+      </code>
     </program>
     
     <p>
@@ -425,18 +418,18 @@ print(cm)
       You can access these directly, for example, like this:
     </p>
     
-    <console>
-      <input>
+    <program language="r">
+      <code>
 cm$overall["Accuracy"]
 cm$byClass[c("Sensitivity","Specificity", "Prevalence", "Pos Pred Value")]
-      </input>
-      <output>
+      </code>
+    </program>
+      <pre>
  Accuracy 
    0.821
    Sensitivity    Specificity     Prevalence Pos Pred Value 
          0.454          0.929          0.227          0.651
-      </output>
-    </console>
+      </pre>
     
     <p>
       We can see that the high overall accuracy is possible despite relatively low sensitivity. As we hinted at above, the reason this happens is because of the low prevalence (0.23): the proportion of females is low. Because prevalence is low, failing to predict females correctly (low sensitivity) does not lower the overall accuracy as much as failing to predict males correctly (low specificity). This is an example of why it is important to examine sensitivity and specificity and not just accuracy.
@@ -483,27 +476,18 @@ cm$byClass[c("Sensitivity","Specificity", "Prevalence", "Pos Pred Value")]
     </p>
     
     <program language="r">
-      <input>
+      <code>
 cutoffs &lt;- seq(61, 70)
 F_1 &lt;- sapply(cutoffs, function(cutoff){
   y_hat &lt;- factor(ifelse(train_set$x &lt;= cutoff, "Female", "Male"))
   F_meas(y_hat, train_set$y)
 })
-      </input>
+      </code>
     </program>
     
     <p>
       As before, we can plot these <m>F_1</m> measures versus the cutoffs:
     </p>
-    
-    <program language="r">
-      <input>
-data.frame(cutoff = cutoffs, F_1 = F_1) |&gt; 
-  ggplot(aes(cutoff, F_1)) + 
-  geom_point() + 
-  geom_line()
-      </input>
-    </program>
     
     <figure xml:id="fig-evaluation-metrics-f1-vs-cutoff">
       <caption><m>F_1</m> score as a function of the height cutoff</caption>
@@ -516,44 +500,46 @@ data.frame(cutoff = cutoffs, F_1 = F_1) |&gt;
       We see that it is maximized at <m>F_1</m> value of:
     </p>
     
-    <console>
-      <input>
+    <program language="r">
+      <code>
 max(F_1)
-      </input>
-      <output>
+      </code>
+    </program>
+      <pre>
 [1] 0.617
-      </output>
-    </console>
+      </pre>
     
     <p>
       This maximum is achieved when we use the following cutoff:
     </p>
     
-    <console>
-      <input>
+    <program language="r">
+      <code>
 best_cutoff &lt;- cutoffs[which.max(F_1)]
 best_cutoff
-      </input>
-      <output>
+      </code>
+    </program>
+
+      <pre>
 [1] 66
-      </output>
-    </console>
+      </pre>
     
     <p>
       A cutoff of 66 makes more sense than 64 because it falls closer to the midpoint between the average heights of males and females. Additionally, it provides a better balance between sensitivity and specificity in the resulting confusion matrix.
     </p>
     
-    <console>
-      <input>
+    <program language="r">
+      <code>
 y_hat &lt;- factor(ifelse(test_set$x &lt;= best_cutoff, "Female", "Male"))
 sensitivity(y_hat, test_set$y)
 specificity(y_hat, test_set$y)
-      </input>
-      <output>
+      </code>
+    </program>
+
+      <pre>
 [1] 0.672
 [1] 0.837
-      </output>
-    </console>
+      </pre>
     
     <p>
       We now see that we do much better than guessing, with sensitivity and specificity both relatively high.
@@ -580,7 +566,7 @@ specificity(y_hat, test_set$y)
     </p>
     
     <program language="r">
-      <input>
+      <code>
 probs &lt;- seq(0, 1, length.out = 11)
 guessing &lt;- sapply(probs, function(p){
   y_hat &lt;- sample(c("Male", "Female"), nrow(test_set), TRUE, c(p, 1 - p)) 
@@ -588,53 +574,12 @@ guessing &lt;- sapply(probs, function(p){
   c(FPR = 1 - specificity(y_hat, test_set$y),
     TPR = sensitivity(y_hat, test_set$y))
 })
-      </input>
+      </code>
     </program>
     
     <p>
       We can use similar code to compute these values for our second approach. By plotting both curves together, we are able to compare sensitivity for different values of specificity. Each point in the "guessing" curve is labeled by the probability that an individual is predicted to be male; each point in the "height cutoff" curve is labeled by the cutoff above which individuals are predicted to be male.
     </p>
-    
-    <program language="r">
-      <input>
-cutoffs &lt;- c(50, seq(60, 75), 80)
-height_cutoff &lt;- sapply(cutoffs, function(x){
-  y_hat &lt;- ifelse(test_set$x &lt;= x, "Female", "Male")
-  y_hat &lt;- factor(y_hat, levels = c("Female", "Male"))
-  c(FPR = 1 - specificity(y_hat, test_set$y),
-    TPR = sensitivity(y_hat, test_set$y))
-})
-      </input>
-    </program>
-    
-    <program language="r">
-      <input>
-library(tidyverse)
-library(ggrepel)
-tmp_1 &lt;- map_df(cutoffs, function(x){
-  y_hat &lt;- ifelse(test_set$x &lt;= x, "Female", "Male") 
-  y_hat &lt;- factor(y_hat, levels = c("Female", "Male"))
-  list(method = "Height cutoff",
-       cutoff = x, 
-       FPR = 1 - specificity(y_hat, test_set$y),
-       TPR = sensitivity(y_hat, test_set$y))
-}) 
-tmp_2 &lt;- map_df(probs, function(p){
-  y_hat &lt;- sample(c("Male", "Female"), nrow(test_set), replace = TRUE, prob = c(p, 1 - p))
-  y_hat &lt;- factor(y_hat, levels = c("Female", "Male"))
-  list(method = "Guessing",
-       cutoff = round(p,1),
-       FPR = 1 - specificity(y_hat, test_set$y),
-       TPR = sensitivity(y_hat, test_set$y))
-})
-
-rbind(tmp_1, tmp_2) |&gt;
-  ggplot(aes(FPR, TPR, label = cutoff, color = method)) +
-  geom_line() +
-  geom_point() +
-  geom_text_repel(nudge_x = 0.01, nudge_y = -0.01, show.legend = FALSE)
-      </input>
-    </program>
     
     <figure xml:id="fig-evaluation-metrics-roc-curve">
       <caption>ROC curves for guessing and the height-cutoff rule</caption>
@@ -650,55 +595,6 @@ rbind(tmp_1, tmp_2) |&gt;
     <p>
       ROC curves have a key limitation: neither metric they display depends on prevalence. When prevalence is important, a precision-recall curve is often more appropriate. The concept is similar, but instead of plotting true positive rate against false positive rate, we plot precision against recall.
     </p>
-    
-    <program language="r">
-      <input>
-library(tidyverse)
-guessing &lt;- map_df(probs[-1], function(p){
-  y_hat &lt;- sample(c("Male", "Female"), nrow(test_set), replace = TRUE, prob = c(p, 1 - p)) 
-  y_hat &lt;- factor(y_hat, levels = c("Female", "Male"))
-  list(method = "Guess",
-    recall = sensitivity(y_hat, test_set$y),
-    precision = precision(y_hat, test_set$y))
-})
-
-height_cutoff &lt;- map_df(cutoffs[-1], function(x){
-  y_hat &lt;- ifelse(test_set$x &lt;= x, "Female", "Male")
-  y_hat &lt;- factor(y_hat, levels = c("Female", "Male"))
-  list(method = "Height cutoff",
-       recall = sensitivity(y_hat, test_set$y),
-    precision = precision(y_hat, test_set$y))
-})
-tmp_1 &lt;- bind_rows(guessing, height_cutoff) |&gt; mutate(Positive = "Y = 1 if Female") 
-
-test_set2 &lt;- test_set
-test_set2$y &lt;- relevel(test_set2$y, ref = "Male")
-guessing &lt;- map_df(probs[-1], function(p){
-  y_hat &lt;- sample(c("Male", "Female"), nrow(test_set2), replace = TRUE, prob = c(p, 1 - p)) 
-  y_hat &lt;- factor(y_hat, levels = c("Male", "Female"))
-  list(method = "Guess",
-    recall = sensitivity(y_hat, test_set2$y),
-    precision = precision(y_hat, test_set2$y))
-})
-
-height_cutoff &lt;- map_df(cutoffs[-1], function(x){
-  y_hat &lt;- ifelse(test_set2$x &lt;= x, "Female", "Male")
-  y_hat &lt;- factor(y_hat, levels = c("Male", "Female"))
-  list(method = "Height cutoff",
-       recall = sensitivity(y_hat, test_set2$y),
-    precision = precision(y_hat, test_set2$y))
-})
-tmp_2 &lt;- bind_rows(guessing, height_cutoff) |&gt; mutate(Positive = "Y = 1 if Male") 
-
-
-bind_rows(tmp_1, tmp_2) |&gt;
-  ggplot(aes(recall, precision, color = method)) +
-  geom_line() +
-  ylim(0,1) +
-  geom_point() +
-  facet_wrap(~ Positive)
-      </input>
-    </program>
     
     <figure xml:id="fig-evaluation-metrics-precision-recall-curve">
       <caption>Precision-recall curves under two definitions of the positive class</caption>
@@ -739,17 +635,6 @@ bind_rows(tmp_1, tmp_2) |&gt;
     <p>
       Here is a plot of precision as a function of prevalence with TPR and TNR both equal to 99%:
     </p>
-    
-    <program language="r">
-      <input>
-tpr &lt;- 0.99; fpr &lt;- 0.01
-prevalence &lt;- seq(0,1,len = 100)
-data.frame(Prevalence = prevalence,
-           Precision = tpr*prevalence/(tpr*prevalence + fpr*(1 - prevalence))) |&gt;
-  ggplot(aes(Prevalence, Precision)) + geom_line() + 
-  labs(title = "Precision as a function of prevalence", subtitle = "when TPR = 0.99 and TNR = 0.99")
-      </input>
-    </program>
     
     <figure xml:id="fig-evaluation-metrics-precision-vs-prevalence">
       <caption>Precision as a function of prevalence</caption>
@@ -829,7 +714,7 @@ data.frame(Prevalence = prevalence,
     </note>
   </section>
 
-  <section xml:id="sec-evaluation-exercises">
+  <exercises xml:id="sec-evaluation-exercises">
     <title>Exercises</title>
     
     <p>
@@ -837,7 +722,7 @@ data.frame(Prevalence = prevalence,
     </p>
     
     <program language="r">
-      <input>
+      <code>
 library(tidyverse)
 library(caret)
 library(titanic)
@@ -845,7 +730,7 @@ library(titanic)
 titanic &lt;- titanic_train |&gt; select(Survived, Pclass, Sex, Age, Fare) |&gt; drop_na() |&gt;
   mutate(Survived = factor(Survived, levels = c(1,0)), 
          Pclass = factor(Pclass), Sex = factor(Sex))
-      </input>
+      </code>
     </program>
     
     <p>
@@ -890,9 +775,9 @@ titanic &lt;- titanic_train |&gt; select(Survived, Pclass, Sex, Age, Fare) |&gt;
           Now repeat exercise 2, but for different cutoffs:
         </p>
         <program language="r">
-          <input>
+          <code>
 cutoffs &lt;- quantile(train_set$Fare, probs = seq(0.05, 0.95, 0.1))
-          </input>
+          </code>
         </program>
         <p>
           For each cutoff, classify passengers as survived / not survived using <c>Fare &gt; cutoff</c> and plot accuracy computed on the <c>train_set</c> against cutoff.
@@ -922,18 +807,18 @@ cutoffs &lt;- quantile(train_set$Fare, probs = seq(0.05, 0.95, 0.1))
           Now use a logistic regression model as a more refined continuous score. Fit the model:
         </p>
         <program language="r">
-          <input>
+          <code>
 fit &lt;- glm(Survived == "1" ~ ., family = binomial, data = train_set)
-          </input>
+          </code>
         </program>
         <p>
           We can obtain predicted probabilities of survival for each individual in both the train and test sets using the <c>predict</c> function:
         </p>
         <program language="r">
-          <input>
+          <code>
 p_hat_train &lt;- predict(fit, newdata = train_set, type = "response")
 p_hat_test &lt;- predict(fit, newdata = test_set, type = "response")
-          </input>
+          </code>
         </program>
         <p>
           Classify passengers as survived if this probability is larger than 0.5. How does the accuracy compare when computed on training and test sets? Comment on why the difference is larger than in our previous comparison in exercises 2 and 3.
@@ -955,14 +840,14 @@ p_hat_test &lt;- predict(fit, newdata = test_set, type = "response")
           The overall prevalence of survival in this dataset is:
         </p>
         <program language="r">
-          <input>
+          <code>
 mean(titanic$Survived == "1")
-          </input>
+          </code>
         </program>
         <p>
           Suppose you deploy your glm-based rule (from exercise 8) in a new setting where survival prevalence is only 20% instead. Explain qualitatively (no code needed) how this change in prevalence would affect <em>precision</em> (positive predictive value), even if sensitivity and specificity remained the same. Why is it important to think about prevalence when evaluating a model?
         </p>
       </statement>
     </exercise>
-  </section>
+  </exercises>
 </chapter>

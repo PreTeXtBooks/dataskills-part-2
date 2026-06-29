@@ -31,9 +31,9 @@
       </p>
       
       <program language="r">
-        <input>
+        <code>
 color &lt;- rep(c("Black", "Red", "Green"), times = c(18, 18, 2))
-        </input>
+        </code>
       </program>
       
       <p>
@@ -41,10 +41,10 @@ color &lt;- rep(c("Black", "Red", "Green"), times = c(18, 18, 2))
       </p>
       
       <program language="r">
-        <input>
+        <code>
 n &lt;- 1000
 x &lt;- sample(ifelse(color == "Black", -1, 1), n, replace = TRUE)
-        </input>
+        </code>
       </program>
       
       <p>
@@ -52,9 +52,9 @@ x &lt;- sample(ifelse(color == "Black", -1, 1), n, replace = TRUE)
       </p>
       
       <program language="r">
-        <input>
+        <code>
 x &lt;- sample(c(-1, 1), n, replace = TRUE, prob = c(9/19, 10/19))
-        </input>
+        </code>
       </program>
       
       <p>
@@ -62,9 +62,9 @@ x &lt;- sample(c(-1, 1), n, replace = TRUE, prob = c(9/19, 10/19))
       </p>
       
       <program language="r">
-        <input>
+        <code>
 s &lt;- sum(x)
-        </input>
+        </code>
       </program>
       
       <p>
@@ -105,14 +105,14 @@ s &lt;- sum(x)
     </p>
     
     <program language="r">
-      <input>
+      <code>
 n &lt;- 1000
 roulette_winnings &lt;- function(n){
   x &lt;- sample(c(-1, 1), n, replace = TRUE, prob = c(9/19, 10/19))
   sum(x)
 }
 s &lt;- replicate(100000, roulette_winnings(n))
-      </input>
+      </code>
     </program>
     
     <p>
@@ -120,51 +120,27 @@ s &lt;- replicate(100000, roulette_winnings(n))
     </p>
     
     <program language="r">
-      <input>
+      <code>
 mean(s &lt;= a)
-      </input>
+      </code>
     </program>
     
     <p>
       For instance, the probability of losing money is:
     </p>
     
-    <console>
-      <input>
+    <program language = "r">
+      <code>
 mean(s &lt; 0)
-      </input>
-      <output>
+      </code>
+    </program>
+      <pre>
 [1] 0.04432
-      </output>
-    </console>
+      </pre>
     
     <p>
       A histogram and qqplot of <m>S_n</m> show that the distribution is approximately normal, an observation that the <term>Central Limit Theorem</term> will soon explain.
     </p>
-    
-    <program language="r">
-      <input>
-library(tidyverse)
-normal_density &lt;- data.frame(x = seq(min(s), max(s), length = 100)) |&gt; 
-  mutate(f = dnorm(x, mean(s), sd(s)))
-p1 &lt;- data.frame(S_n = s) |&gt; ggplot(aes(S_n, after_stat(density))) +
-  geom_histogram(color = "black", binwidth = 10) +
-  ylab("Probability") +
-  geom_line(data = normal_density, mapping = aes(x, f), color = "blue") +
-  labs(y = "Probability ", title = "Histogram of S_n") 
-
-
-qq_sample &lt;- sample(s, 1000)  # take a subset of 1,000 values
-
-p2 &lt;- data.frame(S_n = qq_sample) |&gt;
-  ggplot(aes(sample = S_n)) +
-  stat_qq(distribution = qnorm) +
-  stat_qq_line(distribution = qnorm, color = "blue") +
-  labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
-  ggtitle("QQ Plot of S_n")
-gridExtra::grid.arrange(p1, p2, ncol = 2)
-      </input>
-    </program>
 
     <figure xml:id="fig-sampling-models-clt-hist-qq">
       <caption>Histogram and QQ plot of simulated roulette winnings</caption>
@@ -210,7 +186,7 @@ gridExtra::grid.arrange(p1, p2, ncol = 2)
     </p>
     
     <p>
-      To quantify uncertainty, we compute the standard error, which measures how much <m>S_n</m> varies around its expected value. For an urn with two outcomes <m>a</m> and <m>b</m>, the standard deviation can be shown to be:
+      To quantify uncertainty, we compute the standard error, which measures how much <m>S_n</m> varies around its expected value. For an urn with two outcomes <m>a</m> and <m>b</m> with probabilities <m>p</m> and <m>(1-p)</m>, the standard deviation can be shown to be:
     </p>
     
     <me>
@@ -221,14 +197,15 @@ gridExtra::grid.arrange(p1, p2, ncol = 2)
       In the roulette example we obtain:
     </p>
     
-    <console>
-      <input>
+    <program language = "r">
+      <code>
 2*sqrt(90)/19
-      </input>
-      <output>
+      </code>
+    </program>
+      <pre>
 [1] 0.998614
-      </output>
-    </console>
+      </pre>
+    
     
     <p>
       Thus, the standard error of the sum is:
@@ -242,69 +219,74 @@ gridExtra::grid.arrange(p1, p2, ncol = 2)
       which in this case is:
     </p>
     
-    <console>
-      <input>
+    <program language = "r">
+      <code>
 sqrt(n)*2*sqrt(90)/19
-      </input>
-      <output>
+      </code>
+    </program>
+      <pre>
 [1] 31.57895
-      </output>
-    </console>
+      </pre>
+    
     
     <p>
       These theoretical values agree closely with the Monte Carlo results:
     </p>
     
-    <console>
-      <input>
+    <program language = "r">
+      <code>
 mean(s)
 sd(s)
-      </input>
-      <output>
+      </code>
+    </program>
+      <pre>
 [1] 52.6455
 [1] 31.53624
-      </output>
-    </console>
+      </pre>
+    
     
     <p>
       Using the CLT, we can now compute the probability that the casino loses money without simulation:
     </p>
     
-    <console>
-      <input>
+    <program language = "r">
+      <code>
 pnorm(0, n*(20 - 18)/38, sqrt(n)*2*sqrt(90)/19)
-      </input>
-      <output>
+      </code>
+    </program>
+      <pre>
 [1] 0.04779035
-      </output>
-    </console>
+      </pre>
+    
     
     <p>
       which matches our earlier estimate:
     </p>
     
-    <console>
-      <input>
+    <program language = "r">
+      <code>
 mean(s &lt; 0)
-      </input>
-      <output>
+      </code>
+    </program>
+      <pre>
 [1] 0.04432
-      </output>
-    </console>
+      </pre>
+    
     
     <note>
       <p>
         The quantity <m>(S_n + n)/2</m> represents the number of wins for the casino and follows a <em>binomial distribution</em>. Thus, the probability <m>\mathrm{Pr}(S_n &lt; 0)</m> can also be computed directly:
       </p>
       
-      <console>
-        <input>
+      <program language = "r">
+        <code>
 pbinom(n/2 - 1, size = n, prob = 10/19)
-        </input>
-        <output>
+        </code>
+    </program>
+        <pre>
 [1] 0.04479591
-        </output>
-      </console>
+        </pre>
+      
       
       <p>
         However, the binomial result applies only to Bernoulli trials. In many real-world settings, data are not binomial, yet we still want to approximate the distribution of sums or averages. For those cases, the CLT provides a general framework that extends far beyond Bernoulli trials.
@@ -316,7 +298,7 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     <title>How large is large?</title>
     
     <p>
-      The CLT applies when the number of draws is "large", but <em>large</em> depends on context. In many cases, 30 draws are enough for a good approximation, sometimes even fewer. In the roulette example, when the probabilities of success are very small, much larger samples may be required.
+      The CLT applies when the number of draws is <em>large</em>, but <em>large</em> depends on context. In many cases, 30 draws are enough for a good approximation, sometimes even fewer. In the roulette example, when the probability of success is very small, much larger samples may be required.
     </p>
     
     <p>
@@ -324,7 +306,7 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     </p>
     
     <p>
-      In summary, the CLT explains why the normal distribution appears so often in statistics and why many methods work well in practice. But it has limits: when probabilities are extremely small or distributions are highly skewed, other models, such as the Poisson or binomial, are more appropriate. Developing intuition for when the CLT applies is essential for principled, thoughtful data analysis.
+In summary, the CLT explains why the normal distribution appears so often in statistics and why many methods work well in practice. But it has limits: when probabilities are extremely small, or distributions are highly skewed, other models, such as the Poisson or binomial, are more appropriate. Developing intuition for when the CLT applies is essential for principled, thoughtful data analysis.
     </p>
   </section>
 
@@ -334,7 +316,10 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     <exercise>
       <statement>
         <p>
-          In American Roulette, you can also bet on green. There are 18 reds, 18 blacks, and 2 greens (0 and 00). Create a random variable <m>S_n</m> that is the sum of your winnings after betting on green 1,000 times.
+          From the previous chapter, you have already computed the expected value, standard deviation, and probability distribution for betting on green 100 times (exercises 9-12 in <xref ref="random-variables"/>). Now apply the Central Limit Theorem to betting on green 1,000 times.
+        </p>
+        <p>
+          In American Roulette, you can bet on green. There are 18 reds, 18 blacks, and 2 greens (0 and 00). Create a random variable <m>S_n</m> that is the sum of your winnings after betting on green 1,000 times.
         </p>
       </statement>
     </exercise>
@@ -342,7 +327,7 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     <exercise>
       <statement>
         <p>
-          Compute the expected value of <m>S_n</m>?
+          Use the CLT to estimate the probability that you end up winning money.
         </p>
       </statement>
     </exercise>
@@ -350,7 +335,7 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     <exercise>
       <statement>
         <p>
-          Compute the standard error of <m>S_n</m>?
+          Create a Monte Carlo simulation that generates 10,000 outcomes of <m>S_n</m>. Compute the average and standard deviation of the resulting list to confirm the results from the previous chapter. Start your code by setting the seed to 1 with <c>set.seed(1)</c>.
         </p>
       </statement>
     </exercise>
@@ -358,23 +343,7 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     <exercise>
       <statement>
         <p>
-          Use the CLT to estimate the probability that you end up winning money? Hint: Use the CLT.
-        </p>
-      </statement>
-    </exercise>
-    
-    <exercise>
-      <statement>
-        <p>
-          Create a Monte Carlo simulation that generates 10,000 outcomes of <m>S_n</m>. Compute the average and standard deviation of the resulting list to confirm the results of 2 and 3. Start your code by setting the seed to 1 with <c>set.seed(1)</c>.
-        </p>
-      </statement>
-    </exercise>
-    
-    <exercise>
-      <statement>
-        <p>
-          Now check your answer to 4 using the Monte Carlo result.
+          Now check your answer to 2 using the Monte Carlo result.
         </p>
       </statement>
     </exercise>
@@ -386,14 +355,14 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
         </p>
         <p>
           <ol marker="a">
-            <li>10,000 simulations is not enough. If we do more, they match.</li>
+            <li>10,000 simulations are not enough. If we do more, they match.</li>
             <li>The CLT does not work as well when the probability of success is small. In this case, it was 1/19. If we make the number of roulette plays bigger, they will match better.</li>
             <li>The difference is within rounding error.</li>
             <li>The CLT only works for averages.</li>
           </ol>
         </p>
         <p>
-          Now create a random variable <m>\bar{X}_n</m> that is your average winnings per bet defined as <m>\bar{X}_n = S_n/n</m>. Keep <m>n</m> = 1,000.
+          Now create a random variable <m>\bar{X}_n</m> that is your average winnings per bet, defined as <m>\bar{X}_n = S_n/n</m>. Keep <m>n</m> = 1,000.
         </p>
       </statement>
     </exercise>
@@ -425,7 +394,7 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     <exercise>
       <statement>
         <p>
-          Create a Monte Carlo simulation that generates 25,000 outcomes of <m>\bar{X}_n</m>, instead of 1,000. Compute the average and standard deviation of the resulting list to confirm the results of 13 and 14. Start your code by setting the seed to 1 with <c>set.seed(1)</c>.
+          Create a Monte Carlo simulation that generates 25,000 outcomes of <m>\bar{X}_n</m>, instead of 10,000. Compute the average and standard deviation of the resulting list to confirm the results of 8, 9, and 10. Start your code by setting the seed to 1 with <c>set.seed(1)</c>.
         </p>
       </statement>
     </exercise>
@@ -433,14 +402,14 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     <exercise>
       <statement>
         <p>
-          Now compare your answer to 14 using the Monte Carlo result. What can you say about the CLT approximation for <m>\mathrm{Pr}(\bar{X}_n&gt;0)</m> compared for <m>\mathrm{Pr}(S_n&gt;0)</m>.
+          Now compare your Monte Carlo estimates of <m>\mathrm{Pr}(S_n&gt;0)</m> and <m>\mathrm{Pr}(\bar{X}_n&gt;0)</m> and their corresponding CLT approximations. Which of the following is true:
         </p>
         <p>
           <ol marker="a">
-            <li>We are now computing averages instead of sums so they are very different.</li>
-            <li>25,000 Monte Carlo simulations is not better than 10,000 and provides a much closer estimate.</li>
-            <li>The CLT works better when the sample size is larger. We increased from 10,000 to 25,000.</li>
-            <li>The difference is within rounding error.</li>
+            <li>The probabilities are different because <m>\mathrm{Pr}(\bar{X}_n&gt;0)</m> uses averages while <m>\mathrm{Pr}(S_n&gt;0)</m> uses sums.</li>
+            <li>25,000 Monte Carlo simulations are better than 10,000 and provide a much more precise estimate.</li>
+            <li>The CLT works better when the sample size is larger, and we increased from 10,000 to 25,000.</li>
+            <li>All differences between the Monte Carlo estimates are within rounding error.</li>
           </ol>
         </p>
       </statement>
@@ -452,7 +421,7 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
           The following exercises are inspired by the events surrounding the financial crisis of 2007-2008<fn>https://en.wikipedia.org/w/index.php?title=Financial_crisis_of_2007%E2%80%932008</fn>. This financial crisis was in part caused by underestimating the risk of certain securities<fn>https://en.wikipedia.org/w/index.php?title=Security_(finance)</fn> sold by financial institutions. Specifically, the risks of mortgage-backed securities (MBS) and collateralized debt obligations (CDO) were grossly underestimated. These assets were sold at prices that assumed most homeowners would make their monthly payments, and the probability of this not occurring was calculated as being low. A combination of factors resulted in many more defaults than were expected, which led to a price crash of these securities. As a consequence, banks lost so much money that they required government bailouts to avoid complete closure.
         </p>
         <p>
-          More complex versions of the sampling models we have discussed are also used by banks to determine interest rates and insurance companies to determine premiums. To understand this, suppose you run a small bank that has a history of identifying potential homeowners that can be trusted to make payments. In fact, historically, only 2% of your customers default in a given year, meaning that they don't pay back the money that you lent them. Suppose your bank will give out <m>n</m> = 1,000 loans for $180,000 this year. Also, after adding up all costs, suppose your bank loses <m>l</m>= $200,000 per foreclosure. For simplicity, we assume this includes all operational costs. What is the expected profit <m>S_n</m> for you bank under this scenario?
+          More complex versions of the sampling models we have discussed are also used by banks to determine interest rates and by insurance companies to determine premiums. To understand this, suppose you run a small bank that has a history of identifying potential homeowners who can be trusted to make payments. In fact, historically, only 2% of your customers default in a given year, meaning that they don't pay back the money that you lent them, while all other customers pay back the loan in full (assuming no interest for now). Suppose your bank will give out <m>n</m> = 1,000 loans for $180,000 this year. Also, after adding up all costs, suppose your bank loses <m>l</m> = $200,000 per foreclosure, which happens whenever a customer defaults. For simplicity, we assume this includes all operational costs. What is the expected profit <m>S_n</m> for your bank under this scenario?
         </p>
       </statement>
     </exercise>
@@ -460,7 +429,7 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     <exercise>
       <statement>
         <p>
-          Note that the total loss defined by the final sum in the previous exercise is a random variable. Every time you run the sampling model code, you obtain a different number of people defaulting which results in a different loss. Code a sampling model for the random variable representing your banks profit <m>S_n</m> under scenario described in 13.
+          Note that the total profit <m>S_n</m> defined in the previous exercise is a random variable. Code a sampling model for <m>S_n</m>. Every time you run the sampling model code, you will obtain a different number of customers defaulting, which results in a different profit or loss.
         </p>
       </statement>
     </exercise>
@@ -468,7 +437,7 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     <exercise>
       <statement>
         <p>
-          The previous exercise demonstrates that if you simply loan money to everybody without interest, you will end up losing money due to the 2% that defaults. Although you know 2% of your clients will probably default, you don't know which ones, so you can't remove them. Yet by charging everybody just a bit extra in interest, you can make up the losses incurred due to that 2%, and also cover your operating costs. What quantity <m>x</m> would you have to charge each borrower so that your bank's expected profit is 0? Assume that you don't get <m>x</m> from the borrowers that default. Also, note <m>x</m> is not the interest rate, but the total you add meaning <m>x/180000</m> is the <em>interest rate</em>.
+          The expected value demonstrates that if you simply loan money to everybody without interest, you will end up losing money due to the 2% that defaults. Although you know 2% of your clients will probably default, you don't know which ones, so you can't remove them. Yet by charging everybody just a bit extra in interest, you can make up the losses incurred due to that 2%, and also cover your operating costs. What quantity <m>x</m> would you have to charge each borrower so that your bank's expected profit is 0? Assume that you don't get <m>x</m> from the borrowers that default. Also, note <m>x</m> is not the interest rate, but the total you add, meaning <m>x/180000</m> is the <em>interest rate</em>.
         </p>
       </statement>
     </exercise>
@@ -476,7 +445,7 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     <exercise>
       <statement>
         <p>
-          Rewrite the sample model from exercise 14 to account for the interest you are charging and run a Monte Carlo simulation to get an idea of the distribution of your profit when you charge interest rates.
+          Rewrite the sample model from exercise 12 to account for the interest you are charging and run a Monte Carlo simulation to get an idea of the distribution of your profit when you charge interest rates.
         </p>
       </statement>
     </exercise>
@@ -484,7 +453,7 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     <exercise>
       <statement>
         <p>
-          We don't actually need a Monte Carlo simulation. Based on what we have learned, the CLT informs us that, since our losses are a sum of independent draws, its distribution is approximately normal. What are the expected value and standard errors of the profit <m>S_n</m>? Write these as functions of the probability of foreclosure <m>p</m>, the number of loans <m>n</m>, the loss per foreclosure <m>l</m>, and the quantity you charge each borrower <m>x</m>.
+          We don't actually need a Monte Carlo simulation. Based on what we have learned, the CLT informs us that, since our profit is a sum of independent draws, its distribution is approximately normal. What is the expected value and standard deviation of the profit <m>S_n</m>? Write these as functions of the probability of foreclosure <m>p</m>, the number of loans <m>n</m>, the loss per foreclosure <m>l</m>, and the quantity you charge each borrower <m>x</m>.
         </p>
       </statement>
     </exercise>
@@ -500,7 +469,7 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     <exercise>
       <statement>
         <p>
-          Suppose that if your bank has negative profit, it has to close. Therefore, you need to increase <m>x</m> to minimize this risk. However, setting the interest rates too high may lead your clients to choose another bank. So, let's say that we want our chances of losing money to be 1 in 100. What does the <m>x</m> quantity need to be now? Hint: We want <m>\mathrm{Pr}(S_n&lt;0) = 0.01</m>. Note that you can add subtract constants to both side of an inequality, and the probability does not change: <m>\mathrm{Pr}(S_n&lt;0) = \mathrm{Pr}(S_n+k&lt;0+k)</m>, Similarly, with division of positive constants: <m>\mathrm{Pr}(S_n+k&lt;0+k) = \mathrm{Pr}((S_n+k)/m &lt;k/m)</m>. Use this fact and the CLT to transform the left side of the inequality in <m>\mathrm{Pr}(S_n&lt;0)</m> into a standard normal.
+          Suppose that if your bank has a negative profit, it has to close. Therefore, you need to increase <m>x</m> to minimize this risk. However, setting the interest rates too high may lead your clients to choose another bank. So, let's say that we want our chances of losing money to be 1 in 100. What does the <m>x</m> quantity need to be now? Hint: We want <m>\mathrm{Pr}(S_n&lt;0) = 0.01</m>. Note that you can add and subtract constants to both sides of an inequality, and the probability does not change: <m>\mathrm{Pr}(S_n&lt;0) = \mathrm{Pr}(S_n+k&lt;0+k)</m>, Similarly, with division of positive constants: <m>\mathrm{Pr}(S_n+k&lt;0+k) = \mathrm{Pr}((S_n+k)/m &lt;k/m)</m>. Use this fact and the CLT to transform the left side of the inequality in <m>\mathrm{Pr}(S_n&lt;0)</m> into a standard normal.
         </p>
       </statement>
     </exercise>
@@ -508,7 +477,7 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     <exercise>
       <statement>
         <p>
-          Our interest rate now increases. But it is still a very competitive interest rate. For the <m>x</m> you obtained in exercise 20, what is expected profit per loan and the expected total profit?
+          Our interest rate now increases. But it is still a very competitive interest rate. For the <m>x</m> you obtained in exercise 17, what are the expected profit per loan and the expected total profit?
         </p>
       </statement>
     </exercise>
@@ -516,7 +485,7 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     <exercise>
       <statement>
         <p>
-          Run run a Monte Carlo simulation to double check the theoretical approximation used in 19 and 20.
+          Run a Monte Carlo simulation to confirm the theoretical approximation used in 19 and 20.
         </p>
       </statement>
     </exercise>
@@ -532,7 +501,7 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     <exercise>
       <statement>
         <p>
-          How much do we have to increase <m>n</m> by to assure the probability of losing money is still less than 0.01?
+          How much do we have to increase <m>n</m> by to ensure the probability of losing money is still less than 0.01?
         </p>
       </statement>
     </exercise>
@@ -540,7 +509,7 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     <exercise>
       <statement>
         <p>
-          Confirm the result in exercise 23 with a Monte Carlo simulation.
+          Confirm the result in exercise 21 with a Monte Carlo simulation.
         </p>
       </statement>
     </exercise>
@@ -548,13 +517,13 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     <exercise>
       <statement>
         <p>
-          According to this equation, giving out more loans increases your expected profit and lowers the chances of losing money! Giving out more loans seems like a no-brainier. As a result, your colleague decides to leave your bank and start his own high-risk mortgage company. A few months later, your colleague's bank has gone bankrupt. A book is written, and eventually, the movies "The Big Short" and "Margin Call" are made, recounting the mistake your friend, and many others, made. What happened?
+          According to this equation, giving out more loans increases your expected profit and lowers the chances of losing money! Giving out more loans seems like a no-brainer. As a result, your colleague decides to leave your bank and start his own high-risk mortgage company. A few months later, your colleague's bank has gone bankrupt. A book is written, and eventually, the movies "The Big Short" and "Margin Call" are made, recounting the mistakes your friend and many others made. What happened?
         </p>
         <p>
           Your colleague's scheme was mainly based on this mathematical formula <m>\mathrm{SE}[\bar{X}]= \sigma_X / \sqrt{n}</m>. By making <m>n</m> large, we minimize the standard error of our per-loan profit. However, for this rule to hold, the <m>X</m>s must be independent draws: one person defaulting must be independent of others defaulting.
         </p>
         <p>
-          To construct a more realistic simulation than the original one your colleague ran, let's assume there is a global event affecting everybody with high-risk mortgages and altering their probability simultaneously. We will assume that with a 50-50 chance all the default probabilities slightly increase or decrease to somewhere between 0.03 and 0.05. However, this change occurs universally, impacting everybody at once, not just one person. As these draws are no longer independent, our equation for the standard error of the sum of random variables does not apply. Write a Monte Carlo simulation for your total profit with this model.
+          To construct a more realistic simulation than the original one your colleague ran, let's assume there is a global event affecting everybody with high-risk mortgages and altering their probability simultaneously. We will assume that with a 50-50 chance, all the default probabilities slightly increase or decrease to somewhere between 0.03 and 0.05. However, this change occurs universally, impacting everybody at once, not just one person. As these draws are no longer independent, our equation for the standard error of the sum of random variables does not apply. Write a Monte Carlo simulation for your total profit <m>S_n</m> with this model.
         </p>
       </statement>
     </exercise>
@@ -562,7 +531,7 @@ pbinom(n/2 - 1, size = n, prob = 10/19)
     <exercise>
       <statement>
         <p>
-          Use the simulation results of exercise 25 to report the expected profit, the probability of losing money, and the probability of losing more than $10,000,000. Study the distribution of profit and discuss how making the wrong assumption lead to a catastrophic result.
+          Use the simulation results of exercise 23 to report the expected profit, the probability of losing money, and the probability of losing more than $10,000,000. Study the distribution of profit and discuss how making the wrong assumption led to a catastrophic result.
         </p>
       </statement>
     </exercise>
