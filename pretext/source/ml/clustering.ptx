@@ -4,11 +4,11 @@
   
   <introduction>
     <p>
-      The algorithms we have studied so far represent the most widely used branch of machine learning: supervised learning. In supervised learning, the training data include both predictors and outcomes, and the goal is to learn a function that predicts the outcome for new observations. Much of the mathematical and practical framework developed in previous chapters was aimed at understanding, evaluating, and building these supervised prediction models.
+      The algorithms we have studied so far represent the most widely used branch of machine learning: supervised learning. In supervised learning, the training data include both predictors and outcomes, and the goal is to learn a function that can predict the outcome for new observations. Much of the mathematical and practical framework developed in previous chapters was aimed at understanding, evaluating, and building these supervised prediction models.
     </p>
     
     <p>
-      However, supervised learning is only one part of what is broadly referred to as machine learning. A second major branch is <term>unsupervised learning</term>, in which the outcomes (labels) are not provided. The goal is no longer prediction, but rather to uncover structure in the data: identify groups, detect patterns, or reveal lower-dimensional representations. This family of techniques is extremely important in practice and includes many methods not covered in this book. Here, we provide a brief introduction and refer readers to the recommended texts for a deeper study.
+      However, supervised learning is only one part of what is broadly referred to as machine learning. A second major branch is <em>unsupervised learning</em>, in which the outcomes (labels) are not provided. The goal is no longer prediction, but rather to uncover structure in the data: identify groups, detect patterns, or reveal lower-dimensional representations. This family of techniques is extremely important in practice and includes many methods not covered in this book. Here, we provide a brief introduction and refer readers to the recommended texts for deeper study.
     </p>
     
     <p>
@@ -18,14 +18,14 @@
     <p>
       In this chapter, we focus on two classic clustering algorithms, each illustrating a very different strategy:
     </p>
-    
+
     <ul>
       <li><p><term>Hierarchical clustering</term>, which groups observations based on recursively merging the closest pairs.</p></li>
       <li><p><term>k-means clustering</term>, which partitions the data by iteratively refining cluster centers.</p></li>
     </ul>
-    
+
     <p>
-      These two methods are foundational as many advanced unsupervised learning techniques build on the same ideas.
+      These two methods are foundational, as many advanced unsupervised learning techniques build on the same ideas.
     </p>
   </introduction>
 
@@ -81,7 +81,7 @@ movies &lt;- movies - rowMeans(movies, na.rm = TRUE)
       </p>
       
       <p>
-        Although clustering is typically applied when labels are <em>unknown</em>, this dataset is pedagogically useful because we <em>do</em> know the true tissue types. This lets us examine how well the clusters we find reflect the underlying biological structure: different tissues have distinct patterns of gene expression, even though all cells share the same genome. Different genes play different functional roles in different tissues, and these patterns should be detectable through clustering. From a biological perspective, all these tissues share the same genome, every cell contains the same DNA. What makes tissues different is which genes are turned on or off, and by how much. These tissue-specific expression patterns reflect the distinct functions of each cell type. Because of this, we expect that tissue samples with similar biological roles will show similar gene-expression profiles.
+        Although clustering is typically applied when labels are <em>unknown</em>, this dataset is pedagogically useful because we <em>do</em> know the true tissue types. This lets us examine how well the clusters we find reflect the underlying biological structure: different tissues have distinct patterns of gene expression, even though all cells share the same genome. Different genes play different functional roles in different tissues, and these patterns should be detectable through clustering.
       </p>
       
       <p>
@@ -90,7 +90,7 @@ movies &lt;- movies - rowMeans(movies, na.rm = TRUE)
       
       <program language="r">
         <input>
-genex &lt;- sweep(tissue_gene_expression$x, 2, colMeans(tissue_gene_expression$x))
+genex &lt;- with(tissue_gene_expression, sweep(x, 2, colMeans(x)))
         </input>
       </program>
       
@@ -104,7 +104,7 @@ genex &lt;- sweep(tissue_gene_expression$x, 2, colMeans(tissue_gene_expression$x
     <title>Hierarchical clustering</title>
     
     <p>
-      The first clustering algorithm we describe is <term>hierarchical clustering</term>. As with many clustering algorithms, the first step is to compute distances between each pair of observation. We do this for the <c>movies</c> matrix as an example:
+      The first clustering algorithm we describe is <term>hierarchical clustering</term>. As with many clustering algorithms, the first step is to compute distances between each pair of observations. We do this for the <c>movies</c> matrix as an example:
     </p>
     
     <program language="r">
@@ -118,7 +118,7 @@ d &lt;- dist(movies)
     </p>
     
     <p>
-      With the distance between each pair of movies computed, we need an algorithm to define groups, based on these distances. Hierarchical clustering starts by defining each observation as a separate group, then the two closest groups are joined into new groups. We then continue joining the closest groups into new groups iteratively until there is just one group including all the observations.
+      With the distance between each pair of movies computed, we need an algorithm to define groups based on these distances. Hierarchical clustering starts by defining each observation as a separate group, then the two closest groups are joined into a new group. We then continue joining the closest groups into new groups iteratively until there is just one group including all the observations.
     </p>
     
     <p>
@@ -150,11 +150,11 @@ plot(h, cex = 0.75, main = "", xlab = "")
     </figure>
     
     <p>
-      This graph gives us an approximation between the distance between any two movies. To find this distance, we find the first location, from top to bottom, where these movies split into two different groups. The height of this location is the distance between these two groups. So, for example, the distance between the three <em>Star Wars</em> movies is 8 or less, while the distance between <em>Raiders of the Lost Ark</em> and <em>Silence of the Lambs</em> is about 17.
+      This graph gives us an approximation of the distance between any two movies. To find this distance, we find the first location, from top to bottom, where these movies split into two different groups. The height of this location is the distance between these two groups. So, for example, the distance between the three <em>Star Wars</em> movies is 8 or less, while the distance between <em>Raiders of the Lost Ark</em> and <em>The Silence of the Lambs</em> is about 17.
     </p>
     
     <p>
-      To generate actual groups, we can do one of two things: 1) decide on a minimum distance needed for observations to be in the same group or 2) decide on the number of groups you want and then find the minimum distance that achieves this.
+      To generate actual groups, we can do one of two things: 1) decide on a minimum distance needed for observations to be in the same group, or 2) decide on the number of groups you want and then find the minimum distance that achieves this.
     </p>
     
     <p>
@@ -244,7 +244,7 @@ image(genex[h_1$order, h_2$order])
     </figure>
     
     <p>
-      The <c>heatmap</c> function that does all this for us:
+      The <c>heatmap</c> function does all this for us:
     </p>
     
     <program language="r">
@@ -261,11 +261,11 @@ heatmap(genex)
     </figure>
     
     <p>
-      The two plots above are included for completeness, but with all genes included they are too dense to be especially useful. We therefore filter some columns and remake the heatmap.
+      Note, we do not show the results of the two lines of code above because there are too many features for the plot to be useful. We will therefore filter some columns and remake the plots.
     </p>
     
     <p>
-      If only a few features are different between clusters, including all the features can add enough noise that making cluster detection challenging. A simple approach to avoid this is to assume low variability features are not informative and include only high variability features. For example, in the movie example, users with low variance in their ratings are not really distinguishing movies: all the movies seem about the same to them. Similarly, in the gene expression example, genes that don't vary across samples are less likely to be informative of biologically meaningful patterns.
+      If only a few features are different between clusters, including all the features can add enough noise to make cluster detection challenging. A simple approach to avoid this is to assume low-variability features are not informative and include only high-variability features. For example, in the movie example, users with low variance in their ratings do not really distinguish movies: all the movies seem about the same to them. Similarly, in the gene expression example, genes that don't vary across samples are less likely to be informative of biologically meaningful patterns.
     </p>
     
     <p>
@@ -293,7 +293,7 @@ heatmap(genex[,o], col = rev(RColorBrewer::brewer.pal(11, "Spectral")))
     </p>
     
     <p>
-      Note there are several other heatmap functions in R. A popular example is the <c>heatmap.2</c> in the <term>gplots</term> package.
+      Note there are several other heatmap functions in R. Popular example are the <c>heatmap.2</c> in the <term>gplots</term> package and <c>Heatmap</c> in the <term>ComplexHeatmap</term> package.
     </p>
   </section>
 
@@ -373,7 +373,7 @@ table(km$cluster, tissue_gene_expression$y)
     </console>
     
     <p>
-      The results show that k-means does a reasonably good job at recovering the tissue structure. For example, clusters 1, 3, 4, 5, and 7 correspond largely to cerebellum, liver, endometrium, kidney, and placenta, respectively. All hippocampus samples fall into cluster 6, although five cerebellum samples are incorrectly included there. Cluster 2 captures almost all colon samples, with only one kidney sample misassigned.
+      The results show that k-means does a reasonably good job at recovering the tissue structure. For example, clusters 1, 3, 4, 5, and 7 correspond largely to the cerebellum, liver, endometrium, kidney, and placenta, respectively. All hippocampus samples fall into cluster 6, although five cerebellum samples are incorrectly included there. Cluster 2 consists of almost all colon samples, with only one kidney sample misassigned.
     </p>
     
     <p>
@@ -385,7 +385,7 @@ table(km$cluster, tissue_gene_expression$y)
     <title>Evaluating Clusters with Class Labels</title>
     
     <p>
-      In supervised learning, we evaluate performance with quantities such as accuracy, sensitivity, and RMSE. Clustering presents a different challenge: because the method is unsupervised, the algorithm never sees the true outcomes and has no explicit notion of <q>correct</q> labels. However, in many real data settings we <em>do</em> have ground-truth labels available for evaluation purposes—for example, tissue type in gene-expression studies. In these situations, we can meaningfully ask: How well do the clusters recovered by the algorithm align with the known classes? This kind of external evaluation is common in benchmarking studies that compare clustering methods for a given scientific or applied context.
+      In supervised learning, we evaluate performance with quantities such as accuracy, sensitivity, and RMSE. Clustering presents a different challenge: because the method is unsupervised, the algorithm never sees the true outcomes and has no explicit notion of "correct" labels. However, in many real data settings, we <em>do</em> have ground-truth labels available for evaluation purposes—for example, tissue type in gene-expression studies. In these situations, we can meaningfully ask: How well do the clusters recovered by the algorithm align with the known classes? This kind of external evaluation is common in benchmarking studies that compare clustering methods for a given scientific or applied context.
     </p>
     
     <p>
@@ -517,7 +517,7 @@ sum(apply(tab, 1, max))/sum(tab)
     <exercise>
       <statement>
         <p>
-          Perform hierarchical clustering on the gene-expression matrix <c>genex</c> and label the dendrogram leaves using the tissue types. Two cerebellum samples (<c>29</c> and <c>30</c>) and two kidney (<c>38</c> and <c>39</c>) samples cluster with liver, verify this in your plot.
+          Perform hierarchical clustering on the gene-expression matrix <c>genex</c> and label the dendrogram leaves using the tissue types. Two cerebellum samples (<c>29</c> and <c>30</c>) and two kidney (<c>38</c> and <c>39</c>) samples cluster with liver. Verify this in your plot.
         </p>
       </statement>
     </exercise>
@@ -565,7 +565,7 @@ for (i in 1:7) {
     <exercise>
       <statement>
         <p>
-          Cluster a subset of MNIST digits into 10 clusters:
+          Cluster a subset of MNIST digits into <term>10</term> clusters:
         </p>
         
         <program language="r">
@@ -604,7 +604,7 @@ km &lt;- kmeans(x, centers = 10, nstart = 100)
     <exercise>
       <statement>
         <p>
-          As discussed in <xref ref="sec-purity"/>, purity generally increases with the number of clusters. Repeat Exercise 9 for <c>k</c> in <c>seq(10, 100, 10)</c>. Compute purity for each value of <c>k</c> and make a plot of purity versus number of clusters. Comment on when increases in purity seem meaningful and when they appear to be due only to chance.
+          As discussed in <xref ref="sec-purity"/>, purity generally increases with the number of clusters. Repeat exercise 9 for <c>k</c> in <c>seq(10, 100, 10)</c>. Compute purity for each value of <c>k</c> and make a plot of purity versus the number of clusters. Comment on when increases in purity seem meaningful and when they appear to be due only to chance.
         </p>
       </statement>
     </exercise>

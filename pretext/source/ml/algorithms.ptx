@@ -1,27 +1,1278 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="sec-example-algorithms">
   <title>Supervised Learning Methods</title>
-  
+
   <introduction>
     <p>
-      This chapter covers machine learning algorithms.
+      Machine learning includes a vast collection of algorithms, well over a hundred commonly used methods, each with its own strengths, assumptions, and tuning parameters. In this chapter, we introduce a small but representative set of algorithms that illustrate the major ideas behind supervised learning. Rather than aiming for exhaustive coverage, our goal is to build intuition for <em>how</em> different approaches learn from data and <em>why</em> they make different kinds of predictions.
     </p>
+
+    <p>
+      To keep the examples concrete and accessible, we use the two-predictor digit dataset introduced in <xref ref="sec-two-or-seven"/> as our running example. This dataset is small enough to visualize, yet rich enough to reveal the behavior of real algorithms. We use functions from the <term>caret</term> package for these examples; later, in <xref ref="sec-ml-in-practice"/>, we show how to implement these ideas more efficiently using the same package, which provides a unified interface for fitting and tuning many different machine learning methods.
+    </p>
+
+    <program language="r">
+      <input>
+library(caret)
+library(dslabs)
+      </input>
+    </program>
   </introduction>
+
+  <section xml:id="sec-linear-logistic-regression-ml">
+    <title>Linear and logistic regression</title>
+
+    <introduction>
+      <p>
+        We introduced linear regression and logistic regression in the Linear Models part of the book as tools for quantifying associations between variables. However, these models can also be viewed as <em>prediction algorithms</em>. Once we estimate their parameters from training data, we can make predictions for any new predictor value <m>\mathbf{x}</m> simply by evaluating the fitted model at that point. This predictive perspective places linear and logistic regression squarely within the family of supervised learning methods.
+      </p>
+    </introduction>
+
+    <subsection xml:id="sec-linear-regression-ml">
+      <title>Linear regression</title>
+
+      <p>
+        Linear regression can be considered a supervised learning method for continuous outcomes. Given a numeric outcome <m>Y</m> and predictors <m>\mathbf{X} = (X_1,\dots,X_p)^\top</m>, we model the conditional expectation as
+      </p>
+      <me>
+        \mathrm{E}[Y \mid \mathbf{X} = \mathbf{x}] = \beta_0 + \sum_{j=1}^p \beta_j x_j,
+      </me>
+      <p>
+        a linear function of the predictors. Linear regression provides a simple, interpretable baseline, and many supervised learning algorithms can be viewed as extensions or modifications of this idea.
+      </p>
+
+      <p>
+        However, linear regression is not appropriate when the outcome is categorical. In <xref ref="sec-two-or-seven"/>, we introduced <em>logistic regression</em> as a method designed specifically for modeling class probabilities in binary classification problems.
+      </p>
+    </subsection>
+
+    <subsection xml:id="sec-logistic-regression-ml">
+      <title>Logistic regression</title>
+
+      <p>
+        For the two classes presented in <xref ref="sec-two-or-seven"/>, we can model the probability of class 1 using the logistic function:
+      </p>
+      <me>
+        \log\frac{p(\mathbf{x})}{1 - p(\mathbf{x})} = \beta_0 + \beta_1 x_1 + \beta_2 x_2, \,\, p(\mathbf{x}) = \Pr(Y = 1 \mid X_1 = x_1, X_2 = x_2),
+      </me>
+      <p>
+        which estimates the probability that an observation belongs to class 1. This is the binary logistic regression model.
+      </p>
+
+      <p>
+        For more than two classes (<m>K > 2</m>), logistic regression can be extended in two common ways: <em>one-versus-rest</em> (OvR) and <em>multinomial logistic regression</em>.
+      </p>
+
+      <p>
+        In the one-versus-rest approach, we fit <m>K</m> separate binary logistic regression models. For each class <m>k</m>, we model:
+      </p>
+      <me>
+        \log\frac{q_k(\mathbf{x})}{1 - q_k(\mathbf{x})}
+        = \beta_{k,0} + \sum_{j=1}^p \beta_{k,j} x_j,
+        \qquad k = 1,\dots,K.
+      </me>
+      <p>
+        Here, <m>q_k(\mathbf{x})</m> estimates the probability that an observation belongs to class <m>k</m> <em>versus the rest</em>, but these quantities are not guaranteed to sum to 1, nor to be mutually consistent.
+      </p>
+
+      <p>
+        After fitting all <m>K</m> models, the predicted class for a new observation <m>\mathbf{x}</m> is
+      </p>
+      <me>
+        \hat{y}(\mathbf{x}) = \arg\max_k q_k(\mathbf{x}).
+      </me>
+      <p>
+        OvR is simple but does not produce a coherent probability distribution.
+      </p>
+
+      <p>
+        The multinomial approach resolves this inconsistency by modeling all class probabilities jointly. We select one class, say class <m>K</m>, as a reference and fit:
+      </p>
+      <me>
+        \log\frac{p_k(\mathbf{x})}{p_K(\mathbf{x})}
+        = \beta_{k,0} + \sum_{j=1}^p \beta_{k,j} x_j,
+        \qquad k = 1,\dots,K-1.
+      </me>
+      <p>
+        Let
+      </p>
+      <me>
+        \eta_k(\mathbf{x}) = \beta_{k,0} + \sum_{j=1}^p \beta_{k,j} x_j,
+        \qquad
+        \eta_K(\mathbf{x}) = 0.
+      </me>
+      <p>
+        The class probabilities are computed using the <em>softmax</em> function:
+      </p>
+      <me>
+        p_k(\mathbf{x}) =
+        \frac{\exp(\eta_k(\mathbf{x}))}
+        {\sum_{j=1}^K \exp(\eta_j(\mathbf{x}))},
+        \qquad k=1,\dots,K.
+      </me>
+      <p>
+        These probabilities automatically satisfy
+      </p>
+      <me>
+        \sum_{k=1}^K p_k(\mathbf{x}) = 1.
+      </me>
+      <p>
+        The predicted class is
+      </p>
+      <me>
+        \hat{y}(\mathbf{x}) = \arg\max_k p_k(\mathbf{x}).
+      </me>
+
+      <p>
+        Multinomial logistic regression is generally preferred because it produces coherent probabilities that sum to 1 and jointly models the relationships among classes. The one-versus-rest approach is computationally simpler, especially when <m>K</m> is large, and often yields similar <em>class predictions</em>, even if the corresponding probability estimates differ.
+      </p>
+
+      <p>
+        In <xref ref="sec-ml-conditionals"/>, we saw that logistic regression was not flexible enough to approximate <m>p(\mathbf{x})</m> well for the two-digit example. In the next sections, we introduce algorithms that improve on this by providing the needed flexibility, each using a different approach to estimating the conditional class probabilities.
+      </p>
+    </subsection>
+  </section>
+
+  <section xml:id="sec-knn-ml">
+    <title>k-nearest neighbors</title>
+
+    <p>
+      We introduced the kNN algorithm in <xref ref="sec-knn-cv-intro"/>. In <xref ref="sec-mse-estimates"/>, we noted that <m>k=65</m> provided the highest estimated accuracy. Using <m>k=65</m>, we obtain an improved accuracy over regression. A plot of the estimated conditional probability shows that the kNN estimate is flexible enough and does indeed capture the shape of the true conditional probability.
+    </p>
+
+    <note>
+      <p>
+        You are ready to do exercises 1 - 11.
+      </p>
+    </note>
+  </section>
+
+  <section xml:id="sec-probabilistic-models">
+    <title>Probabilistic classification models</title>
+
+    <introduction>
+      <p>
+        We have described how, when using squared loss, the conditional expectation provides the best approach to developing a decision rule. In a binary case, the smallest true error we can achieve is determined by Bayes' rule, which is a decision rule based on the true conditional probability: <m>p(\mathbf{x}) = \mathrm{Pr}(Y = 1 \mid \mathbf{X}=\mathbf{x})</m>. We have described several approaches to estimating <m>p(\mathbf{x})</m>. In all these approaches, we estimate the conditional probability directly and do not consider the distribution of the predictors. In machine learning, these are referred to as <em>discriminative</em> approaches.
+      </p>
+
+      <p>
+        However, Bayes' theorem tells us that knowing the distribution of the predictors <m>\mathbf{X}</m> may be useful. Methods that model the joint distribution of <m>Y</m> and <m>\mathbf{X}</m> are often referred to as <em>generative models</em> (we model how the entire data, <m>\mathbf{X}</m> and <m>Y</m>, are generated). We start by describing the most general generative model, Naive Bayes, and then proceed to describe two specific cases, quadratic discriminant analysis (QDA) and linear discriminant analysis (LDA).
+      </p>
+    </introduction>
+
+    <subsection xml:id="sec-naive-bayes">
+      <title>Naive Bayes</title>
+
+      <p>
+        Recall that Bayes rule tells us that we can rewrite <m>p(\mathbf{x})</m> as follows:
+      </p>
+      <me>
+        p(\mathbf{x}) = \mathrm{Pr}(Y = 1|\mathbf{X}=\mathbf{x}) = \frac{f_{\mathbf{X}|Y = 1}(\mathbf{x}) \mathrm{Pr}(Y = 1)}
+        { f_{\mathbf{X}|Y = 0}(\mathbf{x})\mathrm{Pr}(Y = 0)  + f_{\mathbf{X}|Y = 1}(\mathbf{x})\mathrm{Pr}(Y = 1) }
+      </me>
+      <p>
+        with <m>f_{\mathbf{X}|Y = 1}</m> and <m>f_{\mathbf{X}|Y = 0}</m> representing the distribution functions of the predictor <m>\mathbf{X}</m> for the two classes <m>Y = 1</m> and <m>Y = 0</m>. The formula implies that if we can estimate these conditional distributions, we can develop a powerful decision rule. However, this is a big <em>if</em>.
+      </p>
+
+      <p>
+        As we go forward, we will encounter examples in which <m>\mathbf{X}</m> has many dimensions, and we do not have much information about the distribution. In these cases, Naive Bayes will be practically impossible to implement. However, there are instances in which we have a small number of predictors (not much more than 2) and many categories in which generative models can be quite powerful. We describe two specific examples and use our previously described case studies to illustrate them.
+      </p>
+
+      <p>
+        Let's start with a very simple and uninteresting, yet illustrative, case: the example related to predicting sex from height.
+      </p>
+
+      <program language="r">
+        <input>
+set.seed(1995)
+y &lt;- heights$height
+train_index &lt;- createDataPartition(y, times = 1, p = 0.5, list = FALSE)
+train_set &lt;- heights[train_index,]
+test_set &lt;- heights[-train_index,]
+        </input>
+      </program>
+
+      <p>
+        In this case, the Naive Bayes approach is particularly appropriate because we know that the normal distribution is a good approximation for the conditional distributions of height given sex for both classes <m>Y = 1</m> (female) and <m>Y = 0</m> (male). This implies that we can approximate the conditional distributions <m>f_{X|Y = 1}</m> and <m>f_{X|Y = 0}</m> by simply estimating averages and standard deviations from the data:
+      </p>
+
+      <program language="r">
+        <input>
+param &lt;- train_set |> group_by(sex) |>
+  summarize(m = mean(height), s = sd(height))
+        </input>
+      </program>
+
+      <p>
+        The prevalence, which we will denote with <m>\pi = \mathrm{Pr}(Y = 1)</m>, can be estimated from the data with:
+      </p>
+
+      <program language="r">
+        <input>
+pi &lt;- mean(train_set$sex == "Female")
+        </input>
+      </program>
+
+      <p>
+        Now we can use our estimates of average and standard deviation to get an actual rule:
+      </p>
+
+      <program language="r">
+        <input>
+x &lt;- test_set$height
+f0 &lt;- dnorm(x, param$m[2], param$s[2])
+f1 &lt;- dnorm(x, param$m[1], param$s[1])
+p_hat_bayes &lt;- f1*pi / (f1*pi + f0*(1 - pi))
+        </input>
+      </program>
+
+      <p>
+        Our Naive Bayes estimate <m>\hat{p}(x)</m> looks a lot like a logistic regression estimate.
+      </p>
+
+      <p>
+        In fact, we can show that the Naive Bayes approach is similar to the logistic regression prediction mathematically. However, we leave the demonstration to a more advanced text, such as the Elements of Statistical Learning<fn>https://web.stanford.edu/~hastie/Papers/ESLII.pdf</fn>.
+      </p>
+    </subsection>
+
+    <subsection xml:id="sec-controlling-prevalence">
+      <title>Controlling prevalence</title>
+
+      <p>
+        One useful feature of the Naive Bayes approach is that it includes a parameter to account for differences in prevalence. Using our sample, we estimated <m>f_{X|Y = 1}</m>, <m>f_{X|Y = 0}</m> and <m>\pi</m>. If we use hats to denote the estimates, we can write <m>\hat{p}(x)</m> as:
+      </p>
+      <me>
+        \hat{p}(x)= \frac{\hat{f}_{X|Y = 1}(x) \hat{\pi}}
+        { \hat{f}_{X|Y = 0}(x)(1-\hat{\pi}) + \hat{f}_{X|Y = 1}(x)\hat{\pi} }
+      </me>
+      <p>
+        As we discussed earlier, our sample has a much lower prevalence than the general population. So if we use the rule <m>\hat{p}(x) > 0.5</m> to predict females, our accuracy will be affected due to the low sensitivity:
+      </p>
+
+      <program language="r">
+        <input>
+y_hat_bayes &lt;- ifelse(p_hat_bayes > 0.5, "Female", "Male")
+sensitivity(data = factor(y_hat_bayes), reference = factor(test_set$sex))
+        </input>
+      </program>
+
+      <p>
+        Again, this is because the algorithm gives more weight to specificity to account for the low prevalence:
+      </p>
+
+      <program language="r">
+        <input>
+specificity(data = factor(y_hat_bayes), reference = factor(test_set$sex))
+        </input>
+      </program>
+
+      <p>
+        This is mainly due to the fact that <m>\hat{\pi}</m> is substantially less than 0.5, so we tend to predict <c>Male</c> more often. It makes sense for a machine learning algorithm to do this in our sample because we do have a higher percentage of males. But if we were to extrapolate this to a general population, our overall accuracy would be affected by the low sensitivity.
+      </p>
+
+      <p>
+        The Naive Bayes approach gives us a direct way to correct this since we can simply force <m>\hat{\pi}</m> to be whatever value we want it to be. So to balance specificity and sensitivity, instead of changing the cutoff in the decision rule, we could simply change <m>\hat{\pi}</m> to 0.5 like this:
+      </p>
+
+      <program language="r">
+        <input>
+p_hat_bayes_unbiased &lt;- f1 * 0.5 / (f1 * 0.5 + f0 * (1 - 0.5))
+y_hat_bayes_unbiased &lt;- ifelse(p_hat_bayes_unbiased > 0.5, "Female", "Male")
+        </input>
+      </program>
+
+      <p>
+        Note the difference in sensitivity with a better balance:
+      </p>
+
+      <program language="r">
+        <input>
+sensitivity(factor(y_hat_bayes_unbiased), factor(test_set$sex))
+specificity(factor(y_hat_bayes_unbiased), factor(test_set$sex))
+        </input>
+      </program>
+
+      <p>
+        The new rule also gives us a very intuitive cutoff between 66-67, which is about the middle of the female and male average heights.
+      </p>
+    </subsection>
+
+    <subsection xml:id="sec-qda">
+      <title>Quadratic discriminant analysis</title>
+
+      <p>
+        Quadratic Discriminant Analysis (QDA) is a version of Naive Bayes in which we assume that the distributions <m>f_{\mathbf{X}|Y = 1}(x)</m> and <m>f_{\mathbf{X}|Y = 0}(\mathbf{x})</m> are multivariate normal. The simple example we described in the previous section is actually QDA. Let's now look at a slightly more complicated case: the 2 or 7 example.
+      </p>
+
+      <p>
+        In this example, we have two predictors, so we assume each one is bivariate normal. This implies that we need to estimate two averages, two standard deviations, and a correlation for each case <m>Y = 1</m> and <m>Y = 0</m>. Once we have these, we can approximate the distributions <m>f_{X_1,X_2|Y = 1}</m> and <m>f_{X_1, X_2|Y = 0}</m>. We can easily estimate parameters from the data, and with these estimates in place, all we need is the prevalence <m>\hat{\pi}</m> to compute:
+      </p>
+      <me>
+        \hat{p}(\mathbf{x})= \frac{\hat{f}_{\mathbf{X}|Y = 1}(\mathbf{x}) \hat{\pi}}
+        { \hat{f}_{\mathbf{X}|Y = 0}(x)(1-\hat{\pi}) + \hat{f}_{\mathbf{X}|Y = 1}(\mathbf{x})\hat{\pi} }
+      </me>
+      <p>
+        Note that the densities <m>f</m> are bivariate normal distributions. Here we provide a visual way of showing the approach. We plot the data and use contour plots to give an idea of what the two estimated normal densities look like (we show the curve representing a region that includes 95% of the points).
+      </p>
+
+      <p>
+        We can fit QDA using the <c>qda</c> function in the <term>MASS</term> package:
+      </p>
+
+      <program language="r">
+        <input>
+train_qda &lt;- MASS::qda(y ~ ., data = mnist_27$train)
+y_hat &lt;- predict(train_qda, mnist_27$test)$class
+        </input>
+      </program>
+
+      <p>
+        We see that we obtain relatively good accuracy:
+      </p>
+
+      <program language="r">
+        <input>
+confusionMatrix(y_hat, mnist_27$test$y)$overall["Accuracy"]
+        </input>
+      </program>
+
+      <p>
+        One reason QDA does not work as well as the kernel methods is that the assumption of normality does not quite hold. Although for the 2s it seems reasonable, for the 7s it does seem to be off. Notice the slight curvature in the points for the 7s.
+      </p>
+
+      <p>
+        QDA can work ok here, but it becomes harder to use as the number of predictors increases. Here we have 2 predictors and had to compute 4 means, 4 SDs, and 2 correlations. Notice that if we have 10 predictors, we need to estimate 45 correlations for each class. In general, the formula for the number of correlations we have to estimate is <m>p(p-1)/2</m> for each class, which grows quickly. Once the number of parameters approaches the size of our data, the method becomes impractical due to overfitting.
+      </p>
+    </subsection>
+
+    <subsection xml:id="sec-lda">
+      <title>Linear discriminant analysis</title>
+
+      <p>
+        A relatively simple solution to QDA's problem of having too many parameters is to assume that the correlation structure is the same for all classes, which reduces the number of parameters we need to estimate.
+      </p>
+
+      <p>
+        We can fit LDA using the <term>MASS</term> <c>lda</c> function:
+      </p>
+
+      <program language="r">
+        <input>
+train_lda &lt;- MASS::lda(y ~ ., data = mnist_27$train)
+y_hat &lt;- predict(train_lda, mnist_27$test)$class
+        </input>
+      </program>
+
+      <p>
+        Now the size of the ellipses as well as the angles are the same. This is because they are assumed to have the same standard deviations and correlations. Although this added constraint lowers the number of parameters, the rigidity lowers our accuracy. When we force this assumption, we can show mathematically that the boundary is a line, just as with logistic regression. For this reason, we call the method <em>linear</em> discriminant analysis (LDA). Similarly, for QDA, we can show that the boundary must be a quadratic function.
+      </p>
+
+      <p>
+        Although LDA often works well for simple datasets, in this case, the lack of flexibility does not permit us to capture the non-linearity in the true conditional probability function.
+      </p>
+    </subsection>
+
+    <subsection xml:id="sec-extension-multiple-classes">
+      <title>Extension to multiple classes</title>
+
+      <p>
+        The ideas introduced above for the two-class case extend naturally to situations with more than two classes. For <m>K</m> classes, Bayes' rule gives
+      </p>
+      <me>
+        p_k(\mathbf{x}) = \Pr(Y = k \mid \mathbf{X} = \mathbf{x}) =
+        \frac{f_{\mathbf{X}\mid Y=k}(\mathbf{x})\,\Pr(Y=k)}{
+        \sum_{l=1}^K f_{\mathbf{X}\mid Y=l}(\mathbf{x})\Pr(Y=l)
+        },
+        \qquad k = 1,\dots,K.
+      </me>
+      <p>
+        To construct a classifier, we simply estimate the quantities in this expression from the training data. For Naive Bayes, LDA, or QDA:
+      </p>
+      <ul>
+        <li>
+          <p>we estimate the class-conditional densities <m>f_{\mathbf{X}\mid Y=k}(\mathbf{x})</m> using the assumed model (a normal distribution with shared covariance for LDA, or a normal distribution with class-specific covariances for QDA), and</p>
+        </li>
+        <li>
+          <p>we estimate the class proportions <m>\Pr(Y = k)</m> with the empirical prevalence <m>\hat{\pi}_k = \frac{1}{n}\sum_{i=1}^n \mathbf{1}(y_i = k)</m>.</p>
+        </li>
+      </ul>
+      <p>
+        Once these components are estimated, we compute <m>\hat{p}_k(\mathbf{x})</m> for all <m>k</m>, and assign <m>\mathbf{x}</m> to the class with the largest posterior probability.
+      </p>
+
+      <p>
+        This generalization requires no new ideas beyond the two-class case. The only difference is that we repeat the same estimation for all <m>K</m> classes.
+      </p>
+    </subsection>
+
+    <subsection xml:id="sec-connection-to-distance">
+      <title>Connection to distance</title>
+
+      <p>
+        In LDA and QDA, we model each class as coming from a multivariate normal distribution estimated from the <em>training data</em>. When we classify a new observation <m>\mathbf{x}</m>, the algorithm computes, for each class <m>k</m>,
+      </p>
+      <me>
+        p_k(\mathbf x) = f_{\mathbf{X}\mid Y=k}(\mathbf{x})\,\Pr(Y=k)
+      </me>
+      <p>
+        and predicts the class with the largest value.
+      </p>
+
+      <p>
+        Understanding how the normal density behaves helps explain why LDA and QDA behave like distance-based classifiers. For simplicity we consider the case in which classes are balanced, that is, <m>\Pr(Y=k) = 1/K</m> for all <m>k</m>.
+      </p>
+
+      <p>
+        Let's first examine the one-dimensional normal density and
+      </p>
+      <me>
+        f(x) = \frac{1}{\sqrt{2\pi}\sigma} \exp\left\{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2\right\}.
+      </me>
+      <p>
+        If we ignore the multiplicative constant <m>1/(\sqrt{2\pi}\sigma)</m> and take the logarithm, we get:
+      </p>
+      <me>
+        \log f(x)
+        \propto -\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2
+      </me>
+      <p>
+        The key point is:
+      </p>
+      <me>
+        \log f(x)
+        \text{ increases as }
+        (x-\mu)^2
+        \text{ decreases.}
+      </me>
+      <p>
+        In other words, the class with the highest density is simply the class whose mean is closest to <m>x</m> (after scaling by <m>\sigma</m>, the within-class standard deviation).
+      </p>
+
+      <p>
+        For multivariate Gaussian classes, the same idea holds but with a more general notion of distance. The log density becomes:
+      </p>
+      <me>
+        \log f(\mathbf{x}) \propto (\mathbf{x} - \boldsymbol{\mu})^\top\Sigma^{-1}(\mathbf{x} - \boldsymbol{\mu}),
+      </me>
+      <p>
+        with <m>\Sigma</m> representing the covariance matrix of the class. This quantity is larger when <m>\mathbf{x}</m> is closer to the class mean <m>\boldsymbol{\mu}</m> in a <em>Mahalanobis</em> distance sense.
+      </p>
+      <ul>
+        <li>
+          <p>In LDA, all classes use the same covariance <m>\Sigma</m>. So each class scores <m>\mathbf{x}</m> by its (scaled) squared distance to the class mean.</p>
+        </li>
+        <li>
+          <p>In QDA, each class has its own covariance, so each class uses a different distance metric.</p>
+        </li>
+      </ul>
+      <p>
+        Thus, LDA and QDA can both be viewed as distance-based classifiers: a new observation is assigned to the class whose Gaussian model places it <em>closest</em> in this Mahalanobis sense.
+      </p>
+
+      <note>
+        <p>
+          You are now ready to do exercises 12<ndash/>18.
+        </p>
+      </note>
+    </subsection>
+  </section>
 
   <section xml:id="sec-trees">
     <title>Classification and regression trees (CART)</title>
-    
+
     <p>
-      Classification and regression trees (CART) provide a flexible, intuitive approach to prediction by repeatedly splitting the predictor space into smaller and more homogeneous regions. This section will be populated with content from the algorithms.qmd file.
+      Classification and regression trees (CART) provide a flexible, intuitive approach to prediction by repeatedly splitting the predictor space into smaller and more homogeneous regions. Instead of fitting a single global model, CART builds a tree-shaped set of decision rules that adapt to complex patterns in the data. In this section, we motivate the idea and provide some details on how it is implemented.
+    </p>
+
+    <subsection xml:id="sec-curse-of-dimensionality">
+      <title>The curse of dimensionality</title>
+
+      <p>
+        We described how methods such as LDA and QDA are not meant to be used with many predictors <m>p</m> because the number of parameters that we need to estimate becomes too large. For example, with the digits example <m>p = 784</m>, we would have over 600,000 parameters with LDA, and we would multiply that by the number of classes for QDA. Kernel methods, such as kNN or local regression, do not have model parameters to estimate. However, they also face a challenge when multiple predictors are used due to what is referred to as the <em>curse of dimensionality</em>. The <em>dimension</em> here refers to the fact that when we have <m>p</m> predictors, the distance between two observations is computed in <m>p</m>-dimensional space.
+      </p>
+
+      <p>
+        A useful way of understanding the curse of dimensionality is by considering how large we have to make a span/neighborhood/window to include a given percentage of the data. Remember that with larger neighborhoods, our methods lose flexibility, and to be flexible, we need to keep the neighborhoods small.
+      </p>
+
+      <p>
+        To see how this becomes an issue for higher dimensions, suppose we have one continuous predictor with equally spaced points in the [0,1] interval, and we want to create windows that include 1/10th of the data. Then it's easy to see that our windows have to be of size 0.1.
+      </p>
+
+      <p>
+        Now, for two predictors, if we decide to keep the neighborhood just as small, 10% for each dimension, we include only a square with sides of size <m>0.1</m>. But if we want to include 10% of the data, then we need to increase the size of each side of the square to <m>\sqrt{.10} \approx 0.316</m>.
+      </p>
+
+      <p>
+        Using the same logic, if we want to include 10% of the data in a three-dimensional space, then the side of each cube is <m>\sqrt[3]{.10} \approx 0.464</m>. In general, to include 10% of the data in a case with <m>p</m> dimensions, we need an interval with each side of size <m>\sqrt[p]{.10}</m> of the total. This proportion gets close to 1 quickly, and if the proportion is 1, it means we include all the data and are no longer smoothing.
+      </p>
+
+      <p>
+        By the time we reach 100 predictors, the neighborhood is no longer very local, as each side covers almost the entire dataset.
+      </p>
+
+      <p>
+        Here, we look at a set of elegant and versatile methods that adapt to higher dimensions and also allow these regions to take more complex shapes while still producing models that are interpretable. These are very popular, well-known, and studied methods. We will concentrate on regression and decision trees and their extension to random forests.
+      </p>
+    </subsection>
+
+    <subsection xml:id="sec-cart-motivation">
+      <title>CART motivation</title>
+
+      <p>
+        To motivate this section, we will use a new dataset that includes the breakdown of the composition of different olive oils into 8 fatty acids:
+      </p>
+
+      <program language="r">
+        <input>
+names(olive)
+        </input>
+      </program>
+
+      <p>
+        For illustrative purposes, we will try to predict the region using the fatty acid composition values as predictors.
+      </p>
+
+      <program language="r">
+        <input>
+table(olive$region)
+        </input>
+      </program>
+
+      <p>
+        We remove the <c>area</c> column because we won't use it as a predictor.
+      </p>
+
+      <program language="r">
+        <input>
+olive &lt;- select(olive, -area)
+        </input>
+      </program>
+
+      <p>
+        Using kNN, we can achieve good test set accuracy. However, a bit of data exploration reveals that we should be able to do even better. For example, if we look at the distribution of each predictor stratified by region, we see that eicosenoic is only present in Southern Italy and that linoleic separates Northern Italy from Sardinia.
+      </p>
+
+      <p>
+        This implies that we should be able to build an algorithm that predicts perfectly! We can see this clearly by plotting the values for eicosenoic and linoleic.
+      </p>
+
+      <p>
+        In <xref ref="sec-predictor-space"/>, we defined <em>predictor spaces</em>, which in this case consist of eight-dimensional points with values between 0 and 100. By eye, we can construct a prediction rule that partitions the predictor space so that each partition contains only outcomes of a single category.
+      </p>
+
+      <p>
+        This, in turn, can be used to define an algorithm with perfect accuracy. Specifically, we define the following decision rule: if eicosenoic is larger than 0.065, predict Southern Italy. If not, then if linoleic is larger than <m>10.535</m>, predict Sardinia, and if lower, predict Northern Italy. We can draw this decision tree as follows:
+      </p>
+
+      <program language="r">
+        <input>
+library(rpart)
+train_rpart &lt;- train(region ~ ., method = "rpart", data = olive)
+plot(train_rpart$finalModel, margin = 0.1)
+text(train_rpart$finalModel, cex = 0.75)
+        </input>
+      </program>
+
+      <p>
+        Decision trees like this are often used in practice. For example, to decide on a person's risk of poor outcome after having a heart attack, doctors use decision tree-style charts.
+      </p>
+
+      <p>
+        A tree is basically a flow chart of yes or no questions. The general idea of the methods we are describing is to define an algorithm that uses data to create these trees with predictions at the ends, referred to as <em>nodes</em>. Regression and decision trees operate by predicting an outcome variable <m>y</m> by partitioning the predictors.
+      </p>
+
+      <p>
+        Although this motivating example is a classification problem, it is easier to first explain the mechanics of recursive partitioning in the regression setting, and then return to classification trees.
+      </p>
+    </subsection>
+
+    <subsection xml:id="sec-regression-trees">
+      <title>Regression trees</title>
+
+      <p>
+        When using trees, and the outcome is continuous, we call the approach a <em>regression</em> tree. To introduce regression trees, we will use the 2008 poll data used in <xref ref="sec-smoothing"/> to describe the basic idea of how we build these algorithms. As with other machine learning algorithms, we will try to estimate the conditional expectation <m>f(x) = \mathrm{E}(Y | X = x)</m> with <m>Y</m> the poll margin and <m>x</m> the day.
+      </p>
+
+      <p>
+        The general idea here is to build a decision tree and, at the end of each <em>node</em>, obtain a predictor <m>\hat{y}</m>. A mathematical way to describe this is: we are partitioning the predictor space into <m>J</m> non-overlapping regions, <m>R_1, R_2, \ldots, R_J</m>, and then for any predictor <m>x</m> that falls within region <m>R_j</m>, estimate <m>f(x)</m> with the average of the training observations <m>y_i</m> for which the associated predictor <m>x_i</m> is also in <m>R_j</m>.
+      </p>
+
+      <p>
+        Regression trees create partitions recursively. We start the algorithm with one partition: the entire predictor space. In this simple example, this is the interval [-155, 1]. In the first step, we will split the predictor space into two partitions. In the second step, we will split one of these partitions into two and will have three partitions, then four, and so on.
+      </p>
+
+      <p>
+        First, how do we pick the partition? For each existing partition, we find a predictor <m>j</m> and value <m>s</m> that define two new partitions, which we will call <m>R_1(j,s)</m> and <m>R_2(j,s)</m>, that split our observations in the current partition by asking if <m>x_j</m> is bigger than <m>s</m>:
+      </p>
+      <me>
+        R_1(j,s) = \{\mathbf{x} \mid x_j &lt; s\} \mbox{  and  } R_2(j,s) = \{\mathbf{x} \mid x_j \geq s\}
+      </me>
+      <p>
+        In our current example, we only have one predictor, so we will always choose <m>j = 1</m>, but in general, this will not be the case. Here, <m>\hat{y}_{R_1}</m> and <m>\hat{y}_{R_2}</m> are the averages of the observations <m>y</m> for which the associated <m>\mathbf{x}</m> is in <m>R_1</m> or <m>R_2</m>, respectively.
+      </p>
+
+      <p>
+        But how do we pick <m>j</m> and <m>s</m>? Basically, we find the pair that minimizes the residual sum of squares (RSS):
+      </p>
+      <me>
+        \sum_{i:\, x_i \in R_1(j,s)} (y_i - \hat{y}_{R_1})^2 +
+        \sum_{i:\, x_i \in R_2(j,s)} (y_i - \hat{y}_{R_2})^2
+      </me>
+      <p>
+        This is then applied recursively to the new regions <m>R_1</m> and <m>R_2</m>. Once we are done partitioning the predictor space into regions, a prediction is made for each region.
+      </p>
+
+      <p>
+        Let's take a look at what this algorithm does on the 2008 presidential election poll data. We will use the <c>rpart</c> function in the <term>rpart</term> package.
+      </p>
+
+      <program language="r">
+        <input>
+library(rpart)
+fit &lt;- rpart(margin ~ ., data = polls_2008)
+        </input>
+      </program>
+
+      <p>
+        We can visualize the splits:
+      </p>
+
+      <program language="r">
+        <input>
+plot(fit, margin = 0.1)
+text(fit, cex = 0.75)
+        </input>
+      </program>
+
+      <p>
+        The first split is made on day 39.5. One of those regions is then split at day 86.5. The two resulting new partitions are split on days 49.5 and 117.5, respectively, and so on. We end up with 8 partitions.
+      </p>
+
+      <p>
+        You can also see the partitions by typing:
+      </p>
+
+      <program language="r">
+        <input>
+summary(fit)
+        </input>
+      </program>
+
+      <p>
+        Now that we know how partitions are chosen, when does partitioning stop? Note that the fit algorithm above stopped partitioning at 8 nodes. This decision is based on a measure called the complexity parameter (cp). Every time the data is split into two new partitions, the training set RSS decreases because the model gains flexibility to adapt to the data. If splitting continued until every observation was isolated in its own partition, the RSS would eventually reach 0. To prevent such overfitting, the algorithm requires that each new split reduce the RSS by at least a factor of cp. Larger values of cp therefore stop the algorithm earlier, leading to fewer nodes.
+      </p>
+
+      <p>
+        However, cp is not the only factor that controls partitioning. Another important parameter is the minimum number of observations required in a node before it can be split, set by the minsplit argument in rpart (default: 20). In addition, rpart allows users to specify the minimum number of observations allowed in a terminal node (leaf), controlled by the <c>minbucket</c> argument. By default, <c>minbucket = round(minsplit / 3)</c>.
+      </p>
+
+      <p>
+        As expected, if we set <c>cp = 0</c> and <c>minsplit = 2</c>, then our prediction is as flexible as possible, and our predictor is our original data.
+      </p>
+
+      <p>
+        Intuitively, we know that this is not a good approach as it will generally result in over-fitting. The <c>cp</c>, <c>minsplit</c>, and <c>minbucket</c> parameters can be used to control the variability of the final predictors: larger values reduce variability but restrict flexibility.
+      </p>
+
+      <p>
+        So how do we pick these parameters? We can use cross-validation, just like with any tuning parameter.
+      </p>
+
+      <p>
+        Note that if we already have a tree and want to apply a higher cp value, we can use the <c>prune</c> function. We call this <em>pruning</em> a tree because we are snipping off partitions that do not meet a <c>cp</c> criterion. Here is an example where we create a tree that uses a <c>cp = 0</c>, and then we prune it back:
+      </p>
+
+      <program language="r">
+        <input>
+fit &lt;- rpart(margin ~ ., data = polls_2008, control = rpart.control(cp = 0))
+pruned_fit &lt;- prune(fit, cp = 0.01)
+        </input>
+      </program>
+    </subsection>
+
+    <subsection xml:id="sec-classification-trees">
+      <title>Classification (decision) trees</title>
+
+      <p>
+        Classification trees, or decision trees, are used in prediction problems where the outcome is categorical. We use the same partitioning principle with some differences to account for the fact that we are now working with a categorical outcome.
+      </p>
+
+      <p>
+        The first difference is that we form predictions by calculating which class is the most common among the training set observations within the partition, rather than taking the average in each partition (as we can't take the average of categories).
+      </p>
+
+      <p>
+        The second is that we can no longer use RSS to choose the partition. While we could use the naive approach of looking for partitions that minimize training error, better performing approaches use more sophisticated metrics. Two of the more popular ones are the <em>Gini Index</em> and <em>Entropy</em>.
+      </p>
+
+      <p>
+        In a perfect scenario, the outcomes in each of our partitions are all of the same category since this will permit perfect accuracy. The <em>Gini Index</em> is going to be 0 in this scenario, and becomes larger the more we deviate from this scenario. To define the Gini Index, we define <m>\hat{p}_{j,k}</m> as the proportion of observations in partition <m>j</m> that are of class <m>k</m>. The Gini Index is defined as:
+      </p>
+      <me>
+        \mbox{Gini}(j) = \sum_{k = 1}^K \hat{p}_{j,k}(1-\hat{p}_{j,k})
+      </me>
+      <p>
+        If you study the formula carefully, you will see that it is, in fact, 0 in the perfect scenario described above.
+      </p>
+
+      <p>
+        <em>Entropy</em> is a related quantity, defined as:
+      </p>
+      <me>
+        \mbox{entropy}(j) = -\sum_{k = 1}^K \hat{p}_{j,k}\log(\hat{p}_{j,k}), \mbox{ with } 0 \times \log(0) \mbox{ defined as }0
+      </me>
+
+      <p>
+        If we use a classification tree on the 2 or 7 example,
+      </p>
+
+      <program language="r">
+        <input>
+fit_rpart &lt;- rpart(y ~ ., data = mnist_27$train, method = "class")
+y_hat &lt;- predict(fit_rpart, newdata = mnist_27$test, type = "class")
+        </input>
+      </program>
+
+      <p>
+        we achieve an accuracy which is better than regression, but is not as good as what we achieved with kernel methods. We don't show the code here as we first need to cover the <term>caret</term> package, which we introduce in the next chapter.
+      </p>
+
+      <p>
+        The plot of the estimated conditional probability shows us the limitations of classification trees.
+      </p>
+
+      <p>
+        Note that with decision trees, it is difficult to make the boundaries smooth since each partition creates a discontinuity.
+      </p>
+
+      <p>
+        Classification trees have certain advantages that make them very useful. They are highly interpretable, even more so than linear models. They are also easy to visualize (if small enough). Finally, they can model human decision processes and don't require the use of dummy predictors for categorical variables. On the other hand, the approach via recursive partitioning can easily over-fit and is therefore a bit harder to train than, for example, linear regression or kNN. Furthermore, in terms of accuracy, it is rarely the best performing method since it is not very flexible and is highly unstable to changes in training data. Random forests, explained next, improve on several of these shortcomings.
+      </p>
+    </subsection>
+  </section>
+
+  <section xml:id="sec-random-forests">
+    <title>Random forests</title>
+
+    <p>
+      Random forests are a <em>very popular</em> machine learning approach that addresses the shortcomings of decision trees using a clever idea. The goal is to improve prediction performance and reduce instability by <em>averaging</em> multiple decision trees: a <em>forest</em> of trees constructed with <em>randomness</em>. It has two features that help accomplish this.
+    </p>
+
+    <p>
+      The first step is <em>bootstrap aggregation</em> or <em>bagging</em>. The general idea is to generate many predictors, each using regression or classification trees, and then form a final prediction based on the average prediction of all these trees. To ensure that the individual trees are not the same, we use the bootstrap to induce randomness. These two features combined explain the name: the bootstrap makes the individual trees <em>randomly</em> different, and the combination of trees is the <em>forest</em>. The specific steps are as follows.
+    </p>
+
+    <p>
+      1. Build <m>B</m> decision trees using the training set. We refer to the fitted models as <m>T_1, T_2, \dots, T_B</m>.
+    </p>
+    <p>
+      2. For every observation in the test set, form a prediction <m>\hat{y}_j</m> using tree <m>T_j</m>.
+    </p>
+    <p>
+      3. For continuous outcomes, form a final prediction with the average <m>\hat{y} = \frac{1}{B} \sum_{j = 1}^B \hat{y}_j</m>. For categorical data classification, predict <m>\hat{y}</m> with majority vote (most frequent class among <m>\hat{y}_1, \dots, \hat{y}_B</m>).
+    </p>
+
+    <p>
+      So how do we get different decision trees from a single training set? For this, we use randomness in two ways, which we explain in the steps below. Let <m>N</m> be the number of observations in the training set. To create <m>T_j, \, j = 1,\ldots,B</m> from the training set we do the following:
+    </p>
+
+    <p>
+      1. Create a bootstrap training set by sampling <m>N</m> observations from the training set <em>with replacement</em>. This is the first way to induce randomness.
+    </p>
+    <p>
+      2. A large number of features is typical in machine learning challenges. Often, many features can be informative, but including them all in the model may result in overfitting. The second way random forests induce randomness is by randomly selecting features to be included in the building of each tree. A different random subset is selected for each tree. This reduces correlation between trees in the forest, thereby improving prediction accuracy.
+    </p>
+
+    <p>
+      To illustrate how the first steps can result in smoother estimates, we will fit a random forest to the 2008 polls data. We will use the <c>randomForest</c> function in the <term>randomForest</term> package:
+    </p>
+
+    <program language="r">
+      <input>
+library(randomForest)
+fit &lt;- randomForest(margin ~ ., data = polls_2008)
+      </input>
+    </program>
+
+    <p>
+      Note that if we apply the function <c>plot</c> to the resulting object, we see how the error rate of our algorithm changes as we add trees:
+    </p>
+
+    <program language="r">
+      <input>
+plot(fit)
+      </input>
+    </program>
+
+    <p>
+      In this case, the accuracy improves as we add more trees until we have used about 300 trees, after which the accuracy stabilizes.
+    </p>
+
+    <p>
+      The resulting estimate for this random forest, obtained with
+    </p>
+
+    <program language="r">
+      <input>
+y_hat &lt;-  predict(fit, newdata = polls_2008)
+      </input>
+    </program>
+
+    <p>
+      is shown with a red curve below.
+    </p>
+
+    <p>
+      Notice that the random forest estimate is much smoother than what we achieved with the regression tree in the previous section. This is possible because the average of many step functions can be smooth. We can see this by visually examining how the estimate changes as we add more trees. In the following figure, you see each of the bootstrap samples for several values of <m>b</m>, and for each one, we see the tree that is fitted in grey, the previous trees that were fitted in lighter grey, and the result of averaging all the trees estimated up to that point.
+    </p>
+
+    <p>
+      If we use a random forest on the 2 or 7 example,
+    </p>
+
+    <program language="r">
+      <input>
+library(randomForest)
+train_rf &lt;- randomForest(y ~ ., data = mnist_27$train)
+      </input>
+    </program>
+
+    <p>
+      the accuracy improves. Visualizing the estimate shows that, although we obtain high accuracy, it appears that there is room for improvement by making the estimate smoother. This could be achieved by changing the parameter that controls the minimum number of data points in the nodes of the tree. The larger this minimum, the smoother the final estimate will be. If we use a node size of 65, the number of neighbors we used with kNN, we get improved accuracy. The selected model provides similar accuracy and a smoother estimate.
     </p>
   </section>
 
   <section xml:id="sec-variable-importance">
     <title>Variable importance</title>
-    
+
     <p>
-      This section covers the concept of variable importance in machine learning models.
+      Random forest performs better than trees in all the examples we have considered. However, a disadvantage of random forests is that we lose interpretability. An approach that helps with interpretability is to examine <em>variable importance</em>. To define <em>variable importance</em>, we count how often a predictor is used in the individual trees. You can learn more about <em>variable importance</em> in an advanced machine learning book<fn>https://web.stanford.edu/~hastie/Papers/ESLII.pdf</fn>. The <term>randomForest</term> package includes the function <c>importance</c> to extract variable importance from a fitted random forest model. The <term>caret</term> package includes the function <c>varImp</c> that extracts variable importance from any model in which the calculation is implemented. We give an example of how we use variable importance in the next section.
     </p>
+
+    <note>
+      <p>
+        You are ready to do exercises 19 - 25.
+      </p>
+    </note>
   </section>
+
+  <exercises xml:id="sec-algorithms-exercises">
+    <title>Exercises</title>
+
+    <exercise>
+      <statement>
+        <p>
+          Create a dataset using the following code:
+        </p>
+
+        <program language="r">
+          <input>
+n &lt;- 100
+Sigma &lt;- 9*matrix(c(1.0, 0.5, 0.5, 1.0), 2, 2)
+dat &lt;- MASS::mvrnorm(n = 100, c(69, 69), Sigma) |>
+  data.frame() |> setNames(c("x", "y"))
+          </input>
+        </program>
+
+        <p>
+          Use the <term>caret</term> package to partition into a test and training set of equal size. Train a linear model and report the RMSE. Repeat this exercise 100 times and make a histogram of the RMSEs and report the average and standard deviation. Hint: adapt the code shown earlier like this:
+        </p>
+
+        <program language="r">
+          <input>
+library(caret)
+y &lt;- dat$y
+test_index &lt;- createDataPartition(y, times = 1, p = 0.5, list = FALSE)
+train_set &lt;- dat[train_index,]
+test_set &lt;- dat[-train_index,]
+fit &lt;- lm(y ~ x, data = train_set)
+y_hat &lt;- fit$coef[1] + fit$coef[2]*test_set$x
+sqrt(mean((y_hat - test_set$y)^2))
+          </input>
+        </program>
+
+        <p>
+          and put it inside a call to <c>replicate</c>.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Now we will repeat the above but using larger datasets. Repeat exercise 1 but for datasets with <c>n &lt;- c(100, 500, 1000, 5000, 10000)</c>. Save the average and standard deviation of RMSE from the 100 repetitions. Hint: use the <c>sapply</c> or <c>map</c> functions.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Describe what you observe with the RMSE as the size of the dataset becomes larger.
+        </p>
+        <ol marker="a">
+          <li><p>On average, the RMSE does not change much as <c>n</c> gets larger, while the variability of RMSE does decrease.</p></li>
+          <li><p>Because of the law of large numbers, the RMSE decreases: more data, more precise estimates.</p></li>
+          <li><p><c>n = 10000</c> is not sufficiently large. To see a decrease in RMSE, we need to make it larger.</p></li>
+          <li><p>The RMSE is not a random variable.</p></li>
+        </ol>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Now repeat exercise 1, but this time make the correlation between <c>x</c> and <c>y</c> larger by changing <c>Sigma</c> like this:
+        </p>
+
+        <program language="r">
+          <input>
+n &lt;- 100
+Sigma &lt;- 9*matrix(c(1, 0.95, 0.95, 1), 2, 2)
+dat &lt;- MASS::mvrnorm(n = 100, c(69, 69), Sigma) |>
+  data.frame() |> setNames(c("x", "y"))
+          </input>
+        </program>
+
+        <p>
+          Repeat the exercise and note what happens to the RMSE now.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Which of the following best explains why the RMSE in exercise 4 is so much lower than that in exercise 1:
+        </p>
+        <ol marker="a">
+          <li><p>It is just luck. If we do it again, it will be larger.</p></li>
+          <li><p>The Central Limit Theorem tells us the RMSE is normal.</p></li>
+          <li><p>When we increase the correlation between <c>x</c> and <c>y</c>, <c>x</c> has more predictive power and thus provides a better estimate of <c>y</c>. This correlation has a much bigger effect on RMSE than <c>n</c>. Large <c>n</c> simply provides us with more precise estimates of the linear model coefficients.</p></li>
+          <li><p>These are both examples of regression, so the RMSE has to be the same.</p></li>
+        </ol>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Create a dataset using the following code:
+        </p>
+
+        <program language="r">
+          <input>
+n &lt;- 1000
+Sigma &lt;- matrix(c(1, 3/4, 3/4, 3/4, 1, 0, 3/4, 0, 1), 3, 3)
+dat &lt;- MASS::mvrnorm(n = 100, c(0, 0, 0), Sigma) |>
+  data.frame() |> setNames(c("y", "x_1", "x_2"))
+          </input>
+        </program>
+
+        <p>
+          Note that <c>y</c> is correlated with both <c>x_1</c> and <c>x_2</c>, but the two predictors are independent of each other.
+        </p>
+
+        <program language="r">
+          <input>
+cor(dat)
+          </input>
+        </program>
+
+        <p>
+          Use the <term>caret</term> package to partition into a test and training set of equal size. Compare the RMSE when using just <c>x_1</c>, just <c>x_2</c>, and both <c>x_1</c> and <c>x_2</c>. Train a linear model and report the RMSE.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Repeat exercise 6, but now create an example in which <c>x_1</c> and <c>x_2</c> are highly correlated:
+        </p>
+
+        <program language="r">
+          <input>
+n &lt;- 1000
+Sigma &lt;- matrix(c(1.0, 0.75, 0.75, 0.75, 1.0, 0.95, 0.75, 0.95, 1.0), 3, 3)
+dat &lt;- MASS::mvrnorm(n = 100, c(0, 0, 0), Sigma) |>
+  data.frame() |> setNames(c("y", "x_1", "x_2"))
+          </input>
+        </program>
+
+        <p>
+          Use the <term>caret</term> package to partition into a test and training set of equal size. Compare the RMSE when using just <c>x_1</c>, just <c>x_2</c>, and both <c>x_1</c> and <c>x_2</c>. Train a linear model and report the RMSE.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Compare the results in 6 and 7 and choose the statement you agree with:
+        </p>
+        <ol marker="a">
+          <li><p>Adding extra predictors can improve RMSE substantially, but not when they are highly correlated with another predictor.</p></li>
+          <li><p>Adding extra predictors improves predictions equally in both exercises.</p></li>
+          <li><p>Adding extra predictors results in over-fitting.</p></li>
+          <li><p>Unless we include all predictors, we have no predictive power.</p></li>
+        </ol>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Define the following dataset:
+        </p>
+
+        <program language="r">
+          <input>
+make_data &lt;- function(n = 1000, p = 0.5,
+                      mu_0 = 0, mu_1 = 2,
+                      sigma_0 = 1,  sigma_1 = 1){
+  y &lt;- rbinom(n, 1, p)
+  f_0 &lt;- rnorm(n, mu_0, sigma_0)
+  f_1 &lt;- rnorm(n, mu_1, sigma_1)
+  x &lt;- ifelse(y == 1, f_1, f_0)
+  test_index &lt;- createDataPartition(y, times = 1, p = 0.5, list = FALSE)
+  list(train = data.frame(x = x, y = as.factor(y)) |>
+         slice(-test_index),
+       test = data.frame(x = x, y = as.factor(y)) |>
+         slice(test_index))
+}
+          </input>
+        </program>
+
+        <p>
+          Note that we have defined a variable <c>x</c> that is predictive of a binary outcome <c>y</c>.
+        </p>
+
+        <program language="r">
+          <input>
+dat$train |> ggplot(aes(x, color = y)) + geom_density()
+          </input>
+        </program>
+
+        <p>
+          Fit a linear regression model by treating (Y) as a continuous outcome, then classify observations by predicting class 1 whenever the fitted value exceeds 0.5. Next, fit a logistic regression model to the same data and compare the classification accuracy of these two approaches.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Repeat the simulation from exercise 9 100 times and compare the average accuracy for each method, and notice that they give practically the same answer.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Generate 25 different datasets changing the difference between the two classes: <c>delta &lt;- seq(0, 3, len = 25)</c>. Plot accuracy versus <c>delta</c>.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          The <term>dslabs</term> package contains an example dataset similar to <c>mnist_27</c>, but that also includes 1. You can load it and explore it like this:
+        </p>
+
+        <program language="r">
+          <input>
+library(dslabs)
+mnist_127$train |> ggplot(aes(x_1, x_2, color = y)) + geom_point()
+          </input>
+        </program>
+
+        <p>
+          Fit QDA using the <c>qda</c> function in the <term>MASS</term> package, then create a confusion matrix for predictions on the test. Which of the following best describes the confusion matrix:
+        </p>
+        <ol marker="a">
+          <li><p>It is a two-by-two table.</p></li>
+          <li><p>Because we have three classes, it is a two-by-three table.</p></li>
+          <li><p>Because we have three classes, it is a three-by-three table.</p></li>
+          <li><p>Confusion matrices only make sense when the outcomes are binary.</p></li>
+        </ol>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          The <c>byClass</c> component returned by the <c>confusionMatrix</c> object provides sensitivity and specificity for each class. Because these terms only make sense when data is binary, each row represents sensitivity and specificity when a particular class is 1 (positives), and the other two are considered 0s (negatives). Based on the values returned by <c>confusionMatrix</c>, which of the following is the most common mistake:
+        </p>
+        <ol marker="a">
+          <li><p>Calling 1s either a 2 or a 7.</p></li>
+          <li><p>Calling 2s either a 1 or a 7.</p></li>
+          <li><p>Calling 7s either a 1 or a 2.</p></li>
+          <li><p>All mistakes are equally common.</p></li>
+        </ol>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          To visualize the QDA decision boundary, start by creating a dense grid of points covering the <m>(x_1, x_2)</m> space:
+        </p>
+
+        <program language="r">
+          <input>
+GS &lt;- 150
+new_x &lt;- with(mnist_127$train,
+  expand.grid(
+    x_1 = seq(min(x_1), max(x_1), length.out = GS),
+    x_2 = seq(min(x_2), max(x_2), length.out = GS)
+  )
+)
+          </input>
+        </program>
+
+        <p>
+          Use your fitted QDA model to compute predicted probabilities on this grid by using <c>predict(qda_fit, newdata = new_x)</c>. This will give you <m>\hat{p}(x_1, x_2)</m> for each point in the grid.
+        </p>
+
+        <p>
+          Finally, plot the grid and color each point depending on whether <m>\hat{p}(x_1, x_2) > 0.5</m> (predict class 1) or <m>\hat{p}(x_1, x_2) \le 0.5</m> (predict class 0). The resulting picture shows the decision region determined by QDA.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Repeat exercise 14 but for LDA. Which of the following explains why LDA has worse accuracy:
+        </p>
+        <ol marker="a">
+          <li><p>LDA separates the space with lines, making it too rigid.</p></li>
+          <li><p>LDA divides the space into two, and there are three classes.</p></li>
+          <li><p>LDA is very similar to QDA; the difference is due to chance.</p></li>
+          <li><p>LDA can't be used with more than one class.</p></li>
+        </ol>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Now repeat exercise 12 for kNN with <m>k=31</m> and compute and compare the overall accuracy for all three methods.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          To understand how a simple method like kNN can outperform a model that explicitly tries to emulate Bayes' rule, explore the conditional distributions of <c>x_1</c> and <c>x_2</c> to see if the normal approximation holds. Generative models can be very powerful, but only when we are able to successfully approximate the joint distribution of predictors conditioned on each class.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Earlier, we used logistic regression to predict sex from height. Use kNN to do the same. Use the code described in this chapter to select the <m>F_1</m> measure and plot it against <m>k</m>. Compare to the <m>F_1</m> of about 0.6 we obtained with regression.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Create a simple dataset where the outcome grows 0.75 units on average for every increase in a predictor:
+        </p>
+
+        <program language="r">
+          <input>
+n &lt;- 1000
+sigma &lt;- 0.25
+x &lt;- rnorm(n, 0, 1)
+y &lt;- 0.75 * x + rnorm(n, 0, sigma)
+dat &lt;- data.frame(x = x, y = y)
+          </input>
+        </program>
+
+        <p>
+          Use <c>rpart</c> to fit a regression tree and save the result to <c>fit</c>.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Plot the final tree so that you can see where the partitions occurred.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Make a scatterplot of <c>y</c> versus <c>x</c> along with the predicted values based on the fit.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Now train a random forest instead of a regression tree using <c>randomForest</c> from the <term>randomForest</term> package, and remake the scatterplot with the prediction line.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Use the function <c>plot</c> to see if the random forest has converged or if we need more trees.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          It seems that the default values for the random forest result in an estimate that is too flexible (not smooth). Re-run the random forest, but this time with <c>nodesize</c> set at 50 and <c>maxnodes</c> set at 25. Remake the plot.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          This <term>dslabs</term> dataset includes the <c>tissue_gene_expression</c> with a matrix <c>x</c>:
+        </p>
+
+        <program language="r">
+          <input>
+library(dslabs)
+dim(tissue_gene_expression$x)
+          </input>
+        </program>
+
+        <p>
+          with the gene expression measured on 500 genes for 189 biological samples representing seven different tissues. The tissue type is stored in <c>tissue_gene_expression$y</c>.
+        </p>
+
+        <program language="r">
+          <input>
+table(tissue_gene_expression$y)
+          </input>
+        </program>
+
+        <p>
+          Fit a random forest using the <c>randomForest</c> function in the package <term>randomForest</term>. Then use the <c>varImp</c> function to see which are the top 10 most predictive genes. Make a histogram of the reported importance to get an idea of the distribution of the importance values.
+        </p>
+      </statement>
+    </exercise>
+
+  </exercises>
 
 </chapter>

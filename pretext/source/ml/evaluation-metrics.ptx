@@ -23,7 +23,7 @@ library(dslabs)
     </program>
     
     <p>
-      We start by noting that <c>heights$sex</c> provides the outcomes (Y) and <c>heights$height</c> is our predictor (X). To simplify the code used throughout this chapter, we rename the variables:
+      We start by noting that <c>heights$sex</c> provides the outcomes <m>Y</m> and <c>heights$height</c> is our predictor <m>X</m>. To simplify the code used throughout this chapter, we rename the variables:
     </p>
     
     <program language="r">
@@ -42,7 +42,7 @@ names(heights) &lt;- c("y", "x")
       </p>
       
       <p>
-        For binary outcomes, <term>caret</term> treats the first factor level as <m>Y=1</m> and the second as <m>Y=0</m>. Because R assigns factor levels in alphabetical order by default, in our examples this means females are coded as <m>Y=1</m> and males as <m>Y=0</m>.
+        For binary outcomes, <term>caret</term> treats the first factor level as <m>Y=1</m> and the second as <m>Y=0</m>. Because R assigns factor levels in alphabetical order by default, in our examples, this means females are coded as <m>Y=1</m> and males as <m>Y=0</m>.
       </p>
     </note>
   </introduction>
@@ -61,12 +61,12 @@ names(heights) &lt;- c("y", "x")
     <program language="r">
       <input>
 set.seed(2010)
-train_index &lt;- createDataPartition(heights$y, times = 1, p = 0.5, list = FALSE)
+train_ind &lt;- createDataPartition(heights$y, p = 0.5, list = FALSE)
       </input>
     </program>
     
     <p>
-      The argument <c>times</c> is used to define how many random samples of indexes to return, the argument <c>p</c> is used to define what proportion of the data is represented by the index, and the argument <c>list</c> is used to decide if we want the indexes returned as a list or not.
+      The argument <c>times</c> is used to define how many random samples of indexes to return and it defaults to 1, the argument <c>p</c> is used to define what proportion of the data is represented by the index, and the argument <c>list</c> is used to decide if we want the indexes returned as a list or not.
     </p>
     
     <p>
@@ -75,8 +75,8 @@ train_index &lt;- createDataPartition(heights$y, times = 1, p = 0.5, list = FALS
     
     <program language="r">
       <input>
-train_set &lt;- heights[train_index, ]
-test_set &lt;- heights[-train_index, ]
+train_set &lt;- heights[train_ind, ]
+test_set &lt;- heights[-train_ind, ]
       </input>
     </program>
     
@@ -124,7 +124,7 @@ mean(y_hat == test_set$y)
     </p>
     
     <p>
-      Can we do better? Exploratory data analysis suggests we can because, on average, males are slightly taller than females. But how do we make use of this insight? Let's try another simple approach: predict 1 (<c>Female</c>) if height is less than two standard deviations from the average male height:
+      Can we do better? Exploratory data analysis suggests we can because, on average, males are taller than females. But how do we make use of this insight? Let's try another simple approach: predict 1 (<c>Female</c>) if height is less than two standard deviations from the average male height:
     </p>
     
     <program language="r">
@@ -148,7 +148,9 @@ mean(test_set$y == y_hat)
     </console>
     
     <p>
-      But can we do even better? In the example above, we used a cutoff of 62, but we can examine the accuracy obtained for other cutoffs and then pick the value that provides the best results. But remember, <term>it is important that we optimize the cutoff using only the training set</term>: the test set is only for evaluation. Although for this simplistic example it is not much of a problem, later we will learn that evaluating an algorithm on the training set can lead to <term>overfitting</term>, which often results in over-optimistic assessments.
+      But can we do even better? In the example above, we used a cutoff of 62, but we can examine the accuracy obtained for other cutoffs and then pick the value that provides the best results. But remember, <term>it is important that we optimize the cutoff using only the training set</term>: the test set is only for evaluation.
+
+      In <xref ref="sec-cross-validation"/> we will learn that evaluating an algorithm on the training set can lead to <term>overfitting</term>, which often results in over-optimistic assessments, but for this simplistic example it is not much of a problem.
     </p>
     
     <p>
@@ -227,7 +229,8 @@ mean(y_hat == test_set$y)
     </console>
     
     <p>
-      We see that it is a bit lower than the accuracy observed for the training set. This is because we used the training set to select the cutoff, so there is some overtraining. However, our cutoff-based approach is still better than guessing. And by testing on a dataset that we did not train on, we know our improvement is not due to overtraining.
+      We see that it is a bit lower than the accuracy observed for the training set. This is because we used the training set to select the cutoff, so there is some overfitting.
+However, our cutoff-based approach is still better than guessing. And by testing on a dataset that we did not train on, we know our improvement is not due to overfitting.
     </p>
   </section>
 
@@ -270,7 +273,7 @@ Sensitivity Specificity
     </console>
     
     <p>
-      We notice an imbalance: too many females are predicted to be male. We are calling almost half of the females male! How can our overall accuracy be so high then? This is because the <term>prevalence</term>, defined as the proportion of <m>Y=1</m> in our data, is low. These heights were collected from three data sciences courses, two of which had higher male enrollment:
+      We notice an imbalance: too many females are predicted to be male. We are calling almost half of the females male! How can our overall accuracy be so high then? This is because the <term>prevalence</term>, defined as the proportion of <m>Y=1</m> in our data, is substantially lower than 0.5. These heights were collected from three data sciences courses, two of which had higher male enrollment:
     </p>
     
     <console>
@@ -292,7 +295,7 @@ Prevalence
     </p>
     
     <p>
-      There are several metrics that we can use to evaluate an algorithm in a way that prevalence does not cloud our assessment, and these can all be derived from the confusion matrix. A general improvement to using overall accuracy is to study <term>sensitivity</term> and <term>specificity</term> separately.
+      There are several metrics that we can use to evaluate an algorithm in a way that prevalence does not cloud our assessment, and these can all be derived from the confusion matrix. A general improvement in using overall accuracy is to study <term>sensitivity</term> and <term>specificity</term> separately.
     </p>
   </section>
 
@@ -415,7 +418,7 @@ print(cm)
     </program>
     
     <p>
-      you will see several metrics including accuracy, sensitivity, specificity, and PPV.
+      you will see several metrics, including accuracy, sensitivity, specificity, and PPV.
     </p>
     
     <p>
@@ -440,7 +443,7 @@ cm$byClass[c("Sensitivity","Specificity", "Prevalence", "Pos Pred Value")]
     </p>
     
     <p>
-      Before applying this algorithm to general datasets, we need to ask ourselves if prevalence in the general population will be the same as in our training dataset.
+      Before applying this algorithm to general datasets, we need to ask ourselves if the prevalence in the general population will be the same as in our training dataset.
     </p>
   </section>
 
@@ -553,7 +556,7 @@ specificity(y_hat, test_set$y)
     </console>
     
     <p>
-      We now see that we do much better than guessing, that both sensitivity and specificity are relatively high.
+      We now see that we do much better than guessing, with sensitivity and specificity both relatively high.
     </p>
   </section>
 
@@ -561,7 +564,7 @@ specificity(y_hat, test_set$y)
     <title>ROC and precision-recall curves</title>
     
     <p>
-      When comparing the two methods (guessing versus using a height cutoff), we looked at accuracy and <m>F_1</m>. The second method clearly outperformed the first. However, while we considered several cutoffs for the second method, for the first we only considered one approach: guessing with equal probability. Be aware that guessing <c>Male</c> with higher probability would give us higher accuracy due to the bias in the sample. But, as described above, this would come at the cost of lower sensitivity. The curves we describe in this section will help us see this.
+      When comparing the two methods (guessing versus using a height cutoff), we looked at accuracy and <m>F_1</m>. The second method clearly outperformed the first. However, while we considered several cutoffs for the second method, for the first, we only considered one approach: guessing with equal probability. Note that guessing <c>Male</c> with higher probability would increase overall accuracy because males are more prevalent in the sample. But, as described above, this would come at the cost of lower sensitivity. The curves in this section illustrate the trade-offs between performance metrics across different cutoffs.
     </p>
     
     <p>
@@ -578,7 +581,7 @@ specificity(y_hat, test_set$y)
     
     <program language="r">
       <input>
-probs &lt;- seq(0, 1, length.out = 10)
+probs &lt;- seq(0, 1, length.out = 11)
 guessing &lt;- sapply(probs, function(p){
   y_hat &lt;- sample(c("Male", "Female"), nrow(test_set), TRUE, c(p, 1 - p)) 
   y_hat &lt;- factor(y_hat, levels = c("Female", "Male"))
@@ -589,7 +592,7 @@ guessing &lt;- sapply(probs, function(p){
     </program>
     
     <p>
-      We can use similar code to compute these values for our our second approach. By plotting both curves together, we are able to compare sensitivity for different values of specificity:
+      We can use similar code to compute these values for our second approach. By plotting both curves together, we are able to compare sensitivity for different values of specificity. Each point in the "guessing" curve is labeled by the probability that an individual is predicted to be male; each point in the "height cutoff" curve is labeled by the cutoff above which individuals are predicted to be male.
     </p>
     
     <program language="r">
@@ -641,15 +644,11 @@ rbind(tmp_1, tmp_2) |&gt;
     </figure>
     
     <p>
-      We see that we obtain higher sensitivity with the cutoff approach for all values of specificity, which implies it is in fact a better method than guessing. Keep in mind that ROC curves for guessing always fall on the identity line. Also, note that when making ROC curves, it is often nice to add the cutoff associated with each point.
+      We see that we obtain higher sensitivity with the cutoff  approach for all values of specificity, which implies it is, in fact, a better method than guessing. Keep in mind that ROC curves for guessing always fall on the identity line. The packages <term>pROC</term> and <term>plotROC</term> are useful for generating these plots.
     </p>
-    
+
     <p>
-      The packages <term>pROC</term> and <term>plotROC</term> are useful for generating these plots.
-    </p>
-    
-    <p>
-      ROC curves have one weakness and it is that neither of the measures plotted depends on prevalence. In cases in which prevalence matters, we may instead make a precision-recall plot. The idea is similar, but we instead plot precision against recall:
+      ROC curves have a key limitation: neither metric they display depends on prevalence. When prevalence is important, a precision-recall curve is often more appropriate. The concept is similar, but instead of plotting true positive rate against false positive rate, we plot precision against recall.
     </p>
     
     <program language="r">
@@ -709,7 +708,7 @@ bind_rows(tmp_1, tmp_2) |&gt;
     </figure>
     
     <p>
-      From the plot on the left, we immediately see that the precision of guessing is not high. This is because the prevalence is low. From the plot on the right, we see that if we change <m>Y=1</m> to mean <c>Male</c> instead of <c>Female</c>, the precision increases. Note that the ROC curve would remain the same.
+      From the plot on the left, we immediately see that the precision is low when randomly guessing, reflecting the low prevalence of females. In the plot on the right, redefining <m>Y=1</m> to mean <c>Male</c> increases precision because the positive class is now more common. Note that the ROC curve would remain the same.
     </p>
   </section>
 
@@ -729,7 +728,7 @@ bind_rows(tmp_1, tmp_2) |&gt;
     </p>
     
     <p>
-      We can use Bayes rule to compute the precision we expect you algorithm to have in the real population:
+      We can use Bayes rule to compute the precision we expect your algorithm to have in the real population:
     </p>
     
     <md>
@@ -738,7 +737,7 @@ bind_rows(tmp_1, tmp_2) |&gt;
     </md>
     
     <p>
-      Here is plot of precision as a function of prevalence with TPR and TNR both equal to 99%:
+      Here is a plot of precision as a function of prevalence with TPR and TNR both equal to 99%:
     </p>
     
     <program language="r">
@@ -760,7 +759,7 @@ data.frame(Prevalence = prevalence,
     </figure>
     
     <p>
-      Although your algorithm achieves a precision of about 99% on the balanced training data (with 50% prevalence), its precision would drop to roughly 33% when applied to the general population, where the disease prevalence is only 0.5%. A doctor cannot rely on a test for which two-thirds of positive results are false positives. Even with perfect sensitivity, the precision would still be about 33% under these conditions. To make the algorithm clinically useful, you would need to drastically reduce the false positive rate (FPR).
+      Although your algorithm achieves a precision of about 99% on the balanced training data (with 50% prevalence), its precision would drop to roughly 33% when applied to the general population, where the disease prevalence is only 0.5%. A doctor cannot rely on a test for which two-thirds of positive results are false positives. At a fixed specificity, even perfect sensitivity would result in around 33% precision. To make the algorithm clinically useful, you would need to drastically increase the specificity, or equivalently, reduce the false positive rate (FPR).
     </p>
   </section>
 
@@ -780,13 +779,17 @@ data.frame(Prevalence = prevalence,
     </p>
     
     <p>
-      Because we often model <m>y</m> as the outcome of a random process, theoretically, it does not make sense to compare algorithms based on <m>(\hat{y} - y)^2</m> as the minimum can change from sample to sample. For this reason, we minimize mean squared error (MSE):
+      Because we often model <m>y</m> as the outcome of a random process, the value of <m>\hat y</m> that minimizes <m>(\hat{y} - y)^2</m> depends on the particular sample. For this reason, we minimize the expected loss, or mean squared error (MSE):
     </p>
     
     <me>
-      \text{MSE} \equiv \text{E}[(\hat{Y} - Y)^2 ]
+      \text{MSE} \equiv \mathrm{E}[(\hat{Y} - Y)^2 ]
     </me>
-    
+
+    <p>
+      where <m>Y</m> represents a new outcome drawn independently from the same distribution as the training data, and <m>\hat{Y}</m> is the corresponding prediction based on the model fitted to the training sample. The expectation is taken over both the randomness in the new observation <m>Y</m> and the randomness in the training data used to construct <m>\hat{Y}</m>.
+    </p>
+
     <p>
       Consider that if the outcomes are binary, the MSE is equivalent to one minus expected accuracy, since <m>(\hat{y} - y)^2</m> is 0 if the prediction was correct and 1 otherwise.
     </p>
@@ -804,11 +807,15 @@ data.frame(Prevalence = prevalence,
     </me>
     
     <p>
-      with the <m>\hat{y}_i</m> generated completely independently from the the <m>y_i</m>s.
+      with the <m>\hat{y}_i</m> generated completely independently from the <m>y_i</m>s.
     </p>
-    
+
     <p>
-      However, the estimate <m>\hat{\text{MSE}}</m> is a random variable. In fact, <m>\text{MSE}</m> and <m>\hat{\text{MSE}}</m> are often referred to as the true error and apparent error, respectively. Due to the complexity of some machine learning algorithms, it is difficult to derive the statistical properties of how well the apparent error estimates the true error. In <xref ref="sec-cross-validation"/>, we introduce cross-validation an approach to estimating the MSE.
+      However, the estimate <m>\widehat{\text{MSE}}</m> is itself a random variable, since it depends on the particular sample used to compute it. The quantity <m>\text{MSE}</m> refers to the <em>true</em> (theoretical) prediction error, defined as an expectation over the data-generating distribution, while <m>\widehat{\text{MSE}}</m> is the corresponding sample-based estimate computed from observed data.
+    </p>
+
+    <p>
+      For many machine learning algorithms, it is difficult to derive how well <m>\widehat{\text{MSE}}</m> approximates <m>\text{MSE}</m>. In <xref ref="sec-cross-validation"/>, we introduce cross-validation, a general approach for estimating the MSE more reliably.
     </p>
     
     <p>
@@ -842,7 +849,7 @@ titanic &lt;- titanic_train |&gt; select(Survived, Pclass, Sex, Age, Fare) |&gt;
     </program>
     
     <p>
-      Note that we defined the levels to be <c>c(1,0)</c> to avoid the default behavior of making 0 (first alphabetically) the first level given that <term>caret</term> defines positives <m>Y=1</m> as the first level.
+      Note that we defined the levels to be <c>c(1,0)</c> to avoid the default behavior of making 0 (first alphabetically) the first level, given that <term>caret</term> defines positives <m>Y=1</m> as the first level.
     </p>
     
     <exercise>
@@ -880,7 +887,7 @@ titanic &lt;- titanic_train |&gt; select(Survived, Pclass, Sex, Age, Fare) |&gt;
     <exercise>
       <statement>
         <p>
-          Now repeat exercise 3 but for different cutoffs:
+          Now repeat exercise 2, but for different cutoffs:
         </p>
         <program language="r">
           <input>
@@ -896,7 +903,7 @@ cutoffs &lt;- quantile(train_set$Fare, probs = seq(0.05, 0.95, 0.1))
     <exercise>
       <statement>
         <p>
-          Using the results from exercise 5, choose the best cutoff and compare accuracy with the rule chosen in exercise 4 on both <c>train_set</c> and <c>test_set</c>.
+          Using the results from exercise 5, find the best cutoff, and compare the resulting decision rule's accuracy to the rule described in exercise 4 (using median <c>Fare</c> as cutoff). Report accuracy for each rule on both <c>train_set</c> and <c>test_set</c>.
         </p>
       </statement>
     </exercise>
@@ -937,7 +944,7 @@ p_hat_test &lt;- predict(fit, newdata = test_set, type = "response")
     <exercise>
       <statement>
         <p>
-          Consider different cutoffs for <c>cutoffs &lt;- seq(0.05, 0.95, 0.05)</c> for this probability and generate an ROC curve based on the test set. Based on this ROC curve and the one computed in exercise 7, which method would you say performs better?
+          Consider <c>cutoffs &lt;- seq(0.05, 0.95, 0.05)</c> for this probability and generate an ROC curve based on the test set. Based on this ROC curve and the one computed in exercise 7, which method would you say performs better?
         </p>
       </statement>
     </exercise>

@@ -4,7 +4,15 @@
   
   <introduction>
     <p>
-      This chapter introduces machine learning.
+      Machine learning has achieved remarkable successes in a variety of applications. These range from the postal service's use of machine learning for reading handwritten zip codes to the development of voice recognition systems like Apple's Siri. Other significant advances include spam and malware detection, housing price prediction algorithms, the ongoing development of autonomous vehicles, and more recently, the emergence of generative systems such as large language models that can produce text, images, and other complex outputs.
+    </p>
+
+    <p>
+      In this part of the book, we introduce the concepts, ideas, and methodologies of machine learning. We also demonstrate their practical application using the example of recognizing handwritten digits, a classic problem that exemplifies the power and utility of machine learning techniques.
+    </p>
+
+    <p>
+      One important note: this part of the book focuses on methods rooted in statistical thinking, emphasizing how models learn from data through the lens of probability. While modern machine learning includes deep learning and generative models (such as large language models), these topics are beyond our scope. Instead, we focus on the statistical principles underlying supervised and unsupervised learning. These foundations are essential for understanding and effectively applying a wide range of machine learning methods.
     </p>
   </introduction>
 

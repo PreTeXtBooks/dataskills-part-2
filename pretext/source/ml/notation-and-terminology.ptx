@@ -60,8 +60,8 @@
             Spam detection has two outcomes: spam or not spam.
             In this book, we denote the <m>K</m> categories with indexes
             <m>k=1,\dots,K</m>.
-            However, for binary data we will use <m>k=0,1</m> for mathematical
-            conveniences that we demonstrate later.
+            However, for binary data, we will use <m>k=0,1</m> for mathematical
+            convenience, which we demonstrate later.
         </p>
     </section>
 
@@ -92,7 +92,7 @@
             When referring to an arbitrary set of features rather than a
             specific image, we drop the index <m>i</m> and simply use <m>Y</m>
             and <m>\mathbf{X} = (X_1, \dots, X_p)</m>.
-            We use uppercase to emphasize that these are random variables.
+            We use uppercase to emphasize that we think of these as random variables.
             Observed values are denoted in lowercase, such as <m>Y=y</m> and
             <m>\mathbf{X} = \mathbf{x}</m>.
             In practice, when writing code, we typically always use lowercase.
@@ -250,7 +250,7 @@
         <p>
             It is worth noting that terminology varies across textbooks and
             courses.
-            Sometimes prediction is used for both categorical and continuous
+            Sometimes, prediction is used for both categorical and continuous
             outcomes.
             The term regression is also used for continuous outcomes, but here
             we avoid it to prevent confusion with linear regression.
@@ -299,7 +299,7 @@
             prediction strategy itself.
             Thus, in machine learning practice, people talk about
             <q>the logistic regression algorithm</q> even though in statistics,
-            a logistic regression is thought more of as a model rather than an
+            a logistic regression is thought of more as a model rather than an
             algorithm.
             This dual use of the term is standard in the field, and we follow
             that convention here.
@@ -354,10 +354,10 @@
                     and <m>p = 50</m> features.
                     Using standard notation, write out:
                     <ul>
-                        <li>The feature matrix <m>X</m></li>
-                        <li>The outcome vector <m>y</m></li>
+                        <li>The feature matrix <m>\mathbf{X}</m></li>
+                        <li>The outcome vector <m>\mathbf{y}</m></li>
                         <li>
-                            A single prediction <m>hat{y}_i</m> for the
+                            A single prediction <m>\hat{y}_i</m> for the
                             <m>i</m>-th observation
                         </li>
                     </ul>
@@ -370,11 +370,11 @@
                 <p>
                     In binary classification, we often use a cutoff <m>c</m> to
                     convert probabilities into class predictions.
-                    If <m>hat{p}(\mathbf{x})</m> represents our estimated
+                    If <m>\hat{p}(\mathbf{x})</m> represents our estimated
                     probability that an observation belongs to class 1, write
                     the decision rule that predicts class 1 when
-                    <m>hat{p}(\mathbf{x}) &gt; c</m> and class 0 otherwise.
-                    What do we call the value <m>c</m>
+                    <m>\hat{p}(\mathbf{x}) &gt; c</m> and class 0 otherwise.
+                    What do we call the value <m>c</m>?
                 </p>
             </statement>
         </exercise>
