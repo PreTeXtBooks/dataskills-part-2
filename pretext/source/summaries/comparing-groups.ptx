@@ -1,482 +1,692 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+
 <chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="comparing-groups">
-  <title>Comparing Groups</title>
-  
-  <introduction>
-    <p>
-      So far, we have focused on summarizing the distribution of a single variable, describing its center, spread, and shape. In practice, however, one of the most common goals of data analysis is <em>comparison</em>: we want to know how one group differs from another, how a treatment compares to a control, or how outcomes vary across conditions. Comparing groups is often the first step toward uncovering relationships and understanding sources of variation.
-    </p>
+    <title>Comparing Groups</title>
 
-    <p>
-      The tools we developed for describing distributions, histograms, boxplots, and numerical summaries such as the mean and median, extend naturally to comparisons. By examining these summaries <em>within subgroups</em> or by comparing <em>quantiles across distributions</em>, we can reveal patterns that a single summary might conceal.
-    </p>
+    <introduction>
+        <p>
+            So far, we have focused on summarizing the distribution of a single
+            variable, describing its center, spread, and shape.
+            In practice, however, one of the most common goals of data analysis
+            is <em>comparison</em>: we want to know how one group differs from
+            another, how a treatment compares to a control, or how outcomes vary
+            across conditions.
+            Comparing groups is often the first step toward uncovering
+            relationships and understanding sources of variation.
+        </p>
 
-    <p>
-      In this chapter, we explore two key techniques for comparing distributions:
-    </p>
+        <p>
+            The tools we developed for describing distributions — histograms,
+            boxplots, and numerical summaries such as the mean and median —
+            extend naturally to comparisons.
+            By examining these summaries <em>within subgroups</em> or by
+            comparing <em>quantiles across distributions</em>, we can reveal
+            patterns that a single summary might conceal.
+        </p>
 
-    <p>
-      <ul>
-        <li><em>Quantile–quantile</em>, which provide a systematic way to compare the shapes of two distributions, including how observed data differ from theoretical models such as the normal distribution.</li>
-        <li><em>Stratification</em>, which involves dividing data into meaningful subgroups and examining each distribution separately.</li>
-      </ul>
-    </p>
+        <p>
+            In this chapter, we explore two key techniques for comparing
+            distributions:
+        </p>
 
-    <p>
-      Together, these methods complete our descriptive toolkit, bridging the transition from exploring single variables to analyzing relationships between variables.
-    </p>
-  </introduction>
+        <p>
+            <ul>
+                <li>
+                    <em>Quantile–quantile plots</em>, which provide a systematic
+                    way to compare the shapes of two distributions, including
+                    how observed data differ from theoretical models such as the
+                    normal distribution.
+                </li>
 
-  <section xml:id="quantile-quantile-plots">
-    <title>Quantile-quantile plots</title>
-    
-    <p>
-      A systematic way to compare two distributions is to compare their cumulative distribution functions (CDFs). A practical way to do this is through their <em>quantiles</em>.
-    </p>
+                <li>
+                    <em>Stratification</em>, which involves dividing data into
+                    meaningful subgroups and examining each distribution
+                    separately.
+                </li>
+            </ul>
+        </p>
 
-    <p>
-      For a proportion <m>0 \leq p \leq 1</m>, the <em><m>p</m>-th quantile</em> of a distribution <m>F(x)</m> is the value <m>q</m> such that <m>F(q) = p</m>, or <m>q = F^{-1}(p)</m>. For example, <m>p = 0</m> gives the minimum, <m>p = 0.5</m> gives the median, and <m>p = 1</m> gives the maximum.
-    </p>
+        <p>
+            Together, these methods complete our descriptive toolkit, bridging
+            the transition from exploring single variables to analyzing
+            relationships between variables.
+        </p>
+    </introduction>
 
-    <p>
-      The notation <m>Q(p) = F^{-1}(p)</m> or equivalently <m>q_p = F^{-1}(p)</m> is commonly used in textbooks to denote the <m>p</m>-th quantile of a distribution.
-    </p>
+    <section xml:id="quantile-quantile-plots">
+        <title>Quantile-quantile plots</title>
 
-    <p>
-      A <em>quantile–quantile plot (qqplot)</em> provides a visual way to compare two distributions, say <m>F_1(x)</m> and <m>F_2(x)</m>, by plotting the quantiles of one distribution against the corresponding quantiles of the other. Specifically, if we define
-    </p>
+        <p>
+            A systematic way to compare two distributions is to compare their
+            cumulative distribution functions (CDFs).
+            A practical way to do this is through their <em>quantiles</em>.
+        </p>
 
-    <me>
-      Q_1(p_i) = F_1^{-1}(p_i)
+        <p>
+            For a proportion <m>0 \leq p \leq 1</m>, the
+            <em><m>p</m>-th quantile</em> of a distribution <m>F(x)</m> is the
+            value <m>q</m> such that <m>F(q) = p</m>, or <m>q = F^{-1}(p)</m>.
+            For example, <m>p = 0</m> gives the minimum, <m>p = 0.5</m> gives
+            the median, and <m>p = 1</m> gives the maximum.
+        </p>
+
+        <p>
+            The notation <m>Q(p) = F^{-1}(p)</m> or equivalently
+            <m>q_p = F^{-1}(p)</m> is commonly used in textbooks to denote the
+            <m>p</m>-th quantile of a distribution.
+        </p>
+
+        <p>
+            A <em>quantile–quantile plot (qqplot)</em> provides a visual way to
+            compare two distributions, say <m>F_1(x)</m> and <m>F_2(x)</m>, by
+            plotting the quantiles of one distribution against the corresponding
+            quantiles of the other.
+            Specifically, if we define
+        </p>
+        <me>
+            Q_1(p_i) = F_1^{-1}(p_i)
       \quad \text{and} \quad
       Q_2(p_i) = F_2^{-1}(p_i)
-    </me>
+        </me>
 
-    <p>
-      for a set of probabilities <m>p_1, \dots, p_m</m>, then the qqplot is created by plotting the pairs
-    </p>
+        <p>
+            for a set of probabilities <m>p_1, \dots, p_m</m>, then the qqplot
+            is created by plotting the pairs
+        </p>
+        <me>
+            \{Q_1(p_i),\, Q_2(p_i)\}, \quad i = 1, \dots, m.
+        </me>
 
-    <me>
-      \{Q_1(p_i),\, Q_2(p_i)\}, \quad i = 1, \dots, m.
-    </me>
+        <p>
+            A common choice for these probabilities is
+        </p>
+        <me>
+            p_i = \frac{i - 0.5}{n}, \quad i = 1, \dots, n,
+        </me>
 
-    <p>
-      A common choice for these probabilities is
-    </p>
+        <p>
+            where <m>n</m> is the size of the smaller dataset.
+            Subtracting <m>0.5</m> prevents evaluating quantiles at <m>p = 0</m>
+            or <m>p = 1</m>, which for some theoretical distributions, such as
+            the normal, would correspond to <m>-\infty</m> or <m>+\infty</m>.
+        </p>
 
-    <me>
-      p_i = \frac{i - 0.5}{n}, \quad i = 1, \dots, n,
-    </me>
+        <p>
+            The most common use of qqplots is to assess whether two
+            distributions, <m>F_1(x)</m> and <m>F_2(x)</m>, are similar.
+            If the points in the qqplot fall approximately along the identity
+            line, it suggests that the two distributions have a similar shape.
+        </p>
 
-    <p>
-      where <m>n</m> is the sample size of the smaller dataset. Subtracting <m>0.5</m> prevents evaluating quantiles at <m>p = 0</m> or <m>p = 1</m>, which for some theoretical distributions, such as the normal, would correspond to <m>-\infty</m> or <m>+\infty</m>.
-    </p>
+        <subsection xml:id="qqplot-example">
+            <title>Example</title>
 
-    <p>
-      The most common use of qqplots is to assess whether two distributions, <m>F_1(x)</m> and <m>F_2(x)</m>, are similar. If the points in the qqplot fall approximately along the identity line, it suggests that the two distributions have a similar shape.
-    </p>
+            <p>
+                Up to now we have only examined the distribution of heights for
+                males.
+                We expect that the distribution for females to be similar except
+                for 2-3 inch shift due to males being taller than females, on
+                average.
+                A qqplot confirms this after shifting both distributions to have
+                the same average height:
+            </p>
 
-    <subsection xml:id="qqplot-example">
-      <title>Example</title>
-      
-      <p>
-        Up to now we have only examined the distribution of heights for males. We expect that the distribution for females to be similar except for 2-3 inch shift due to males being taller than females, on average. A qqplot confirms this:
-      </p>
-
-      <program language="r">
-        <input>
+            <program language="r">
+                <input>
 par(mfrow = c(1, 1))
 library(dslabs)
 f &lt;- with(heights, height[sex == "Female"])
 m &lt;- with(heights, height[sex == "Male"])
 qqplot(f - mean(f), m - mean(m))
 abline(0,1)
-        </input>
-      </program>
+                </input>
+            </program>
 
-      <figure xml:id="fig-comparing-groups-female-male-qqplot">
-        <caption>QQ plot comparing centered female and male height distributions</caption>
-        <image source="images/comparing-groups-female-male-qqplot.png" width="70%">
-          <description>A quantile-quantile plot comparing centered female and male heights. The points track the identity line through the middle and bend away in the tails, showing similar central shape with tail differences.</description>
-        </image>
-      </figure>
+            <figure xml:id="fig-comparing-groups-female-male-qqplot">
+                <image source="images/comparing-groups-female-male-qqplot.png" width="70%">
+                    <description>
+                        A quantile-quantile plot comparing centered female and
+                        male heights.
+                        The points track the identity line through the middle
+                        and bend away in the tails, showing similar central
+                        shape with tail differences.
+                    </description>
+                </image>
+            </figure>
 
-      <p>
-        We see that in the middle of the plot the points are on the identiy line, confirming the distirbutiosn are similar except for the shift. However, for the smaller and larger quantiles we see a deviation from the line. We come back to this observation in <xref ref="sec-stratification"/>.
-      </p>
-    </subsection>
+            <p>
+                We see that in the middle of the plot the points are on the
+                identity line, confirming the distributions are similar except
+                for the shift.
+                However, for the smaller and larger quantiles we see a deviation
+                from the line.
+                We come back to this observation in
+                <xref ref="sec-stratification"/>.
+            </p>
+        </subsection>
 
-    <subsection xml:id="percentiles">
-      <title>Percentiles</title>
-      
-      <p>
-        <em>Percentiles</em> are special cases of <em>quantiles</em> that are commonly used. The percentiles are the quantiles you obtain when setting the <m>p</m> at <m>0.01, 0.02, \ldots, 0.99</m>. For example, we refer to the case of <m>p = 0.25</m> as the 25th percentile, representing a value below which 25% of the data falls. The most famous percentile is the 50th, also known as the <em>median</em>. Another special case that receives a name are the <em>quartiles</em>, which are obtained when setting <m>p = 0.25, 0.50</m>, and <m>0.75</m>.
-      </p>
-    </subsection>
-  </section>
+        <subsection xml:id="percentiles">
+            <title>Percentiles</title>
 
-  <section xml:id="sec-qqplots">
-    <title>Assessing normality with QQ plots</title>
-    
-    <p>
-      A common use of qqplots is to assess whether data follow a normal distribution.
-    </p>
+            <p>
+                <em>Percentiles</em> are special cases of <em>quantiles</em>
+                where the probability <m>p</m> is expressed as a percentage.
+                For example, we refer to the case of <m>p = 0.25</m> as the 25th
+                percentile, representing a value below which 25% of the data
+                falls.
+                The most famous percentile is the 50th, also known as the
+                <em>median</em>.
+            </p>
 
-    <p>
-      The cumulative distribution function (CDF) of the standard normal is written as <m>\Phi(x)</m>, giving the probability that a normal random variable is less than <m>x</m>. For example, <m>\Phi(-1.96) = 0.025</m> and <m>\Phi(1.96) = 0.975</m>. In R, this is computed with <c>pnorm</c>:
-    </p>
+            <p>
+                Another special case is the <em>quartiles</em>, defined as the
+                quantiles at <m>p = 0.25, 0.50</m>, and <m>0.75</m>.
+                Quartiles divide the data into four regions, each containing 25%
+                of the observations.
+                Quartiles are visualized by boxplots as seen in
+                <xref ref="sec-boxplots"/>.
+            </p>
+        </subsection>
+    </section>
 
-    <console>
-      <input>
+    <section xml:id="sec-qqplots">
+        <title>Assessing normality with QQ plots</title>
+
+        <p>
+            A common use of qqplots is to assess whether data follow a normal
+            distribution.
+        </p>
+
+        <p>
+            The cumulative distribution function (CDF) of the standard normal is
+            written as <m>\Phi(x)</m>, giving the probability that a normal
+            random variable is less than <m>x</m>.
+            For example, <m>\Phi(-1.96) = 0.025</m> and
+            <m>\Phi(1.96) = 0.975</m>.
+            In R, this is computed with <c>pnorm</c>:
+        </p>
+
+        <program language="r">
+            <input>
 pnorm(-1.96)
-      </input>
-      <output>
+            </input>
+        </program>
+
+        <console>
+            <output>
 [1] 0.0249979
-      </output>
-    </console>
+            </output>
+        </console>
 
-    <p>
-      The inverse of <m>\Phi</m>, denoted <m>\Phi^{-1}(p)</m>, provides the <em>theoretical quantiles</em>. For instance, <m>\Phi^{-1}(0.975) = 1.96</m> which we compute with <c>qnorm</c>:
-    </p>
+        <p>
+            The inverse of <m>\Phi</m>, denoted <m>\Phi^{-1}(p)</m>, provides
+            the <em>theoretical quantiles</em>.
+            For instance, <m>\Phi^{-1}(0.975) = 1.96</m> which we compute with
+            <c>qnorm</c>:
+        </p>
 
-    <console>
-      <input>
+        <program language="r">
+            <input>
 qnorm(0.975)
-      </input>
-      <output>
+            </input>
+        </program>
+
+        <console>
+            <output>
 [1] 1.959964
-      </output>
-    </console>
+            </output>
+        </console>
 
-    <p>
-      By default, <c>pnorm</c> and <c>qnorm</c> assume the <em>standard normal</em> distribution (mean 0, SD 1). You can specify different parameters with the <c>mean</c> and <c>sd</c> arguments:
-    </p>
+        <p>
+            By default, <c>pnorm</c> and <c>qnorm</c> assume the
+            <em>standard normal</em> distribution (mean 0, SD 1).
+            You can specify different parameters with the <c>mean</c> and
+            <c>sd</c> arguments:
+        </p>
 
-    <console>
-      <input>
+        <program language="r">
+            <input>
 qnorm(0.975, mean = 69, sd = 3)
-      </input>
-      <output>
+            </input>
+        </program>
+
+        <console>
+            <output>
 [1] 74.87989
-      </output>
-    </console>
+            </output>
+        </console>
 
-    <p>
-      For observed data, we can compute sample quantiles using the <c>quantile</c> function. For example, here are the quartiles of male heights:
-    </p>
+        <p>
+            For observed data, we can compute sample quantiles using the
+            <c>quantile</c> function.
+            For example, here are the quartiles of male heights:
+        </p>
 
-    <console>
-      <input>
+        <program language="r">
+            <input>
 x &lt;- with(heights, height[sex == "Male"])
 quantile(x, c(0.25, 0.50, 0.75))
-      </input>
-      <output>
+            </input>
+        </program>
+
+        <console>
+            <output>
 25% 50% 75% 
  67  69  72 
-      </output>
-    </console>
+            </output>
+        </console>
 
-    <p>
-      To check whether these data are approximately normal, we can construct a QQ plot following these steps:
-    </p>
+        <p>
+            To check whether these data are approximately normal, we can
+            construct a QQ plot following these steps:
+        </p>
 
-    <p>
-      <ol>
-        <li>Define a vector of proportions <m>p_1, \dots, p_m</m>.</li>
-        <li>Compute sample quantiles from the data.</li>
-        <li>Compute theoretical quantiles from a normal distribution with the same mean and SD as the data.</li>
-        <li>Plot the two sets of quantiles against each other.</li>
-      </ol>
-    </p>
+        <p>
+            <ol>
+                <li>Define a vector of proportions <m>p_1, \dots, p_m</m>.</li>
+                <li>Compute sample quantiles from the data.</li>
+                <li>
+                    Compute theoretical quantiles from a normal distribution
+                    with the same mean and SD as the data.
+                </li>
 
-    <p>
-      Example:
-    </p>
+                <li>Plot the two sets of quantiles against each other.</li>
+            </ol>
+        </p>
 
-    <program language="r">
-      <input>
-par(mfrow = c(1, 1))
+        <p>
+            Example:
+        </p>
+
+        <program language="r">
+            <input>
 p &lt;- seq(0.05, 0.95, 0.05)
 sample_quantiles &lt;- quantile(x, p)
 theoretical_quantiles &lt;- qnorm(p, mean = mean(x), sd = sd(x))
 plot(theoretical_quantiles, sample_quantiles)
 abline(0, 1)
-      </input>
-    </program>
+            </input>
+        </program>
 
-    <figure xml:id="fig-comparing-groups-manual-normal-qqplot">
-      <caption>QQ plot of male heights against normal quantiles</caption>
-      <image source="images/comparing-groups-manual-normal-qqplot.png" width="70%">
-        <description>A quantile-quantile plot comparing male height quantiles with theoretical normal quantiles using matched mean and standard deviation. The points stay close to the identity line, supporting the normal approximation.</description>
-      </image>
-    </figure>
+        <figure xml:id="fig-comparing-groups-manual-normal-qqplot">
+            <image source="images/comparing-groups-manual-normal-qqplot.png" width="70%">
+                <description>
+                    A quantile-quantile plot comparing male height quantiles
+                    with theoretical normal quantiles using matched mean and
+                    standard deviation.
+                    The points stay close to the identity line, supporting the
+                    normal approximation.
+                </description>
+            </image>
+        </figure>
 
-    <p>
-      Because the points fall close to the identity line, we conclude that the normal distribution provides a good approximation for this dataset.
-    </p>
+        <p>
+            Recall that the qqplot in <xref ref="quantile-quantile-plots"/>
+            compared quantiles from two sets of observations, where points along
+            the identity line indicated similar distributions.
+            In this case, the theoretical quantiles along the x-axis are
+            computed using the sample mean and standard deviation.
+            Here, the identity line marks where we expect points to lie if the
+            data really came from this theoretical distribution.
+        </p>
 
-    <p>
-      The code becomes simpler if we standardize the data first:
-    </p>
+        <p>
+            Because the points fall close to the identity line, we conclude that
+            the normal distribution provides a good approximation for this
+            dataset.
+        </p>
 
-    <program language="r">
-      <input>
+        <p>
+            The code becomes simpler if we standardize the data first:
+        </p>
+
+        <program language="r">
+            <input>
 plot(quantile(scale(x), p), qnorm(p))
-      </input>
-    </program>
+abline(a = 0, b = 1)
+            </input>
+        </program>
 
-    <figure xml:id="fig-comparing-groups-standardized-qqplot">
-      <caption>QQ plot of standardized male heights</caption>
-      <image source="images/comparing-groups-standardized-qqplot.png" width="70%">
-        <description>A QQ plot comparing standardized male heights to standard normal quantiles. The points align closely with a straight line, showing that the standardized data are near normal.</description>
-      </image>
-    </figure>
+        <p>
+            And similarly with ggplot2, which uses a different vector of
+            probabilities than our p:
+        </p>
 
-    <p>
-      R provides built-in functions for generating qqplots that compare observed data to a normal distribution:
-    </p>
-
-    <program language="r">
-      <input>
-qqnorm(x)
-qqline(x)
-      </input>
-    </program>
-
-    <figure xml:id="fig-comparing-groups-base-qqnorm">
-      <caption>Base R QQ plot for male heights</caption>
-      <image source="images/comparing-groups-base-qqnorm.png" width="70%">
-        <description>A base R normal QQ plot for male heights with a reference line. Most points lie near the line, with modest departures in the tails.</description>
-      </image>
-    </figure>
-
-    <p>
-      These functions use the average and standard deviation of the data <c>x</c> to define the theoretical normal distribution used for the x-axis values. In other words, the plotted line represents what we would expect if the data were normally distributed with the same mean and spread as the observed sample.
-    </p>
-
-    <p>
-      And equivalently with <c>ggplot2</c>:
-    </p>
-
-    <program language="r">
-      <input>
+        <program language="r">
+            <input>
 library(ggplot2)
-library(dplyr)
-library(dslabs)
-heights |> filter(sex == "Male") |>
+heights |&gt; filter(sex == "Male") |&gt;
   ggplot(aes(sample = scale(height))) + 
   geom_qq() +
   geom_abline()
-      </input>
-    </program>
+            </input>
+        </program>
 
-    <figure xml:id="fig-comparing-groups-ggplot-qqnorm">
-      <caption>ggplot2 QQ plot for standardized male heights</caption>
-      <image source="images/comparing-groups-ggplot-qqnorm.png" width="70%">
-        <description>A ggplot2 QQ plot of standardized male heights with a diagonal reference line. The points cluster near the line, again indicating an approximately normal distribution.</description>
-      </image>
-    </figure>
+        <p>
+            R provides built-in functions for generating qqplots that compare
+            observed data to a normal distribution:
+        </p>
 
-    <note>
-      <p>
-        By default, both <c>qqnorm</c> and <c>geom_qq</c> use all <m>n</m> quantiles, with <m>p_i = (i - 0.5)/n</m>. Because of this default behavior, large datasets can produce thousands of overlapping points that appear as a solid line. In such cases, it's better to compute and plot a smaller, representative set of quantiles manually rather than relying on the defaults in <c>qqplot</c> or <c>qqnorm</c>.
-      </p>
-    </note>
-  </section>
+        <program language="r">
+            <input>
+qqnorm(x)
+qqline(x)
+            </input>
+        </program>
 
-  <section xml:id="sec-stratification">
-    <title>Stratification</title>
-    
-    <p>
-      In data analysis, we often divide observations into groups based on the values of one or more variables associated with those observations. For example, we can divide the height values into groups based on a sex variable: females and males. We call this procedure <em>stratification</em> and refer to the resulting groups as <em>strata</em>.
-    </p>
+        <figure xml:id="fig-comparing-groups-base-qqnorm">
+            <image source="images/normal-qq-plot.png" width="70%">
+                <description>
+                    A base R normal QQ plot for male heights with a reference
+                    line.
+                    Most points lie near the line, with modest departures in the
+                    tails.
+                </description>
+            </image>
+        </figure>
 
-    <p>
-      Stratification is common in data visualization because we are often interested in how the distribution of variables differs across different subgroups.
-    </p>
+        <p>
+            The function <c>qqnorm()</c> plots the sample quantiles of the data
+            <c>x</c> against theoretical quantiles from a standard normal
+            distribution.
+            The function <c>qqline()</c> adds a reference line representing
+            where we would expect points to lie if the data were normally
+            distributed with the same mean and standard deviation as the
+            observed sample.
+            Because the sample and theoretical quantiles are not on the same
+            scale, this reference is no longer the identity line.
+        </p>
 
-    <p>
-      Using the histogram, density plots, and qqplots, we have become convinced that the male height data is well approximated with a normal distribution. In this case, we report back to ET a very succinct summary: male heights follow a normal distribution with an average of 69.3 inches and a SD of 3.6 inches. With this information, ET will have a good idea of what to expect when he meets our male students. However, to provide a complete picture we need to also provide a summary of the female heights.
-    </p>
+        <note>
+            <p>
+                By default, both <c>qqnorm</c> and <c>geom_qq</c> use all
+                <m>n</m> quantiles, with <m>p_i = (i - 0.5)/n</m>.
+                Because of this default behavior, large datasets can produce
+                thousands of overlapping points that appear as a solid line.
+                In such cases, it's better to compute and plot a smaller,
+                representative set of quantiles manually rather than relying on
+                the defaults in <c>qqplot</c> or <c>qqnorm</c>.
+            </p>
+        </note>
+    </section>
 
-    <p>
-      We learned that boxplots are useful when we want to quickly compare two or more distributions. Here are the heights for females and males:
-    </p>
+    <section xml:id="sec-stratification">
+        <title>Stratification</title>
 
-    <program language="r">
-      <input>
+        <p>
+            In data analysis, we often divide observations into groups based on
+            the values of one or more variables associated with those
+            observations.
+            For example, we can divide the height values into groups based on a
+            sex variable: females and males.
+            We call this procedure <em>stratification</em> and refer to the
+            resulting groups as <em>strata</em>.
+        </p>
+
+        <p>
+            Stratification is common in data visualization because we are often
+            interested in how the distribution of variables differs across
+            different subgroups.
+        </p>
+
+        <p>
+            Using the histogram, density plots, and qqplots, we have become
+            convinced that the male height data is well approximated with a
+            normal distribution.
+            In this case, we report back to ET a very succinct summary: male
+            heights follow a normal distribution with an average of 69.3 inches
+            and a SD of 3.6 inches.
+            With this information, ET will have a good idea of what to expect
+            when he meets our male students.
+            However, to provide a complete picture we need to also provide a
+            summary of the female heights.
+        </p>
+
+        <p>
+            Boxplots are useful when we want to quickly compare two or more
+            distributions.
+            Here are the heights for females and males:
+        </p>
+
+        <program language="r">
+            <input>
 library(tidyverse)
 library(dslabs)
-heights |> ggplot(aes(sex, height, fill = sex)) + geom_boxplot()
-      </input>
-    </program>
+heights |&gt; ggplot(aes(sex, height, fill = sex)) + geom_boxplot()
+            </input>
+        </program>
 
-    <figure xml:id="fig-comparing-groups-height-boxplots">
-      <caption>Boxplots of student heights by sex</caption>
-      <image source="images/comparing-groups-height-boxplots.png" width="70%">
-        <description>Side-by-side boxplots comparing female and male student heights. The male distribution is shifted upward, while the spreads appear similar.</description>
-      </image>
-    </figure>
-
-    <p>
-      The plot immediately reveals that males are, on average, taller than females. The standard deviations appear to be similar. But does the normal approximation also work for the female height data collected by the survey? We expect that they will follow a normal distribution, just like males. However, exploratory plots reveal that the approximation is not as useful:
-    </p>
-
-    <program language="r">
-      <input>
-p1 &lt;- heights |> filter(sex == "Female") |>
-  ggplot(aes(height)) +
-  geom_density(fill = "#F8766D") 
-p2 &lt;- heights |> filter(sex == "Female") |> 
-  ggplot(aes(sample = scale(height))) +
-  geom_qq() + geom_abline() + ylab("Standard Units")
-gridExtra::grid.arrange(p1, p2, ncol = 2)
-      </input>
-    </program>
-
-    <figure xml:id="fig-comparing-groups-female-density-qq">
-      <caption>Female height density plot and QQ plot</caption>
-      <image source="images/comparing-groups-female-density-qq.png" width="100%">
-        <description>Two panels for female heights: a density plot with a visible secondary bump and a QQ plot with tail departures from the normal reference line. Together they show why a normal approximation is less convincing for the female data.</description>
-      </image>
-    </figure>
-
-    <p>
-      We see something we did not see for the males: the density plot has a second <em>bump</em>. Also, the qqplot shows that the highest points tend to be taller than expected by the normal distribution. Finally, we also see five points in the qqplot that suggest shorter than expected heights for a normal distribution. When reporting back to ET, we might need to provide a histogram rather than just the average and standard deviation for the female heights.
-    </p>
-
-    <p>
-      We have noticed what we didn't expect to see. If we look at other female height distributions, we do find that they are well approximated with a normal distribution. So why are our female students different? Is our class a requirement for the female basketball team? Are small proportions of females claiming to be taller than they are? Another, perhaps more likely, explanation is that in the form students used to enter their heights, <c>Female</c> was the default sex and some males entered their heights, but forgot to change the sex variable. In any case, data visualization has helped discover a potential flaw in our data.
-    </p>
-
-    <p>
-      Regarding the five smallest values, note that these are:
-    </p>
-
-    <console>
-      <input>
-heights |> filter(sex == "Female") |> 
-  top_n(5, desc(height)) |>
-  pull(height)
-      </input>
-      <output>
-[1] 51 53 55 52 52
-      </output>
-    </console>
-
-    <p>
-      Because these are reported heights, a possibility is that the student meant to enter <c>5'1"</c>, <c>5'2"</c>, <c>5'3"</c> or <c>5'5"</c>.
-    </p>
-  </section>
-
-  <exercises xml:id="exercises-comparing-groups">
-    <title>Exercises</title>
-
-    <exercise number="1">
-      <statement>
-        <p>
-          Study the following boxplots showing population sizes by country:
-        </p>
-        <figure>
-          <caption>Population sizes by continent</caption>
-          <image source="images/boxplot-exercise-comparing-groups.png" width="70%">
-            <description>Boxplots showing population sizes by continent with y-axis on log scale. The y-axis shows population in millions from 1 to 1000 on a log scale, and the x-axis shows continents: Africa, Americas, Asia, Europe, and Oceania.</description>
-          </image>
+        <figure xml:id="fig-comparing-groups-height-boxplots">
+            <image source="images/comparing-groups-height-boxplots.png" width="70%">
+                <description>
+                    Side-by-side boxplots comparing female and male student
+                    heights.
+                    The male distribution is shifted upward, while the spreads
+                    appear similar.
+                </description>
+            </image>
         </figure>
-        <p>
-          Which continent has the country with the biggest population size?
-        </p>
-      </statement>
-    </exercise>
 
-    <exercise number="2">
-      <statement>
         <p>
-          Which continent has the largest median population size?
+            The plot immediately reveals that males are, on average, taller than
+            females.
+            The standard deviations appear to be similar.
+            But does the normal approximation also work for the female height
+            data collected by the survey?
+            We expect that they will follow a normal distribution, just like
+            males.
+            However, exploratory plots reveal that the approximation is not as
+            useful:
         </p>
-      </statement>
-    </exercise>
 
-    <exercise number="3">
-      <statement>
-        <p>
-          What is median population size for Africa to the nearest million?
-        </p>
-      </statement>
-    </exercise>
+        <figure xml:id="fig-comparing-groups-female-density-qq">
+            <image source="images/comparing-groups-female-density-qq.png" width="100%">
+                <description>
+                    Two panels for female heights: a density plot with a visible
+                    secondary bump and a QQ plot with tail departures from the
+                    normal reference line.
+                    Together they show why a normal approximation is less
+                    convincing for the female data.
+                </description>
+            </image>
+        </figure>
 
-    <exercise number="4">
-      <statement>
         <p>
-          What proportion of countries in Europe have populations below 14 million?
+            We see something we did not see for the males: the density plot has
+            a second <em>bump</em> near a height of 52 inches.
+            This is reflected in the qqplot with five points that suggest
+            shorter than expected heights for a normal distribution.
+            The qqplot also shows that the highest points tend to be taller than
+            expected by the normal distribution.
+            When reporting back to ET, we might need to provide a histogram
+            rather than just the average and standard deviation for the female
+            heights.
         </p>
-        <p>
-          <ol marker="a">
-            <li>0.99</li>
-            <li>0.75</li>
-            <li>0.50</li>
-            <li>0.25</li>
-          </ol>
-        </p>
-      </statement>
-    </exercise>
 
-    <exercise number="5">
-      <statement>
         <p>
-          If we use a log transformation, which continent shown above has the largest interquartile range?
+            This is unexpected — studies of other female height distributions
+            find they are well approximated by a normal distribution.
+            What explains the five unusually short heights and the excess of
+            very tall students?
+            One possibility is that some males entered their heights without
+            changing the default sex selection of <c>Female</c> in the form.
+            Whatever the cause, data visualization has uncovered a potential
+            flaw in the data.
         </p>
-      </statement>
-    </exercise>
 
-    <exercise number="6">
-      <statement>
         <p>
-          Define variables containing the heights of males and females as follows:
+            Regarding the five smallest values, note that these are:
         </p>
+
         <program language="r">
-          <input>
+            <input>
+heights |&gt; filter(sex == "Female") |&gt; 
+  top_n(5, desc(height)) |&gt;
+  pull(height)
+            </input>
+        </program>
+
+        <console>
+            <output>
+[1] 51 53 55 52 52
+            </output>
+        </console>
+
+        <p>
+            Because these are reported heights, a possibility is that the
+            student meant to enter <c>5'1"</c>, <c>5'2"</c>, <c>5'3"</c> or
+            <c>5'5"</c>.
+        </p>
+    </section>
+    <exercises xml:id="exercises-comparing-groups">
+        <title>Exercises</title>
+
+        <exercise number="1">
+            <statement>
+                <p>
+                    Study the following boxplots showing population sizes by
+                    country:
+                </p>
+
+                <figure>
+                    <image source="images/boxplot-exercise-comparing-groups.png" width="70%">
+                        <description>
+                            Boxplots showing population sizes by continent with
+                            y-axis on log scale.
+                            The y-axis shows population in millions from 1 to
+                            1000 on a log scale, and the x-axis shows
+                            continents: Africa, Americas, Asia, Europe, and
+                            Oceania.
+                        </description>
+                    </image>
+                </figure>
+
+                <p>
+                    Which continent has the country with the biggest population
+                    size?
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise number="2">
+            <statement>
+                <p>
+                    Which continent has the largest median population size?
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise number="3">
+            <statement>
+                <p>
+                    What is median population size for Africa to the nearest
+                    million?
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise number="4">
+            <statement>
+                <p>
+                    What proportion of countries in Europe have populations
+                    below 14 million?
+                </p>
+
+                <p>
+                    <ol marker="a">
+                        <li>0.99</li>
+                        <li>0.75</li>
+                        <li>0.50</li>
+                        <li>0.25</li>
+                    </ol>
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise number="5">
+            <statement>
+                <p>
+                    On the displayed log scale, which continent has the largest
+                    interquartile range (IQR)?
+                    Hint: IQR was defined in <xref ref="sec-boxplots"/>.
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise number="6">
+            <statement>
+                <p>
+                    Define variables containing the heights of males and females
+                    as follows:
+                </p>
+
+                <program language="r">
+                    <input>
 library(dslabs)
 male &lt;- heights$height[heights$sex == "Male"]
 female &lt;- heights$height[heights$sex == "Female"]
-          </input>
-        </program>
-        <p>
-          How many measurements do we have for each?
-        </p>
-      </statement>
-    </exercise>
+                    </input>
+                </program>
 
-    <exercise number="7">
-      <statement>
-        <p>
-          Suppose we can't make a plot and want to compare the distributions side by side. We can't just list all the numbers. Instead, we will look at the percentiles. Create a five row table showing <c>female_percentiles</c> and <c>male_percentiles</c> with the 10th, 30th, 50th, 70th, &amp; 90th percentiles for each sex. Then create a data frame with these two as columns.
-        </p>
-      </statement>
-    </exercise>
+                <p>
+                    How many measurements do we have for each?
+                </p>
+            </statement>
+        </exercise>
 
-    <exercise number="8">
-      <statement>
-        <p>
-          Use a qqplot to demonstrate that murder rates
-        </p>
-        <program language="r">
-          <input>
+        <exercise number="7">
+            <statement>
+                <p>
+                    Suppose we can't make a plot and want to compare the
+                    distributions side by side.
+                    We can't just list all the numbers.
+                    Instead, we will look at the percentiles.
+                    Create a table for each sex with 10th, 30th, 50th, 70th,
+                    &amp; 90th percentiles.
+                    Then create a data frame with a column for each sex, and 5
+                    rows as these percentiles.
+                </p>
+            </statement>
+        </exercise>
+
+        <exercise number="8">
+            <statement>
+                <p>
+                    Use a qqplot to demonstrate that murder rates do not follow
+                    a normal distribution.
+                </p>
+
+                <program language="r">
+                    <input>
 library(dslabs)
 r &lt;- with(murders, total/population*100000)
-          </input>
-        </program>
-      </statement>
-    </exercise>
+                    </input>
+                </program>
+            </statement>
+        </exercise>
 
-    <exercise number="10">
-      <statement>
-        <p>
-          Remove DC, then generate qqplot to see if the rate follow a normal distribution within each of the four region.
-        </p>
-      </statement>
-    </exercise>
+        <exercise number="9">
+            <statement>
+                <p>
+                    Remove the data for the District of Columbia (DC), then
+                    stratify the data into the four regions and generate a
+                    qqplot for each to see if the murder rates follow a normal
+                    distribution within each of the four regions.
+                </p>
+            </statement>
+        </exercise>
 
-  </exercises>
-
+        <exercise number="10">
+            <statement>
+                <p>
+                    Calculate the mean and standard deviation of murder rates
+                    for each region.
+                    Perform the analysis twice: once including all observations
+                    and once excluding Washington, DC.
+                    Discuss which comparison is more informative and explain
+                    your reasoning.
+                </p>
+            </statement>
+        </exercise>
+    </exercises>
 </chapter>

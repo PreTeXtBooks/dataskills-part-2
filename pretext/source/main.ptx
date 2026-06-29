@@ -1,135 +1,938 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!--
-    Introduction to Data Science
-    Statistics and Prediction Algorithms Through Case Studies
--->
+
 <pretext xmlns:xi="http://www.w3.org/2001/XInclude" xml:lang="en-US">
-  
-  <docinfo>
-    <macros>
+    <docinfo>
+        <macros>
       % Add any custom LaTeX macros here
-    </macros>
-  </docinfo>
+        </macros>
+    </docinfo>
 
-  <book xml:id="intro-data-science">
-    <title>Introduction to Data Science</title>
-    <subtitle>Statistics and Prediction Algorithms Through Case Studies</subtitle>
+    <book xml:id="intro-data-science">
+        <title>Introduction to Data Science</title>
 
-    <!-- Front Matter -->
-    <xi:include href="./frontmatter/frontmatter.ptx"/>
+        <subtitle>
+            Statistics and Prediction Algorithms Through Case Studies
+        </subtitle>
+        <!-- Front Matter -->
+        <xi:include href="./frontmatter/frontmatter.ptx"/>
+        <!-- Part 1: Summary Statistics -->
+        <part xml:id="part-summary-statistics">
+            <title>Summary Statistics</title>
 
-    <!-- Part 1: Summary Statistics -->
-    <part xml:id="part-summary-statistics">
-      <title>Summary Statistics</title>
-       <introduction>
-           <p>We begin with one of the simplest and most powerful tools in data analysis: summarizing data. This part of the book introduces techniques that help us describe and understand datasets without relying on probability models. These summaries will later provide the intuition needed to understand statistical modeling and inference.</p>
-           <p>In the first chapter, we focus on <xref ref="distributions"/>, visual representations such as histograms and density plots, that reveal patterns of variation, symmetry, and outliers. In the second chapter, we move from pictures to numbers, introducing <xref ref="sec-numeric-summaries"/>, such as the average and standard deviation, which quantify the center and spread of a distribution. To motivate these summaries, we introduce the normal distribution.</p>
-           <p>However, these summaries are not ideal for all datasets. Outliers and skewed distributions can make certain summaries, like the average and standard deviation, less appropriate or cause them to no longer represent what we think they do. For this reason, we also introduce rank-based summaries such as the median and interquartile range, which are more robust to outliers and provide complementary perspectives on data. Together, these ideas form the foundation of data analysis: describing what we see before we attempt to model why it happens.
-           </p>
-     </introduction>
-      <xi:include href="./summaries/distributions.ptx"/>
-      <xi:include href="./summaries/numerical-summaries.ptx"/>
-      <xi:include href="./summaries/comparing-groups.ptx"/>
-      <xi:include href="./summaries/reading-summaries.ptx"/>
-    </part>
+            <introduction>
+                <p>
+                    We begin with one of the simplest and most powerful tools in
+                    data analysis: summarizing data.
+                    This part of the book introduces techniques that help us
+                    describe and understand datasets without relying on
+                    probability models.
+                    This part focuses on single‑variable datasets — a dataset
+                    with a single variable, a vector of observed values such as
+                    heights or category labels.
+                    These summaries will later provide the intuition needed to
+                    understand statistical modeling and inference.
+                </p>
 
-    <!-- Part 2: Probability -->
-    <part xml:id="part-probability">
-      <title>Probability</title>
-       <introduction>
-       <p>The first part of the book focused on describing data we have already collected. But in most data analysis projects, what we observe is only one possible outcome among many. If we were to collect the same data again, another survey, another experiment, we would not obtain exactly the same results. This variation is not to be ignored as it reflects the fundamental uncertainty that accompanies all real data.</p>
-       <p>Probability is the mathematical language we use to describe that uncertainty. It provides the foundation for reasoning about variation, quantifying how likely different outcomes are, and ultimately, for drawing conclusions from data. Every inferential method we will learn, from confidence intervals to regression and machine learning, rests on these ideas.</p>
-       <p>The study of probability began with games of chance, where uncertainty is both concrete and controlled: tossing coins, drawing cards, or betting on outcomes. Mathematicians such as Cardano, Fermat, and Pascal developed the first formal methods for computing odds in these settings, laying the groundwork for what would become modern probability theory.</p>
-       <p>In this part of the book, we use these games of chance as a pedagogical tool. They provide clear, well-defined examples that make abstract ideas intuitive. By working with them, we can focus on the logic of probability without the complications of real-world data collection In later parts of the book, we return to data analysis and show how these same principles apply to real-world uncertainty, polls, experiments, and prediction problems.</p>
-       <p>We will introduce the essential concepts of probability through simple, concrete examples: defining events, computing probabilities, and describing random variables and their distributions. Our emphasis is on intuition and computation rather than mathematical derivation.</p>
-       <p>Throughout this part of the book, we also connect probability theory to computer simulations. Using R code and Monte Carlo methods, we will learn how to estimate probabilities, explore random behavior, and develop intuition for uncertainty through simulation. This practical, code-based approach will prepare you to see how probability connects directly to real data in the chapters that follow.</p>
-       </introduction>
-      <xi:include href="./prob/connecting-data-and-probability.ptx"/>
-      <xi:include href="./prob/discrete-probability.ptx"/>
-      <xi:include href="./prob/continuous-probability.ptx"/>
-      <xi:include href="./prob/random-variables.ptx"/>
-      <xi:include href="./prob/sampling-models-and-clt.ptx"/>
-      <xi:include href="./prob/reading-prob.ptx"/>
-    </part>
+                <p>
+                    In the first chapter, we focus on distributions — visual
+                    representations such as histograms and density plots — that
+                    reveal patterns of variation, symmetry, and outliers.
+                    In the second chapter, we move from pictures to numbers,
+                    introducing numerical summaries such as the average and
+                    standard deviation, which quantify the center and spread of
+                    a distribution.
+                    To motivate these summaries, we introduce the normal
+                    distribution.
+                </p>
 
-    <!-- Part 3: Statistical Inference -->
-    <part xml:id="part-statistical-inference">
-      <title>Statistical Inference</title>
-       <introduction>
-      <p>Statistical Inference is the branch of statistics dedicated to distinguishing patterns arising from signal versus those arising from chance. It is a broad topic and, in this section, we review the basics using polls as a motivating example. To illustrate the concepts, we supplement mathematical formulas with Monte Carlo simulations and R code. We demonstrate the practical value of these concepts by using election forecasting as a case study. Readers already familiar with statistical inference theory and interested in the case study can focus on <xref ref="sec-election-forecasting"/>.</p>
-      <p>The day before the 2008 presidential election, Nate Silver’s FiveThirtyEight stated that “Barack Obama appears poised for a decisive electoral victory”. They went further and predicted that Obama would win the election with 349 electoral votes to 189, and the popular vote by a margin of 6.1%. FiveThirtyEight also attached a probabilistic statement to their prediction claiming that Obama had a 91% chance of winning the election. The predictions were quite accurate since, in the final results, Obama won the electoral college 365 to 173 and the popular vote by a 7.2% difference. Their performance in the 2008 election brought FiveThirtyEight to the attention of political pundits and TV personalities. Four years later, the week before the 2012 presidential election, FiveThirtyEight’s Nate Silver was giving Obama a 90% chance of winning despite many of the experts thinking the final results would be closer. Political commentator Joe Scarborough said during his show1:.</p>
-      <p>"Anybody that thinks that this race is anything but a toss-up right now is such an ideologue ... they’re jokes.".</p>
-      <p>To which Nate Silver responded via Twitter:</p>
-      <p>"If you think it’s a toss-up, let’s bet. If Obama wins, you donate $1,000 to the American Red Cross. If Romney wins, I do. Deal?"</p>
-      <p>Obama won the election.</p>
-      <p>In 2016, Silver was not as certain and gave Hillary Clinton only a 71% of winning. In contrast, many other forecasters were almost certain she would win. She lost. But 71% is still more than 50%, so was Mr. Silver wrong? And what does probability mean in this context anyway?</p>
-      <p>In this part of the book, we show how the probability concepts from the previous part can be applied to develop statistical methods that make polls effective tools for understanding public opinion. Although in the United States the popular vote does not determine the presidential outcome, we use it as a simple and illustrative example to introduce the core ideas of statistical inference.</p>
-      <p>We begin by learning how to define estimates and margins of error for the popular vote and how these lead naturally to <xref ref="sec-parameters-and-estimates"/>. We then extend this framework by aggregating data from multiple pollsters to examine the limitations of traditional models and explore improvements. To interpret probabilistic statements about the likelihood of a candidate winning, we introduce <xref ref="sec-bayesian-statistics"/>, and finally, we combine these ideas through <xref ref="sec-election-forecasting"/> to build a simplified version of the FiveThirtyEight election model and apply it to the 2016 election.</p>
-      <p>We conclude with two widely taught topics that, while not required for the case study, are central to statistical practice: statistical power and p-values. The part ends with a brief introduction to <xref ref="sec-bootstrap"/>, an inferential method we will revisit in the machine learning part.</p>
-      <p>https://www.youtube.com/watch?v=TbKkjm-gheY.</p>
-       </introduction>
-      <xi:include href="./inference/estimates-confidence-intervals.ptx"/>
-      <xi:include href="./inference/models.ptx"/>
-      <xi:include href="./inference/bayes.ptx"/>
-      <xi:include href="./inference/hierarchical-models.ptx"/>
-      <xi:include href="./inference/hypothesis-testing.ptx"/>
-      <xi:include href="./inference/bootstrap.ptx"/>
-      <xi:include href="./inference/reading-inference.ptx"/>
-    </part>
+                <p>
+                    However, these summaries are not ideal for all datasets.
+                    Outliers and skewed distributions can make certain
+                    summaries, like the average and standard deviation, less
+                    appropriate or cause them to no longer represent what we
+                    think they do.
+                    For this reason, we also introduce rank-based summaries such
+                    as the median and interquartile range, which are more robust
+                    to outliers and provide complementary perspectives on data.
+                    Together, these ideas form the foundation of data analysis:
+                    describing what we see before we attempt to model why it
+                    happens.
+                </p>
+            </introduction>
 
-    <!-- Part 4: Linear Models -->
-    <part xml:id="part-linear-models">
-      <title>Linear Models</title>
-       <introduction>
-        <p>Up to this point, the book has focused mainly on datasets with a single variable. In real data analysis, however, we are often interested in the relationship between two or more variables. In this part of the book, we introduce linear models, a general framework that unifies methods for studying associations among variables, including simple and multivariable regression, treatment effect models, association tests, and generalized linear models. We will use several case studies to illustrate these ideas. We will examine whether height is hereditary (<xref ref="sec-regression"/>), whether a high-fat diet makes mice heavier (<xref ref="sec-treatment-effect-models"/>), whether there is gender bias in research funding in the Netherlands (<xref ref="sec-association-tests"/>), and how to build a baseball team on a budget (<xref ref="sec-multivariable-regression"/>). We also include a chapter on the important concept that association is not causation, with a detailed discussion and examples of the challenges that arise when interpreting relationships between variables.</p>
-       </introduction>
-      <xi:include href="./linear-models/regression.ptx"/>
-      <xi:include href="./linear-models/linear-model-framework.ptx"/>
-      <xi:include href="./linear-models/treatment-effect-models.ptx"/>
-      <xi:include href="./linear-models/glm.ptx"/>
-      <xi:include href="./linear-models/association-not-causation.ptx"/>
-      <xi:include href="./linear-models/multivariable-regression.ptx"/>
-      <xi:include href="./linear-models/reading-lm.ptx"/>
-    </part>
+            <xi:include href="./summaries/distributions.ptx"/>
+            <xi:include href="./summaries/numerical-summaries.ptx"/>
+            <xi:include href="./summaries/comparing-groups.ptx"/>
+            <conclusion>
+                <title>Recommended Reading</title>
 
-    <!-- Part 5: High Dimensional Data -->
-    <part xml:id="part-high-dimensional-data">
-      <title>High Dimensional Data</title>
-       <introduction>
-      <p>High-dimensional datasets are increasingly common in modern data analysis, especially in fields like genomics, image processing, natural language processing, and recommender systems. There is a variety of computational techniques and statistical concepts that are useful for analyzing datasets in which each observation is associated with a large number of numerical variables. In this part of the book, we introduce ideas that are useful in the analysis of these high-dimensional datasets. Specifically, we provide brief introductions to <xref ref="matrices-in-R"/>, <xref ref="linear-algebra"/>, <xref ref="dimension-reduction"/>, <xref ref="sec-latent-factor-models"/>, and <xref ref="sec-regularization"/>. As motivating examples, we use handwritten digit recognition and movie recommendation systems, both of which involve high-dimensional datasets with hundreds or thousands of variables per observation. We start this part of the book by demonstrating how to work with matrices in R.</p>
-      <p>One specific task we use to motivate linear algebra is measuring the similarity between two handwritten digits. Because each digit is represented by 28x28=784 pixel values, we cannot simply subtract two vectors as we would in a one-dimensional setting. Instead, we treat each observation as a point in a high-dimensional space and use a mathematical definition of distance to quantify similarity. Many machine learning techniques introduced later in the book rely on this geometric interpretation.</p>
-      <p>We also use this high-dimensional concept of distance to motivate dimension reduction, a set of techniques that summarize high-dimensional data in lower-dimensional representations that are easier to visualize and analyze, while preserving the essential information. Distance between observations provides a concrete example: we aim to reduce the number of variables while preserving the pairwise distances between observations as much as possible. This leads naturally to matrix factorization methods, which arise from the mathematical structure underlying these techniques.</p>
-      <p>Finally, we introduce the concept of regularization, which is useful when analyzing high-dimensional data. In many applications, the large number of variables increases the risk of overfitting or cherry-picking results that appear significant by chance. Regularization provides a mathematically principled way to constrain models, improve generalization, and avoid misleading conclusions.</p>
-      <p>Together, these topics lay the groundwork for understanding and implementing many of the machine learning techniques we cover in the next part of the book.</p>
-       </introduction>
-      <xi:include href="./highdim/matrices-in-R.ptx"/>
-      <xi:include href="./highdim/linear-algebra.ptx"/>
-      <xi:include href="./highdim/dimension-reduction.ptx"/>
-      <xi:include href="./highdim/regularization.ptx"/>
-      <xi:include href="./highdim/latent-factor-models.ptx"/>
-      <xi:include href="./highdim/reading-highdim.ptx"/>
-    </part>
+                <ul>
+                    <li>
+                        <p>
+                            <em>Freedman, D., Pisani, R., &amp; Purves, R. (2007). Statistics (4th ed.).</em>
+                            A clear, concept-first introduction to
+                            distributions, variability, and summaries, excellent
+                            for intuition and statistical thinking.
+                        </p>
+                    </li>
 
-    <!-- Part 6: Machine Learning -->
-    <part xml:id="part-machine-learning">
-      <title>Machine Learning</title>
-       <introduction>
-      <p>Machine learning has achieved remarkable successes in a variety of applications. These range from the postal service’s use of machine learning for reading handwritten zip codes to the development of voice recognition systems like Apple’s Siri. Other significant advances include spam and malware detection, housing price prediction algorithms, and the ongoing development of autonomous vehicles.</p>
-      <p>The field of Artificial Intelligence (AI) has been evolving for several decades. Traditional AI systems, including some chess-playing machines, often relied on decision-making based on preset rules and knowledge representation. However, with the advent of data availability, machine learning has gained prominence. It focuses on decision-making through algorithms trained with data. In recent years, the terms AI and Machine Learning have been used interchangeably in many contexts, though they have distinct meanings. AI broadly refers to systems or applications that exhibit intelligent behavior, encompassing both rule-based approaches and machine learning. Machine Learning specifically involves learning from data to make decisions or predictions.</p>
-      <p>In this part of the book, we will delve into the concepts, ideas, and methodologies of machine learning. We will also demonstrate their practical application, using the example of recognizing handwritten digits, a classic problem that exemplifies the power and utility of machine learning techniques.</p>
-       </introduction>
-      <xi:include href="./ml/notation-and-terminology.ptx"/>
-      <xi:include href="./ml/evaluation-metrics.ptx"/>
-      <xi:include href="./ml/conditionals-and-smoothing.ptx"/>
-      <xi:include href="./ml/resampling-methods.ptx"/>
-      <xi:include href="./ml/algorithms.ptx"/>
-      <xi:include href="./ml/ml-in-practice.ptx"/>
-      <xi:include href="./ml/clustering.ptx"/>
-      <xi:include href="./ml/reading-ml.ptx"/>
-    </part>
+                    <li>
+                        <p>
+                            <em>Tukey, J. W. (1977). Exploratory Data Analysis.</em>
+                            The classic source for boxplots, robust summaries,
+                            and EDA philosophy, foundational for this chapter's
+                            emphasis on describing data.
+                        </p>
+                    </li>
 
-    <!-- Back Matter -->
+                    <li>
+                        <p>
+                            <em>Cleveland, W. S. (1993). Visualizing Data.</em>
+                            A practical, graphics-first treatment of
+                            distributions and patterns; pairs well with
+                            histograms, density plots, and eCDFs.
+                        </p>
+                    </li>
 
-  </book>
+                    <li>
+                        <p>
+                            <em>Hoaglin, D. C., Mosteller, F., &amp; Tukey, J. W. (1983). Understanding Robust and Exploratory Data Analysis. Wiley.</em>
+                            A classic edited volume aimed at explaining robust
+                            methods in an accessible style; many chapters are
+                            practical.
+                        </p>
+                    </li>
 
+                    <li>
+                        <p>
+                            <em>Wilcox, R. R. (2017). Introduction to Robust Estimation and Hypothesis Testing (4th ed.). Academic Press.</em>
+                            A practical, applied text with many worked examples.
+                            It goes well beyond what we covered in this chapter
+                            but starts with chapters on medians, trimmed means,
+                            MAD, and robust alternatives to SD.
+                            The later chapters require knowledge of hypothesis
+                            testing which we cover in the statistical inference
+                            part of the book.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Huber, P. J., &amp; Ronchetti, E. M. (2009). Robust Statistics (2nd ed.). Wiley.</em>
+                            More advanced, but the opening chapters give a
+                            rigorous yet readable account of why robustness
+                            matters.
+                            Useful for readers that want to go a deeper.
+                            Requires knowledge of topics we cover in the
+                            statistical inference and linear model parts of the
+                            book.
+                        </p>
+                    </li>
+                </ul>
+            </conclusion>
+        </part>
+        <!-- Part 2: Probability -->
+        <part xml:id="part-probability">
+            <title>Probability</title>
+
+            <introduction>
+                <p>
+                    The first part of the book focused on describing the data we
+                    have already collected.
+                    But in most data analysis projects, what we observe is only
+                    one possible outcome among many.
+                    If we were to collect the same data again through another
+                    survey or experiment, we would not obtain exactly the same
+                    results.
+                    This variation is not to be ignored, as it reflects the
+                    fundamental uncertainty that accompanies all real data.
+                </p>
+
+                <p>
+                    Probability is the mathematical language we use to describe
+                    that uncertainty.
+                    It provides the foundation for reasoning about variation,
+                    quantifying how likely different outcomes are, and
+                    ultimately, for drawing conclusions from data.
+                    Every inferential method we will learn, from confidence
+                    intervals to regression and machine learning, rests on these
+                    ideas.
+                </p>
+
+                <p>
+                    The study of probability began with
+                    <em>games of chance</em>, where uncertainty is both concrete
+                    and controlled: tossing coins, drawing cards, or betting on
+                    outcomes.
+                    Mathematicians such as Cardano, Fermat, and Pascal developed
+                    the first formal methods for computing odds in these
+                    settings, laying the groundwork for what would become modern
+                    probability theory.
+                </p>
+
+                <p>
+                    In this part of the book, we use these games of chance as a
+                    pedagogical tool.
+                    They provide clear, well-defined examples that make abstract
+                    ideas intuitive.
+                    By working with them, we can focus on the logic of
+                    probability without the complications of real-world data
+                    collection.
+                    In later parts of the book, we return to data analysis and
+                    show how these same principles apply to real-world
+                    uncertainty, polls, experiments, and prediction problems.
+                </p>
+
+                <p>
+                    We will introduce the essential concepts of probability
+                    through simple, concrete examples: defining events,
+                    computing probabilities, and describing random variables and
+                    their distributions.
+                    Our emphasis is on intuition and computation rather than
+                    mathematical derivation.
+                </p>
+
+                <p>
+                    Throughout this part of the book, we also connect
+                    probability theory to computer simulations.
+                    Using R code and Monte Carlo methods, we will learn how to
+                    estimate probabilities, explore random behavior, and develop
+                    intuition for uncertainty through simulation.
+                    This practical, code-based approach will prepare you to see
+                    how probability connects directly to real data in the
+                    chapters that follow.
+                </p>
+            </introduction>
+
+            <xi:include href="./prob/connecting-data-and-probability.ptx"/>
+            <xi:include href="./prob/discrete-probability.ptx"/>
+            <xi:include href="./prob/continuous-probability.ptx"/>
+            <xi:include href="./prob/random-variables.ptx"/>
+            <xi:include href="./prob/sampling-models-and-clt.ptx"/>
+            <conclusion>
+                <title>Recommended Reading</title>
+
+                <ul>
+                    <li>
+                        <p>
+                            <em>Fisher, R. A. (1935). The Design of Experiments. Edinburgh: Oliver &amp; Boyd.</em>
+                            A foundational text that introduced the principles
+                            of randomization and experimental control, forming
+                            the basis of modern statistical design.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Montgomery, D. C. (2017). Design and Analysis of Experiments (9th ed.). Wiley.</em>
+                            A comprehensive and accessible modern treatment of
+                            experimental design, emphasizing applications and
+                            interpretation.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>David Freedman, Robert Pisani &amp; Roger Purves, Statistics.</em>
+                            This book emphasizes clear reasoning, real examples,
+                            and conceptual insight rather than formula
+                            memorization.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>A First Course in Probability by Sheldon Ross</em>-
+                            a widely used undergraduate text that builds a solid
+                            foundation through clear explanations and a broad
+                            range of exercises.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Introduction to Probability by Joseph K. Blitzstein and Jessica Hwang</em>-
+                            an engaging, example-driven introduction that
+                            emphasizes problem solving and intuition.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>An Introduction to Probability Theory and Its Applications, Volume 1 by William Feller</em>-
+                            a rigorous classic that provides a deeper and more
+                            formal treatment of the subject.
+                        </p>
+                    </li>
+                </ul>
+            </conclusion>
+        </part>
+        <!-- Part 3: Statistical Inference -->
+        <part xml:id="part-statistical-inference">
+            <title>Statistical Inference</title>
+
+            <introduction>
+                <p>
+                    Statistical Inference is the branch of statistics dedicated
+                    to distinguishing patterns arising from signal versus those
+                    arising from chance.
+                    It is a broad topic and, in this section, we review the
+                    basics using polls as a motivating example.
+                    To illustrate the concepts, we supplement mathematical
+                    formulas with Monte Carlo simulations and R code.
+                    We demonstrate the practical value of these concepts by
+                    using election forecasting as a case study.
+                    Readers already familiar with statistical inference theory
+                    and interested in the case study you can focus on
+                    <xref ref="sec-election-forecasting">Hierarchical Models</xref>.
+                </p>
+
+                <p>
+                    The day before the 2008 presidential election, Nate Silver's
+                    FiveThirtyEight stated that “Barack Obama appears poised for
+                    a decisive electoral victory”.
+                    They went further and predicted that Obama would win the
+                    election with 349 electoral votes to 189, and the popular
+                    vote by a margin of 6.1%.
+                    FiveThirtyEight also attached a probabilistic statement to
+                    their prediction claiming that Obama had a 91% chance of
+                    winning the election.
+                    The predictions were quite accurate since, in the final
+                    results, Obama won the electoral college 365 to 173 and the
+                    popular vote by a 7.2% difference.
+                    Their performance in the 2008 election brought
+                    FiveThirtyEight to the attention of political pundits and TV
+                    personalities.
+                    Four years later, the week before the 2012 presidential
+                    election, FiveThirtyEight's Nate Silver was giving Obama a
+                    90% chance of winning despite many of the experts thinking
+                    the final results would be closer.
+                    Political commentator Joe Scarborough said during his show
+                    <fn><url href="https://www.youtube.com/watch?v=TbKkjm-gheY">https://www.youtube.com/watch?v=TbKkjm-gheY</url></fn>.
+                </p>
+
+                <p>
+                    "Anybody that thinks that this race is anything but a
+                    toss-up right now is such an ideologue ...
+                    they're jokes.".
+                </p>
+
+                <p>
+                    To which Nate Silver responded via Twitter:
+                </p>
+
+                <p>
+                    "If you think it's a toss-up, let's bet.
+                    If Obama wins, you donate $1,000 to the American Red Cross.
+                    If Romney wins, I do.
+                    Deal?"
+                </p>
+
+                <p>
+                    Obama won the election.
+                </p>
+
+                <p>
+                    In 2016, Silver was not as certain and gave Hillary Clinton
+                    only a 71% chance of winning.
+                    In contrast, many other forecasters were almost certain she
+                    would win.
+                    She lost.
+                    But 71% is still more than 50%, so was Mr.
+                    Silver wrong?
+                    And what does probability mean in this context anyway?
+                </p>
+
+                <p>
+                    In this part of the book, we show how the probability
+                    concepts from the previous part can be applied to develop
+                    statistical methods that make polls effective tools for
+                    understanding public opinion.
+                    Although in the United States the popular vote does not
+                    determine the presidential outcome, we use it as a simple
+                    and illustrative example to introduce the core ideas of
+                    statistical inference.
+                </p>
+
+                <p>
+                    We begin by learning how to define estimates and margins of
+                    error for the popular vote and how these lead naturally to
+                    confidence intervals.
+                    We then extend this framework by aggregating data from
+                    multiple pollsters to examine the limitations of traditional
+                    models and explore improvements.
+                    To interpret probabilistic statements about the likelihood
+                    of a candidate winning, we introduce Bayesian modeling, and
+                    finally, we combine these ideas through hierarchical models
+                    to build a simplified version of the FiveThirtyEight
+                    election model and apply it to the 2016 election.
+                </p>
+
+                <p>
+                    We conclude with two widely taught topics that, while not
+                    required for the case study, are central to statistical
+                    practice: statistical power and p-values.
+                    This part of the book ends with a brief introduction to the
+                    bootstrap, an inferential method we will revisit in the
+                    machine learning part.
+                </p>
+            </introduction>
+
+            <xi:include href="./inference/estimates-confidence-intervals.ptx"/>
+            <xi:include href="./inference/models.ptx"/>
+            <xi:include href="./inference/bayes.ptx"/>
+            <xi:include href="./inference/hierarchical-models.ptx"/>
+            <xi:include href="./inference/hypothesis-testing.ptx"/>
+            <xi:include href="./inference/bootstrap.ptx"/>
+            <conclusion>
+                <title>Recommended Reading</title>
+
+                <introduction>
+                    <p>
+                        The following books and resources provide additional
+                        depth on the topics covered in this part of the book.
+                    </p>
+                </introduction>
+
+                <ul>
+                    <li>
+                        <p>
+                            <em>Freedman, D., Pisani, R., &amp; Purves, R. (2007). Statistics (4th ed.).</em>
+                            Emphasizes conceptual understanding of estimation
+                            and uncertainty.
+                            Especially strong on interpreting standard errors
+                            and margins of error.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Moore, D. S., McCabe, G. P., &amp; Craig, B. A. (2017). Introduction to the Practice of Statistics (9th ed.).</em>
+                            A classic intro text that develops inference from
+                            sampling distributions through confidence intervals
+                            and practical interpretation.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Berger, J. O. (1985). Statistical Decision Theory and Bayesian Analysis (2nd ed.). Springer-Verlag.</em>
+                            A classic and comprehensive reference that develops
+                            Bayesian methods from first principles of decision
+                            theory.
+                            Recommended for readers who wish to explore the
+                            mathematical foundations in more depth.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Nate Silver (2016). How FiveThirtyEight's Election Forecast Works.</em>
+                            FiveThirtyEight's official explanation of the 2016
+                            model, including poll weighting, correlated errors,
+                            and simulation methodology.
+                            <url href="https://fivethirtyeight.com/features/how-fivethirtyeights-election-forecast-works/">https://fivethirtyeight.com/features/how-fivethirtyeights-election-forecast-works/</url>
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>FiveThirtyEight (2020). How Our Presidential Forecast Works (2020 Edition).</em>
+                            Details updates to the 2020 model, including
+                            adjustments for state and national polling
+                            correlation, house effects, and uncertainty in
+                            turnout and the Electoral College.
+                            <url href="https://fivethirtyeight.com/features/how-our-presidential-forecast-works/">https://fivethirtyeight.com/features/how-our-presidential-forecast-works/</url>
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Andrew Gelman (2020). Election Forecasting: Why We're Not as Sure as We Think.</em>
+                            A statistical perspective on model uncertainty,
+                            correlated polling errors, and the interpretation of
+                            forecast probabilities.
+                            <url href="https://statmodeling.stat.columbia.edu/2020/11/02/election-forecasting-why-were-not-as-sure-as-we-think/">https://statmodeling.stat.columbia.edu/2020/11/02/election-forecasting-why-were-not-as-sure-as-we-think/</url>
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>James, G., Witten, D., Hastie, T., &amp; Tibshirani, R. (2021). An Introduction to Statistical Learning (2nd ed.). Springer.</em>
+                            See the chapter on resampling methods for a clear,
+                            concise introduction to the bootstrap with intuitive
+                            examples and code.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Efron, B., &amp; Tibshirani, R. J. (1993). An Introduction to the Bootstrap. Chapman &amp; Hall/CRC.</em>
+                            The classic, authoritative treatment.
+                            Develops the bootstrap from first principles, with
+                            theory, practical guidance, and many examples.
+                        </p>
+                    </li>
+                </ul>
+            </conclusion>
+        </part>
+        <!-- Part 4: Linear Models -->
+        <part xml:id="part-linear-models">
+            <title>Linear Models</title>
+
+            <introduction>
+                <p>
+                    Up to this point, this book has focused mainly on datasets
+                    with a single variable.
+                    In real data analysis, however, we are often interested in
+                    the relationship between two or more variables.
+                    In this part of the book, we introduce linear models, a
+                    general framework that unifies methods for studying
+                    associations among variables, including simple and
+                    multivariable regression, treatment effect models,
+                    association tests, and generalized linear models.
+                    We will use several case studies to illustrate these ideas.
+                    We will examine whether height is hereditary (
+                    <xref ref="sec-regression">Introduction to Regression</xref>
+                    ), whether a high-fat diet makes mice heavier (
+                    <xref ref="sec-treatment-effect-models">Treatment Effect
+                    Models</xref>
+                    ), whether there is gender bias in research funding in the
+                    Netherlands (
+                    <xref ref="sec-association-tests">Association Tests</xref>
+                    ), and how to build a baseball team on a budget (
+                    <xref ref="sec-multivariable-regression">Multivariable Regression</xref>
+                    ).
+                    We also include a chapter on the important concept that
+                    association is not causation (
+                    <xref ref="sec-association-not-causation">Association Is Not Causation</xref>
+                    ), with a detailed discussion and examples of the challenges
+                    that arise when interpreting relationships between
+                    variables.
+                </p>
+            </introduction>
+
+            <xi:include href="./linear-models/regression.ptx"/>
+            <xi:include href="./linear-models/linear-model-framework.ptx"/>
+            <xi:include href="./linear-models/treatment-effect-models.ptx"/>
+            <xi:include href="./linear-models/glm.ptx"/>
+            <xi:include href="./linear-models/association-not-causation.ptx"/>
+            <xi:include href="./linear-models/multivariable-regression.ptx"/>
+            <conclusion>
+                <title>Recommended Reading</title>
+
+                <introduction>
+                    <p>
+                        The following books and resources provide additional
+                        depth on the topics covered in this part of the book.
+                    </p>
+                </introduction>
+
+                <ul>
+                    <li>
+                        <p>
+                            <em>Montgomery, D. C. (2017). Design and Analysis of Experiments (9th ed.). Wiley.</em>
+                            The standard reference for experimental design,
+                            randomization, and treatment effect estimation ,from
+                            randomized blocks to factorial designs.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Freedman, D. A. (2009). Statistical Models: Theory and Practice. Cambridge University Press.</em>
+                            Conceptually sharp and rigorous introduction to what
+                            regression models mean and how assumptions affect
+                            inference.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Kutner, M. H., Nachtsheim, C. J., &amp; Neter, J. (2004). Applied Linear Regression Models (4th ed.). McGraw-Hill.</em>
+                            A widely used undergraduate/graduate text
+                            emphasizing linear model formulation, assumptions,
+                            and practical applications.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>James, G., Witten, D., Hastie, T., &amp; Tibshirani, R. (2021). An Introduction to Statistical Learning with Applications in R (2nd ed.). Springer.</em>
+                            Chapters 3-4 provide a gentle, modern introduction
+                            to simple and multiple regression with R code
+                            examples.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Agresti, A. (2013). Categorical Data Analysis (3rd ed.).</em>
+                            Authoritative resource on association tests and
+                            categorical data.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Dobson, A. J., &amp; Barnett, A. G. (2018). An Introduction to Generalized Linear Models (4th ed.).</em>
+                            A clear, accessible introduction to GLMs.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>McCullagh, P., &amp; Nelder, J. A. (1989). Generalized Linear Models (2nd ed.).</em>
+                            The classic and definitive text on GLMs; more
+                            theoretical but essential for deep understanding.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Tyler Vigen. Spurious Correlations.</em> A
+                            lighthearted but instructive look at how unrelated
+                            variables can appear strongly correlated.
+                            Helps develop critical thinking about association
+                            versus causation.
+                            <url href="https://www.tylervigen.com/spurious-correlations">Website</url>
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Rothman, K. J., Greenland, S., &amp; Lash, T. L. (2021). Modern Epidemiology (4th ed.).</em>
+                            A thorough reference on confounding, bias, and study
+                            design, often used in epidemiology and public
+                            health.
+                        </p>
+                    </li>
+                </ul>
+            </conclusion>
+        </part>
+        <!-- Part 5: High Dimensional Data -->
+        <part xml:id="part-high-dimensional-data">
+            <title>High Dimensional Data</title>
+
+            <introduction>
+                <p>
+                    High-dimensional datasets are increasingly common in modern
+                    data analysis, especially in fields like genomics, image
+                    processing, natural language processing, and recommender
+                    systems.
+                    There is a variety of computational techniques and
+                    statistical concepts that are useful for analyzing datasets
+                    in which each observation is associated with a large number
+                    of numerical variables.
+                    In this part of the book, we introduce ideas that are useful
+                    in the analysis of these high-dimensional datasets.
+                    Specifically, we provide brief introductions to
+                    <xref ref="linear-algebra">linear algebra</xref>,
+                    <xref ref="dimension-reduction">dimension reduction</xref>,
+                    <xref ref="matrices-in-R">matrix factorization</xref>, and
+                    <xref ref="sec-regularization">regularization</xref>.
+                    As motivating examples, we use handwritten digit recognition
+                    and movie recommendation systems, both of which involve
+                    high-dimensional datasets with hundreds or thousands of
+                    variables per observation.
+                    We start this part of the book by demonstrating how to work
+                    with matrices in R.
+                </p>
+
+                <p>
+                    One specific task we use to motivate linear algebra is
+                    measuring the similarity between two handwritten digits.
+                    Because each digit is represented by 28x28=784 pixel values,
+                    we cannot simply subtract two vectors as we would in a
+                    one-dimensional setting.
+                    Instead, we treat each observation as a point in a
+                    high-dimensional space and use a mathematical definition of
+                    distance to quantify similarity.
+                    Many machine learning techniques introduced later in the
+                    book rely on this geometric interpretation.
+                </p>
+
+                <p>
+                    We also use this high-dimensional concept of distance to
+                    motivate dimension reduction, a set of techniques that
+                    summarize high-dimensional data in lower-dimensional
+                    representations that are easier to visualize and analyze,
+                    while preserving the essential information.
+                    Distance between observations provides a concrete example:
+                    we aim to reduce the number of variables while preserving
+                    the pairwise distances between observations as much as
+                    possible.
+                    This leads naturally to matrix factorization methods, which
+                    arise from the mathematical structure underlying these
+                    techniques.
+                </p>
+
+                <p>
+                    Finally, we introduce the concept of regularization, which
+                    is useful when analyzing high-dimensional data.
+                    In many applications, the large number of variables
+                    increases the risk of overfitting or cherry-picking results
+                    that appear significant by chance.
+                    Regularization provides a mathematically principled way to
+                    constrain models, improve generalization, and avoid
+                    misleading conclusions.
+                </p>
+
+                <p>
+                    Together, these topics lay the groundwork for understanding
+                    and implementing many of the machine learning techniques we
+                    cover in the next part of the book.
+                </p>
+            </introduction>
+
+            <xi:include href="./highdim/matrices-in-R.ptx"/>
+            <xi:include href="./highdim/linear-algebra.ptx"/>
+            <xi:include href="./highdim/dimension-reduction.ptx"/>
+            <xi:include href="./highdim/regularization.ptx"/>
+            <xi:include href="./highdim/latent-factor-models.ptx"/>
+            <conclusion>
+                <title>Recommended Reading</title>
+
+                <introduction>
+                    <p>
+                        The following books and resources provide additional
+                        depth on the topics covered in this part of the book.
+                    </p>
+                </introduction>
+
+                <ul>
+                    <li>
+                        <p>
+                            <em>Hefferon, J. (2017). Linear Algebra.</em> A free
+                            and accessible open-source textbook designed for
+                            beginners, with clear explanations, worked examples,
+                            and plenty of exercises.
+                            Ideal for self-learners or students seeking to build
+                            both intuition and practical skills.
+                            <url href="http://joshua.smcvt.edu/linearalgebra/">Available online</url>
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Strang, G. (2019). Linear Algebra and Learning from Data.</em>
+                            Focuses on the role of linear algebra in modern
+                            machine learning and data science.
+                            A practical companion to statistical and algorithmic
+                            methods.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Seber, G. A. F. (2003). Linear Regression Analysis (2nd ed.).</em>
+                            A concise and mathematically rigorous exploration of
+                            regression, grounded in matrix algebra.
+                            Offers expanded coverage of diagnostics, model
+                            fitting, selection, and prediction.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>James, G., Witten, D., Hastie, T., &amp; Tibshirani, R. (2021). An Introduction to Statistical Learning (2nd ed.).</em>
+                            A highly accessible introduction to statistical
+                            learning, including clear explanations and examples
+                            of regularization techniques such as ridge
+                            regression and the lasso.
+                            Available
+                            <url href="https://www.statlearning.com/">online for free</url>.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Hastie, T., Tibshirani, R., &amp; Friedman, J. (2009). The Elements of Statistical Learning: Data Mining, Inference, and Prediction (2nd ed.).</em>
+                            The authoritative reference on regularization and
+                            other machine learning techniques.
+                            More theoretical and in-depth, suited for readers
+                            looking for a deeper mathematical understanding.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Koren, Y., Bell, R., &amp; Volinsky, C. (2009). The BellKor Solution to the Netflix Prize.</em>
+                            A technical yet accessible explanation of the
+                            ensemble of models that won the Netflix Prize,
+                            detailing matrix factorization, neighborhood models,
+                            and hybrid ensemble techniques.
+                            <url href="https://www.netflixprize.com/assets/GrandPrize2009_BPC_BellKor.pdf">Available online</url>
+                        </p>
+                    </li>
+                </ul>
+            </conclusion>
+        </part>
+        <!-- Part 6: Machine Learning -->
+        <part xml:id="part-machine-learning">
+            <title>Machine Learning</title>
+
+            <introduction>
+                <p>
+                    Machine learning has achieved remarkable successes in a
+                    variety of applications.
+                    These range from the postal service's use of machine
+                    learning for reading handwritten zip codes to the
+                    development of voice recognition systems like Apple's Siri.
+                    Other significant advances include spam and malware
+                    detection, housing price prediction algorithms, the ongoing
+                    development of autonomous vehicles, and more recently, the
+                    emergence of generative systems such as large language
+                    models that can produce text, images, and other complex
+                    outputs.
+                </p>
+
+                <p>
+                    In this part of the book, we introduce the concepts, ideas,
+                    and methodologies of machine learning.
+                    We also demonstrate their practical application using the
+                    example of recognizing handwritten digits, a classic problem
+                    that exemplifies the power and utility of machine learning
+                    techniques.
+                </p>
+
+                <p>
+                    One important note: this part of the book focuses on methods
+                    rooted in statistical thinking, emphasizing how models learn
+                    from data through the lens of probability.
+                    While modern machine learning includes deep learning and
+                    generative models (such as large language models), these
+                    topics are beyond our scope.
+                    Instead, we focus on the statistical principles underlying
+                    supervised and unsupervised learning.
+                    These foundations are essential for understanding and
+                    effectively applying a wide range of machine learning
+                    methods.
+                </p>
+            </introduction>
+
+            <xi:include href="./ml/notation-and-terminology.ptx"/>
+            <xi:include href="./ml/evaluation-metrics.ptx"/>
+            <xi:include href="./ml/conditionals-and-smoothing.ptx"/>
+            <xi:include href="./ml/resampling-methods.ptx"/>
+            <xi:include href="./ml/algorithms.ptx"/>
+            <xi:include href="./ml/ml-in-practice.ptx"/>
+            <xi:include href="./ml/clustering.ptx"/>
+            <conclusion>
+                <title>Recommended Reading</title>
+
+                <introduction>
+                    <p>
+                        The following books and resources provide additional
+                        depth on the topics covered in this part of the book.
+                    </p>
+                </introduction>
+
+                <ul>
+                    <li>
+                        <p>
+                            <em>Hastie, T., Tibshirani, R., &amp; Friedman, J. (2009). The Elements of Statistical Learning: Data Mining, Inference, and Prediction (2nd ed.). Springer.</em>
+                            A foundational text covering the theory and
+                            mathematics behind modern machine learning methods,
+                            including regression, classification, and ensemble
+                            techniques.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>James, G., Witten, D., Hastie, T., &amp; Tibshirani, R. (2023). An Introduction to Statistical Learning with Applications in R (3rd ed.). Springer.</em>
+                            A more accessible companion to
+                            <em>The Elements of Statistical Learning</em>,
+                            focused on practical implementation in R with
+                            extensive code examples.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Bishop, C. M. (2006). Pattern Recognition and Machine Learning. Springer.</em>
+                            A comprehensive reference for probabilistic and
+                            Bayesian approaches to machine learning, suitable
+                            for readers seeking a deeper mathematical
+                            understanding.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Ripley, B. D. (1996). Pattern Recognition and Neural Networks. Cambridge University Press.</em>
+                            A classic text that bridges traditional statistical
+                            modeling with early neural network methods,
+                            emphasizing connections between machine learning and
+                            statistics.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Wood, S. N. (2017). Generalized Additive Models: An Introduction with R (2nd ed.). CRC Press.</em>
+                            The definitive reference for understanding and
+                            applying GAMs using the <c>mgcv</c> package.
+                            Wood introduces spline-based smoothing,
+                            penalization, model selection, and diagnostics with
+                            clear R examples.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Wand, M. P. &amp; Jones, M. C. (1995). Kernel Smoothing. Chapman &amp; Hall/CRC.</em>
+                            A classic text offering a rigorous treatment of
+                            kernel smoothing methods, bandwidth selection, and
+                            bias-variance trade-offs, suitable for readers
+                            seeking a mathematical foundation.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Simonoff, J. S. (1996). Smoothing Methods in Statistics. Springer.</em>
+                            A comprehensive overview of smoothing techniques
+                            across regression, density estimation, and
+                            nonparametric modeling, with intuitive explanations
+                            and numerous examples.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Kaufman, L. &amp; Rousseeuw, P. J. (2005). Finding Groups in Data: An Introduction to Cluster Analysis. Wiley.</em>
+                            A foundational text on clustering, introducing key
+                            methods such as partitioning, hierarchical
+                            clustering, and density-based approaches, with
+                            practical insights and examples.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Maechler, M., Rousseeuw, P., Struyf, A., Hubert, M., &amp; Hornik, K. (2025). cluster: Cluster Analysis Basics and Extensions. R package version 2.1.8.</em>
+                            The main R package for clustering, providing
+                            implementations of many of the methods described in
+                            Kaufman &amp; Rousseeuw (2005), along with practical
+                            extensions and tools for applied work.
+                            Available at:
+                            <url href="https://cran.r-project.org/package=cluster">https://cran.r-project.org/package=cluster</url>
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            <em>Kuhn, M. &amp; Johnson, K. (2013). Applied Predictive Modeling. Springer.</em>
+                            A practical guide to building, tuning, and
+                            evaluating predictive models in R, with extensive
+                            coverage of the <c>caret</c> package.
+                        </p>
+                    </li>
+                </ul>
+            </conclusion>
+        </part>
+        <!-- Back Matter -->
+    </book>
 </pretext>
