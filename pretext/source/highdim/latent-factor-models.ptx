@@ -141,7 +141,7 @@ dim(y)
             </program><pre>
 [1] 120   6
             </pre>
-        </console>
+        
 
         <p>
             If we examine the correlation between movies based on user ratings,
@@ -161,7 +161,7 @@ Scent of a Woman        -0.527      -0.450     -0.888            1.000          
 You've Got Mail         -0.734      -0.649     -0.487            0.451           1.000                0.756
 Sleepless in Seattle    -0.721      -0.739     -0.505            0.475           0.756                1.000
             </pre>
-        </console>
+        
 
         <p>
             It appears that ratings are positively correlated within genres, for
@@ -288,7 +288,7 @@ Scent of a Woman         0.557       0.594     -0.671            1.000          
 You've Got Mail         -0.280      -0.186      0.619           -0.641           1.000                0.353
 Sleepless in Seattle    -0.198      -0.364      0.650           -0.656           0.353                1.000
             </pre>
-        </console>
+        
 
         <p>
             Looking more closely, this structure appears to come from whether or
@@ -379,7 +379,7 @@ Scent of a Woman       0.00716     -0.0443    1.00000          1.00000         -
 You've Got Mail        0.24118      0.4955   -0.03395         -0.03395          1.0000             -0.27145
 Sleepless in Seattle   0.41857      0.2074   -0.00554         -0.00554         -0.2714              1.00000
             </pre>
-        </console>
+        
 
         <p>
             there is no clear pattern left.
@@ -532,7 +532,7 @@ pca$sdev^2/sum(pca$sdev^2)
             </program><pre>
 [1] 0.6939 0.1790 0.0402 0.0313 0.0303 0.0253
             </pre>
-        </console>
+        
 
         <p>
             Next, notice that the first column of <m>\mathbf{V}</m>:
@@ -548,7 +548,7 @@ pca$rotation[,1]
     Scent of a Woman      You've Got Mail Sleepless in Seattle
               -0.570               -0.294               -0.300
             </pre>
-        </console>
+        
 
         <p>
             is assigning positive values to the mob movies and negative values
@@ -569,7 +569,7 @@ pca$rotation[,2]
     Scent of a Woman      You've Got Mail Sleepless in Seattle
                0.437               -0.448               -0.442
             </pre>
-        </console>
+        
 
         <p>
             is coding for Al Pacino movies.
@@ -709,7 +709,7 @@ Scent of a Woman          0.46         0.21       0.04             1.00         
 You've Got Mail          -0.36        -0.25      -0.27            -0.37            1.00                 0.43
 Sleepless in Seattle     -0.42        -0.43      -0.45            -0.50            0.43                 1.00
             </pre>
-        </console>
+        
 
         <p>
             As in the simulated example, we see clear correlation patterns.
@@ -894,7 +894,7 @@ rmse(resid)
                 </program><pre>
 [1] 0.859
                 </pre>
-            </console>
+            
 
             <p>
                 This improves accuracy beyond the regularized user + movie
@@ -991,7 +991,7 @@ names(sort(factors[,1], decreasing = TRUE)[1:5])
 [4] "Taxi Driver"
 [5] "Silence of the Lambs, The"
                 </pre>
-            </console>
+            
 
             <p>
                 from Hollywood blockbusters
@@ -1008,7 +1008,7 @@ names(sort(factors[,1])[1:5])
 [4] "Star Wars: Episode I - The Phantom Menace"
 [5] "Mission: Impossible II"
                 </pre>
-            </console>
+            
 
             <p>
                 The second factor separates weird cult movies
@@ -1022,7 +1022,7 @@ names(sort(factors[,2], decreasing = TRUE)[1:5])
 [1] "Showgirls"         "Scary Movie"       "Leaving Las Vegas"
 [4] "Dogma"             "Rosemary's Baby"
                 </pre>
-            </console>
+            
 
             <p>
                 from big-budget epic historical and fantasy sagas
@@ -1039,7 +1039,7 @@ names(sort(factors[,2])[1:5])
 [4] "Dances with Wolves"
 [5] "Matrix, The"
                 </pre>
-            </console>
+            
 
             <p>
                 These results demonstrate that the latent factors capture
@@ -1163,7 +1163,7 @@ all.equal(pca$x, s$u %*% diag(s$d), check.attributes = FALSE)
 [1] TRUE
 [1] TRUE
             </pre>
-        </console>
+        
 
         <p>
             As an optimization, note that <c>s$u %*% diag(s$d)</c> can be
