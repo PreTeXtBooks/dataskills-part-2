@@ -72,7 +72,10 @@ x &lt;- rbind(mvrnorm(n/2, c(69, 69), s),
             there are two groups of twins, the adults (upper right points) and
             the children (lower left points):
         </p>
-        <!-- Figure distance-illustration will be inserted here in final version -->
+        <figure xml:id="fig-distance-illustration-1">
+            <image source="images/distance-illustration-1.png" width="80%">
+            </image>
+        </figure>
         <p>
             Our features are <m>n</m> two-dimensional points represneting the
             two heights.
@@ -123,23 +126,6 @@ c(d[1, 2], d[2, 51])
             This distance is based on two dimensions, and we need a distance
             approximation based on just one.
         </p>
-        <!-- HTML comment section converted to XML comment -->
-        <!--
-    Let's start with the naive approach of simply removing one of the two dimensions. Let's compare the actual distances to the distances computed with just the first dimension:
-    
-    z <- x[,1]
-    
-    To make the distances comparable, we divide the sum of squares by the number of dimensions being added. So for the two dimensional case, we have:
-    
-    sqrt( (1/2) * sum_{j=1}^2 (x_{1j}-x_{2j})^2 )
-    
-    To make the distances comparable, we divide the two-dimensional distances by sqrt(2):
-    
-    plot(dist(x) / sqrt(2), dist(z))
-    abline(0, 1, col = "red")
-    
-    This one number summary does ok at preserving distances, but, can we pick a one-dimensional summary that improves the approximation?
-    -->
         <p>
             If we look back at the height scatterplot above and imagine drawing
             a line between any pair of points, the length of that line
@@ -197,11 +183,15 @@ c(d[1, 2], d[2, 51])
             z_1 = r \cos(\phi+ \theta), \,\,
       z_2 = r \sin(\phi + \theta)
         </me>
-        <!-- Figure rotation-diagram will be inserted here in final version -->
+
         <p>
             We can use trigonometric identities to rewrite <m>(z_1, z_2)</m> as
             follows:
         </p>
+        <figure xml:id="fig-rotation-diagram-1">
+            <image source="images/rotation-diagram-1.png" width="80%">
+            </image>
+        </figure>
         <md>
             <mrow>z_1 = r \cos(\phi + \theta) \amp= r \cos \phi \cos\theta -  r \sin\phi \sin\theta =  x_1 \cos(\theta) -  x_2 \sin(\theta)</mrow>
             <mrow>z_2 = r \sin(\phi + \theta) \amp=  r \cos\phi \sin\theta + r \sin\phi \cos\theta =  x_1 \sin(\theta) + x_2 \cos(\theta)</mrow>
@@ -216,7 +206,10 @@ c(d[1, 2], d[2, 51])
             Here is what the twin standardized heights look like after rotating
             each point by <m>-45</m> degrees:
         </p>
-        <!-- Figure before-after-rotation will be inserted here in final version -->
+        <figure xml:id="fig-before-after-rotation-1">
+            <image source="images/before-after-rotation-1.png" width="80%">
+            </image>
+        </figure>
         <p>
             Note that while the variabilities of <m>x_1</m> and <m>x_2</m> are
             similar, the variability of <m>z_1</m> is much larger than the
@@ -627,7 +620,7 @@ plot(angles, variance_explained, type = "l")
                 Variance explained by the first rotated dimension across angles
             </caption>
 
-            <image source="images/dimension-reduction-max-rotation.png" width="50%">
+            <image source="images/dimension-reduction-max-rotation.png" width="80%">
                 <description>
                     A line plot showing how the proportion of variance explained
                     by the first rotated dimension changes as the rotation angle
@@ -668,7 +661,10 @@ z &lt;- x %*% V
             The following further illustrates how different rotations affect the
             variability explained by the dimensions of the rotated data:.
         </p>
-        <!-- Animation code and static figure pca-demo omitted - would be included in final version -->
+        <figure xml:id="fig-pca">
+            <image source="images/pca.gif" width="80%">
+            </image>
+        </figure>
         <p>
             The first dimension of <c>z</c> is referred to as the
             <em>first principal component (PC)</em>.
@@ -676,7 +672,10 @@ z &lt;- x %*% V
             distance between rows in <c>x</c> can be very well approximated by
             the distance calculated with just <c>z[,1]</c>.
         </p>
-        <!-- Figure distance-approx-2 will be inserted here in final version -->
+        <figure xml:id="fig-distance-approx-2-1">
+            <image source="images/distance-approx-2-1.png" width="80%">
+            </image>
+        </figure>
         <p>
             We also notice that the two groups, adults and children, can be
             clearly observed with the one-number summary, better than with
@@ -713,7 +712,10 @@ hist(z[,1], breaks = seq(-4,4,0.5))
             In the plot below, red represents high values and blue represents
             negative values:
         </p>
-        <!-- Figure illustrate-pca-twin-heights will be inserted here in final version -->
+        <figure xml:id="fig-illustrate-pca-twin-heights-1">
+            <image source="images/illustrate-pca-twin-heights-1.png" width="80%">
+            </image>
+        </figure>
         <p>
             This idea extends naturally to more than two dimensions.
             As in the two-dimensional case, we begin by finding a
@@ -950,7 +952,7 @@ image(as.matrix(d), col = rev(RColorBrewer::brewer.pal(9, "RdBu")))
 
             <figure xml:id="fig-iris-distances">
                 <caption>Pairwise distances among iris observations</caption>
-                <image source="images/dimension-reduction-iris-distances.png" width="50%">
+                <image source="images/dimension-reduction-iris-distances.png" width="80%">
                     <description>
                         A heatmap of the pairwise distance matrix for the iris
                         measurements.
@@ -1082,7 +1084,9 @@ data.frame(pca$x[,1:2], Species = iris$Species) |&gt;
             <p>
                 Looking more closely at the resulting PCs and rotations:
             </p>
-            <!-- Figure illustrate-pca-twin-heights-iris will be inserted here in final version -->
+            <figure xml:id="fig-illustrate-pca-twin-heights-iris-1">
+                <image source="images/illustrate-pca-twin-heights-iris-1.png" width="80%"></image>
+            </figure>
             <p>
                 we learn that the first PC is obtained by taking a weighted
                 average of sepal length, petal length, and petal width (red in
@@ -1156,13 +1160,17 @@ plot(pca$sdev^2/sum(pca$sdev^2), xlab = "PC", ylab = "Variance explained")
                 see information about the labels.
                 Here is a random sample of 500 digits:
             </p>
-            <!-- Figure mnist-pca-1-2-scatter will be inserted here in final version -->
+            <figure xml:id="fig-mnist-pca-1-2-scatter-1">
+                <image source="images/mnist-pca-1-2-scatter-1.png" width="80%"></image>
+            </figure>
             <p>
                 We can also <em>see</em> the rotation values on the 28
                 <m>\times</m> 28 grid to get an idea of how pixels are being
                 weighted in the transformations that result in the PCs:
             </p>
-            <!-- Figure mnist-pca-1-4 will be inserted here in final version -->
+            <figure xml:id="fig-mnist-pca-1-4-1">
+                <image source="images/mnist-pca-1-4-1.png" width="80%"></image>
+            </figure>
             <p>
                 We can clearly see that the first PC appears to be separating
                 the 1s (red) from the 0s (blue).
@@ -1173,20 +1181,22 @@ plot(pca$sdev^2/sum(pca$sdev^2), xlab = "PC", ylab = "Variance explained")
                 For example, we see that the second PC separates 7s, 9s, and 4s
                 from the rest:
             </p>
-            <!-- Figure digit-pc-boxplot will be inserted here in final version -->
+            <figure xml:id="fig-digit-pc-boxplot-1">
+                <image source="images/digit-pc-boxplot-1.png" width="80%"></image>
+            </figure>
             <p>
                 We can also confirm that the lower variance PCs appear related
                 to unimportant variability in the last few PCs, mainly smudges
                 in the corners:
             </p>
-            <!-- Figure mnist-pca-last will be inserted here in final version -->
-        </subsection>
+            <figure xml:id="fig-mnist-pca-last-1">
+                <image source="images/mnist-pca-last-1.png" width="80%"></image>
+            </figure>
+       </subsection>
     </section>
 
-    <section xml:id="exercises-dimension-reduction">
+    <exercises xml:id="exercises-dimension-reduction">
         <title>Exercises</title>
-
-        <exercises>
             <exercise>
                 <statement>
                     <p>
@@ -1260,5 +1270,4 @@ dim(tissue_gene_expression$x)
                 </statement>
             </exercise>
         </exercises>
-    </section>
 </chapter>
