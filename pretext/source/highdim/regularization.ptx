@@ -106,13 +106,13 @@
                 <c>dslabs</c> package:
             </p>
 
-            <console>
-                <input>
+            <program language = "r">
+                <code>
 library(data.table)
 library(dslabs)
 movielens |&gt; tibble:::tibble() |&gt; head(5)
-                </input>
-                <output>
+                </code>
+                </program><pre>
 # A tibble: 5 × 7
   movieId title                              year genres userId rating timestamp
     &lt;int&gt; &lt;chr&gt;                             &lt;int&gt; &lt;fct&gt;   &lt;int&gt;  &lt;dbl&gt;     &lt;int&gt;
@@ -121,8 +121,8 @@ movielens |&gt; tibble:::tibble() |&gt; head(5)
 3    1061 Sleepers                           1996 Thriller    1    3      1.26e9
 4    1129 Escape from New York               1981 Action      1    2      1.26e9
 5    1172 Cinema Paradiso (Nuovo cinema Pa…  1989 Drama       1    4      1.26e9
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 Each row represents a rating given by one user to one movie.
@@ -135,9 +135,9 @@ movielens |&gt; tibble:::tibble() |&gt; head(5)
             </p>
 
             <program language="r">
-                <input>
+                <code>
 dt &lt;- as.data.table(movielens)
-                </input>
+                </code>
             </program>
 
             <p>
@@ -145,22 +145,21 @@ dt &lt;- as.data.table(movielens)
                 how many unique movies were rated:
             </p>
 
-            <console>
-                <input>
+            <program language = "r">
+                <code>
 dt[, .(n_users = uniqueN(userId), n_movies = uniqueN(movieId))]
-                </input>
-                <output>
+                </code>
+                </program><pre>
    n_users n_movies
 1:     671     9066
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 If we multiply those two numbers, we get a figure exceeding 5
                 million, yet our dataset contains only about 100,000 rows.
                 This tells us that not every user rated every movie.
-                In fact, the median number of movies rated per user is
-                relatively small.
+                In fact, the median number of movies rated per user is 71.
                 We can think of the data as a very large matrix, with users as
                 rows and movies as columns, filled with many missing entries.
                 The goal of a movie recommendation system is to accurately
@@ -241,9 +240,9 @@ dt[, .(n_users = uniqueN(userId), n_movies = uniqueN(movieId))]
             </p>
 
             <program language="r">
-                <input>
+                <code>
 dt &lt;- as.data.table(movielens)[, if (.N &gt;= 100) .SD, by = userId]
-                </input>
+                </code>
             </program>
 
             <p>
@@ -255,10 +254,10 @@ dt &lt;- as.data.table(movielens)[, if (.N &gt;= 100) .SD, by = userId]
             </p>
 
             <program language="r">
-                <input>
+                <code>
 dt[, `:=`(userId = as.character(userId), movieId = as.character(movieId))]
 dt &lt;- dt[, c("userId", "movieId", "title", "rating")]
-                </input>
+                </code>
             </program>
 
             <note>
@@ -302,12 +301,12 @@ dt &lt;- dt[, c("userId", "movieId", "title", "rating")]
             </p>
 
             <program language="r">
-                <input>
+                <code>
 set.seed(2006)
 indexes &lt;- split(1:nrow(dt), dt$userId)
 test_ind &lt;- sapply(indexes, function(i) sample(i, ceiling(length(i) * 0.2)))
 test_ind &lt;- sort(unlist(test_ind))
-                </input>
+                </code>
             </program>
 
             <p>
@@ -315,10 +314,10 @@ test_ind &lt;- sort(unlist(test_ind))
             </p>
 
             <program language="r">
-                <input>
+                <code>
 test_set  &lt;- dt[test_ind,]
 train_set &lt;- dt[-test_ind,]
-                </input>
+                </code>
             </program>
 
             <p>
@@ -328,9 +327,9 @@ train_set &lt;- dt[-test_ind,]
             </p>
 
             <program language="r">
-                <input>
+                <code>
 test_set &lt;- test_set[movieId %in% train_set$movieId]
-                </input>
+                </code>
             </program>
 
             <p>
@@ -405,9 +404,9 @@ test_set &lt;- test_set[movieId %in% train_set$movieId]
             </p>
 
             <program language="r">
-                <input>
+                <code>
 rmse &lt;- function(r) sqrt(mean(r^2))
-                </input>
+                </code>
             </program>
 
             <note>
@@ -452,9 +451,9 @@ rmse &lt;- function(r) sqrt(mean(r^2))
             </p>
 
             <program language="r">
-                <input>
+                <code>
 mu &lt;- mean(train_set$rating)
-                </input>
+                </code>
             </program>
 
             <p>
@@ -462,14 +461,14 @@ mu &lt;- mean(train_set$rating)
                 value, the resulting RMSE is:
             </p>
 
-            <console>
-                <input>
+            <program language = "r">
+                <code>
 rmse(test_set$rating - mu)
-                </input>
-                <output>
+                </code>
+                </program><pre>
 [1] 1.039564
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 Mathematically, this choice is optimal for this model.
@@ -477,14 +476,14 @@ rmse(test_set$rating - mu)
                 For example:
             </p>
 
-            <console>
-                <input>
+            <program language = "r">
+                <code>
 rmse(test_set$rating - 3)
-                </input>
-                <output>
+                </code>
+                </program><pre>
 [1] 1.170255
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 This simple approach provides a useful baseline.
@@ -551,9 +550,9 @@ rmse(test_set$rating - 3)
             </p>
 
             <program language="r">
-                <input>
+                <code>
 fit &lt;- lm(rating ~ userId, data = train_set)
-                </input>
+                </code>
             </program>
 
             <p>
@@ -561,14 +560,14 @@ fit &lt;- lm(rating ~ userId, data = train_set)
                 is:
             </p>
 
-            <console>
-                <input>
+            <program language = "r">
+                <code>
 uniqueN(train_set$userId)
-                </input>
-                <output>
+                </code>
+                </program><pre>
 [1] 263
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 We therefore need hundreds of dummy variables, which makes
@@ -583,10 +582,10 @@ uniqueN(train_set$userId)
             </p>
 
             <program language="r">
-                <input>
+                <code>
 mu &lt;- mean(train_set$rating)
 user_avgs &lt;- train_set[, .(avg = mean(rating - mu)), by = userId]
-                </input>
+                </code>
             </program>
 
             <p>
@@ -595,9 +594,9 @@ user_avgs &lt;- train_set[, .(avg = mean(rating - mu)), by = userId]
             </p>
 
             <program language="r">
-                <input>
+                <code>
 a &lt;- setNames(user_avgs$avg, user_avgs$userId)
-                </input>
+                </code>
             </program>
 
             <p>
@@ -624,9 +623,9 @@ a &lt;- setNames(user_avgs$avg, user_avgs$userId)
             </p>
 
             <program language="r">
-                <input>
+                <code>
 clamp &lt;- function(x, lower = 0.5, upper = 5) pmax(pmin(x, upper), lower)
-                </input>
+                </code>
             </program>
 
             <p>
@@ -634,15 +633,15 @@ clamp &lt;- function(x, lower = 0.5, upper = 5) pmax(pmin(x, upper), lower)
                 obtained on the training set and then evaluate the RMSE:
             </p>
 
-            <console>
-                <input>
+            <program language = "r">
+                <code>
 resid &lt;- with(test_set, rating - clamp(mu + a[userId]))
 rmse(resid)
-                </input>
-                <output>
+                </code>
+                </program><pre>
 [1] 0.9490388
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 The RMSE decreases, which confirms that user effects improve our
@@ -680,9 +679,9 @@ rmse(resid)
             </p>
 
             <program language="r">
-                <input>
+                <code>
 fit &lt;- lm(rating ~ userId + movieId, data = train_set)
-                </input>
+                </code>
             </program>
 
             <p>
@@ -722,7 +721,7 @@ fit &lt;- lm(rating ~ userId + movieId, data = train_set)
             </p>
 
             <program language="r">
-                <input>
+                <code>
 fit &lt;- copy(train_set)
 mu &lt;- mean(fit$rating)
 fit[, `:=`(a = 0, b = 0)]  # starting values
@@ -736,7 +735,7 @@ for (iter in 1:100) {
   
   if (max(c(abs(fit$a - a_old), abs(fit$b - b_old))) &lt; 1e-6) break
 }
-                </input>
+                </code>
             </program>
 
             <p>
@@ -744,10 +743,10 @@ for (iter in 1:100) {
             </p>
 
             <program language="r">
-                <input>
+                <code>
 a &lt;- setNames(fit$a, fit$userId)
 b &lt;- setNames(fit$b, fit$movieId)
-                </input>
+                </code>
             </program>
 
             <p>
@@ -761,15 +760,15 @@ b &lt;- setNames(fit$b, fit$movieId)
                 The resulting RMSE for the predictions on the test set is:
             </p>
 
-            <console>
-                <input>
+            <program language = "r">
+                <code>
 resid &lt;- with(test_set, rating - clamp(mu + a[userId] + b[movieId]))
 rmse(resid)
-                </input>
-                <output>
+                </code>
+                </program><pre>
 [1] 0.8815976
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 This further reduces the error, confirming that including both
@@ -788,20 +787,20 @@ rmse(resid)
                 films with only a single rating:
             </p>
 
-            <console>
-                <input>
+            <program language = "r">
+                <code>
 top_movies &lt;- names(b[b == max(b)])
 train_set[, .(n = .N), by = .(movieId, title)][movieId %in% top_movies]
-                </input>
-                <output>
+                </code>
+                </program><pre>
    movieId                                         title n
 1:    1450 Prisoner of the Mountains (Kavkazsky plennik) 1
 2:    4076                                     Two Ninas 1
 3:    4591                               Erik the Viking 1
 4:    4930                             Funeral in Berlin 1
 5:    5427                                       Caveman 1
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 Do we really believe these are the best movies in the database?
@@ -811,42 +810,42 @@ train_set[, .(n = .N), by = .(movieId, title)][movieId %in% top_movies]
                 effects <m>\hat{\beta}_j \ge 2</m>:
             </p>
 
-            <console>
-                <input>
+            <program language = "r">
+                <code>
 top_movies &lt;- names(b[b &gt; 2])
 length(top_movies)
-                </input>
-                <output>
+                </code>
+                </program><pre>
 [1] 16
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 All 16 of these movies were rated at most twice:
             </p>
 
-            <console>
-                <input>
+            <program language = "r">
+                <code>
 range(table(train_set[movieId %in% top_movies]$movieId))
-                </input>
-                <output>
+                </code>
+                </program><pre>
 [1] 1 2
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 And every prediction we made for these movies in the test set
                 was an overestimate:
             </p>
 
-            <console>
-                <input>
+            <program language = "r">
+                <code>
 range(resid[with(test_set, which(movieId %in% top_movies))])
-                </input>
-                <output>
+                </code>
+                </program><pre>
 [1] -1.408257 -0.500000
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 This is a clear example of <em>overfitting</em>.
@@ -934,10 +933,10 @@ range(resid[with(test_set, which(movieId %in% top_movies))])
             </p>
 
             <program language="r">
-                <input>
+                <code>
 library(MASS)
 fit &lt;- lm.ridge(y ~ x, lambda = 0.001)
-                </input>
+                </code>
             </program>
 
             <p>
@@ -1059,7 +1058,7 @@ fit &lt;- lm.ridge(y ~ x, lambda = 0.001)
             </p>
 
             <program language="r">
-                <input>
+                <code>
 fit_als &lt;- function(lambda, tol = 1e-6, max_iter = 100) {
   fit &lt;- copy(train_set)
   N &lt;- nrow(fit)
@@ -1078,7 +1077,7 @@ fit_als &lt;- function(lambda, tol = 1e-6, max_iter = 100) {
   }
   return(with(fit, list(mu = mu, a = setNames(a, userId), b = setNames(b, movieId))))
 }
-                </input>
+                </code>
             </program>
 
             <p>
@@ -1090,10 +1089,10 @@ fit_als &lt;- function(lambda, tol = 1e-6, max_iter = 100) {
             </p>
 
             <program language="r">
-                <input>
+                <code>
 fit &lt;- fit_als(lambda = 0.0001)
 mu &lt;- fit$mu; a_reg &lt;- fit$a; b_reg &lt;- fit$b
-                </input>
+                </code>
             </program>
 
             <p>
@@ -1112,6 +1111,11 @@ mu &lt;- fit$mu; a_reg &lt;- fit$a; b_reg &lt;- fit$b
                 unpenalized ones by plotting them against each other:
             </p>
 
+        <figure xml:id="fig-b-reg-vs-b-1">
+            <image source="images/b-reg-vs-b-1.png" width="70%">
+            </image>
+        </figure>
+
             <p>
                 We note that movies with few ratings are heavily shrunk: the
                 regularized versions are closer to 0 than the original.
@@ -1127,20 +1131,20 @@ mu &lt;- fit$mu; a_reg &lt;- fit$a; b_reg &lt;- fit$b
                 Let us look at the top 5 movies under the penalized model:
             </p>
 
-            <console>
-                <input>
+            <program language = "r">
+                <code>
 top_movies &lt;- names(sort(-b_reg[unique(names(b_reg))])[1:5])
 train_set[, .(n = .N), by = .(movieId, title)][movieId %in% top_movies]
-                </input>
-                <output>
+                </code>
+                </program><pre>
    movieId                     title   n
 1:     296              Pulp Fiction 155
 2:     858            Godfather, The 112
 3:      50       Usual Suspects, The 111
 4:     318 Shawshank Redemption, The 131
 5:    1252                 Chinatown  49
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 These are far more plausible than the previous list of
@@ -1151,15 +1155,15 @@ train_set[, .(n = .N), by = .(movieId, title)][movieId %in% top_movies]
                 Finally, we evaluate the RMSE:
             </p>
 
-            <console>
-                <input>
+            <program language = "r">
+                <code>
 resid &lt;- with(test_set, rating - clamp(mu + a_reg[userId] + b_reg[movieId]))
 rmse(resid)
-                </input>
-                <output>
+                </code>
+                </program><pre>
 [1] 0.867735
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 The RMSE improves, confirming that regularization stabilizes
@@ -1191,19 +1195,23 @@ rmse(resid)
         </p>
 
         <program language="r">
-            <input>
+            <code>
 lambdas &lt;- seq(0, 0.0002, length.out = 100)
 rmses &lt;- sapply(lambdas, function(lambda) { 
   fit &lt;- fit_als(lambda)
   resid &lt;- with(test_set, rating - clamp(fit$mu + fit$a[userId] + fit$b[movieId]))
   rmse(resid)
 })
-            </input>
+            </code>
         </program>
 
         <p>
             We then plot RMSE as a function of <m>\lambda</m>:
         </p>
+
+<program language="r"><code>
+plot(lambdas, rmses, type = "l", xlab = expression(lambda), ylab = "RMSE")
+</code></program>
 
         <figure xml:id="fig-regularization-rmse-vs-lambda">
             <caption>
@@ -1227,39 +1235,39 @@ rmses &lt;- sapply(lambdas, function(lambda) {
             The optimal value is:
         </p>
 
-        <console>
-            <input>
+        <program language = "r">
+            <code>
 best_lambda &lt;- lambdas[which.min(rmses)]
 best_lambda
-            </input>
-            <output>
+            </code>
+            </program><pre>
 [1] 3.636364e-05
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             We now refit the model using this value:
         </p>
 
         <program language="r">
-            <input>
+            <code>
 fit &lt;- fit_als(best_lambda)
-            </input>
+            </code>
         </program>
 
         <p>
             and compute the final RMSE:
         </p>
 
-        <console>
-            <input>
+        <program language = "r">
+            <code>
 resid &lt;- with(test_set, rating - clamp(fit$mu + fit$a[userId] + fit$b[movieId]))
 rmse(resid)
-            </input>
-            <output>
+            </code>
+            </program><pre>
 [1] 0.8630572
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             This result confirms that regularization improves our predictive
@@ -1267,6 +1275,33 @@ rmse(resid)
             The following table compares this RMSE to the values obtained from
             the earlier models.
         </p>
+<table xml:id="table-rmse-models">
+  <title>RMSE by Model</title>
+  <tabular halign="right">
+    <col halign="left"/>
+    <col halign="right"/>
+    <row header="yes">
+      <cell>model</cell>
+      <cell>RMSE</cell>
+    </row>
+    <row>
+      <cell>Just the mean</cell>
+      <cell>1.040</cell>
+    </row>
+    <row>
+      <cell>User effect</cell>
+      <cell>0.949</cell>
+    </row>
+    <row>
+      <cell>User + movie effect</cell>
+      <cell>0.882</cell>
+    </row>
+    <row>
+      <cell>Regularized</cell>
+      <cell>0.863</cell>
+    </row>
+  </tabular>
+</table>
     </section>
 
     <section xml:id="exercises-regularization">
@@ -1282,10 +1317,10 @@ rmse(resid)
         </p>
 
         <program language="r">
-            <input>
+            <code>
 set.seed(1986)
 n &lt;- round(2^rnorm(1000, 8, 1))
-            </input>
+            </code>
         </program>
 
         <p>
@@ -1298,9 +1333,9 @@ n &lt;- round(2^rnorm(1000, 8, 1))
         </p>
 
         <program language="r">
-            <input>
+            <code>
 mu &lt;- round(80 + 2 * rt(1000, 5))
-            </input>
+            </code>
         </program>
 
         <p>
@@ -1308,22 +1343,22 @@ mu &lt;- round(80 + 2 * rt(1000, 5))
         </p>
 
         <program language="r">
-            <input>
+            <code>
 schools &lt;- data.frame(id = sprintf("PS%03d", 0:999), size = n, quality = mu, 
                       rank = rank(-mu))
-            </input>
+            </code>
         </program>
 
         <p>
             You can view the top 10 schools with:
         </p>
 
-        <console>
-            <input>
+        <program language = "r">
+            <code>
 library(dplyr)
 schools |&gt; top_n(10, quality) |&gt; arrange(desc(quality))
-            </input>
-            <output>
+            </code>
+            </program><pre>
       id size quality rank
 1  PS040  491      90  1.0
 2  PS443  527      89  2.0
@@ -1335,8 +1370,8 @@ schools |&gt; top_n(10, quality) |&gt; arrange(desc(quality))
 8  PS547  469      87  8.5
 9  PS645  185      87  8.5
 10 PS919  121      87  8.5
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             Now let's have the students in the school take a test.
@@ -1347,11 +1382,11 @@ schools |&gt; top_n(10, quality) |&gt; arrange(desc(quality))
         </p>
 
         <program language="r">
-            <input>
+            <code>
 scores &lt;- sapply(1:nrow(schools), function(i)
   rnorm(schools$size[i], schools$quality[i], 30))
 schools &lt;- schools |&gt; mutate(score = sapply(scores, mean))
-            </input>
+            </code>
         </program>
         <exercises>
             <exercise>
@@ -1420,9 +1455,9 @@ schools &lt;- schools |&gt; mutate(score = sapply(scores, mean))
                     </p>
 
                     <program language="r">
-                        <input>
+                        <code>
 schools &lt;- mutate(schools, theta = score - mean(score))
-                        </input>
+                        </code>
                     </program>
 
                     <p>

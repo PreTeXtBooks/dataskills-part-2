@@ -4,49 +4,6 @@
     <title>Latent Factor Models</title>
 
     <introduction>
-        <program language="r">
-            <input>
-library(data.table)
-library(dslabs)
-movielens &lt;- as.data.table(movielens)
-movielens &lt;- movielens[, if (.N &gt;= 100) .SD, by = userId]
-
-set.seed(2006)
-indexes &lt;- split(1:nrow(movielens), movielens$userId)
-
-test_ind &lt;- sapply(indexes, function(i) sample(i, ceiling(length(i)*.2)))
-test_ind &lt;- sort(unlist(test_ind))
-
-movielens[, `:=`(userId = as.character(userId), movieId = as.character(movieId))]
-cols &lt;- c("userId", "movieId", "title", "rating")
-test_set &lt;- movielens[test_ind, ..cols]
-train_set &lt;- movielens[-test_ind, ..cols]
-test_set &lt;- test_set[movieId %in% train_set$movieId]
-
-rmse &lt;- function(r) sqrt(mean(r^2))
-clamp &lt;- function(x, lower = 0.5, upper = 5) pmax(pmin(x, upper), lower)
-fit_als &lt;- function(lambda, tol = 1e-6, max_iter = 100) {
-  fit &lt;- copy(train_set)
-  N &lt;- nrow(fit)
-  mu &lt;- mean(fit$rating)
-  fit[, `:=`(a = 0, b = 0)]  # starting values
-
-  for (iter in 1:max_iter) {
-    a_old &lt;- copy(fit$a)
-    b_old &lt;- copy(fit$b)
-
-    fit[, a := sum(rating - mu - b)/(.N + N*lambda) , by = userId]
-    fit[, b := sum(rating - mu - a)/(.N + N*lambda), by = movieId]
-
-    delta &lt;- max(c(abs(fit$a - a_old), abs(fit$b - b_old)))
-    if (delta &lt; tol) break
-  }
-  return(with(fit, list(mu = mu, a = setNames(a, userId), b = setNames(b, movieId))))
-}
-movie_map &lt;- unique(train_set[,.(movieId, title)])
-            </input>
-        </program>
-
         <p>
             Many data problems involve large matrices with structure we cannot
             see directly.
@@ -93,10 +50,10 @@ movie_map &lt;- unique(train_set[,.(movieId, title)])
         </p>
 
         <program language="r">
-            <input>
+            <code>
 fit &lt;- fit_als(lambda = 3.636364e-05)
 train_set[, resid := rating - clamp(fit$mu + fit$a[userId] + fit$b[movieId])]
-            </input>
+            </code>
         </program>
 
         <p>
@@ -125,7 +82,7 @@ train_set[, resid := rating - clamp(fit$mu + fit$a[userId] + fit$b[movieId])]
             These correlations range from strongly positive to negative.
             Specifically the correlations between <em>The Godfather</em> and
             <em>The Godfather part II</em>, <em>Goodfellas</em>, and
-            <em>Sleepless in Seattle</em> are approximately 0.82, 0.69, and
+            <em>Sleepless in Seattle</em> are 0.82, 0.69, and
             -0.15, respectively.
             Users who love <em>The Godfather</em> also tend to like
             <em>The Godfather Part II</em> and <em>Goodfellas</em>, but often
@@ -167,24 +124,6 @@ train_set[, resid := rating - clamp(fit$mu + fit$a[userId] + fit$b[movieId])]
 
     <section xml:id="sec-factor-analysis">
         <title>Factor analysis</title>
-
-        <program language="r">
-            <input>
-set.seed(1987)
-short_names &lt;- c("Godfather", "Godfather 2", "Goodfellas",
-                 "Scent of a Woman", "You've Got Mail", "Sleepless in Seattle")
-q &lt;- cbind(c(1 , 1, 1, -1, -1, -1),
-           c(1 , 1, -1, 1, -1, -1))
-p &lt;- cbind(sqrt(2)*rep(c(-1,0,1), c(3,6,3)*10),
-           1/sqrt(2)*rep(c(-1,1,0,1,0,-1), c(1,2,3,2,1,3)*10))
-
-rownames(p) &lt;- 1:nrow(p)
-rownames(q) &lt;- c(short_names)
-
-y &lt;- p %*% t(q) + matrix(rnorm(nrow(p)*nrow(q), 0, 0.5), nrow(p), nrow(q))
-            </input>
-        </program>
-
         <p>
             We start with a simple simulated example of ratings <m>Y_{ij}</m>
             for six movies and 120 users.
@@ -195,25 +134,25 @@ y &lt;- p %*% t(q) + matrix(rnorm(nrow(p)*nrow(q), 0, 0.5), nrow(p), nrow(q))
             and we store the residuals in the object <c>y</c>:
         </p>
 
-        <console>
-            <input>
+        <program language="r">
+            <code>
 dim(y)
-            </input>
-            <output>
+            </code>
+            </program><pre>
 [1] 120   6
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             If we examine the correlation between movies based on user ratings,
             we notice a pattern:
         </p>
 
-        <console>
-            <input>
+        <program language="r">
+            <code>
 cor(y)
-            </input>
-            <output>
+            </code>
+            </program><pre>
                      Godfather Godfather 2 Goodfellas Scent of a Woman You've Got Mail Sleepless in Seattle
 Godfather                1.000       0.671      0.558           -0.527          -0.734               -0.721
 Godfather 2              0.671       1.000      0.471           -0.450          -0.649               -0.739
@@ -221,8 +160,8 @@ Goodfellas               0.558       0.471      1.000           -0.888          
 Scent of a Woman        -0.527      -0.450     -0.888            1.000           0.451                0.475
 You've Got Mail         -0.734      -0.649     -0.487            0.451           1.000                0.756
 Sleepless in Seattle    -0.721      -0.739     -0.505            0.475           0.756                1.000
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             It appears that ratings are positively correlated within genres, for
@@ -242,9 +181,9 @@ Sleepless in Seattle    -0.721      -0.739     -0.505            0.475          
         </p>
 
         <program language="r">
-            <input>
+            <code>
 q &lt;- c(1, 1, 1, -1, -1, -1)
-            </input>
+            </code>
         </program>
 
         <p>
@@ -258,9 +197,9 @@ q &lt;- c(1, 1, 1, -1, -1, -1)
         </p>
 
         <program language="r">
-            <input>
+            <code>
 p &lt;- apply(y, 1, function(y_i) lm(y_i ~ q - 1)$coef)
-            </input>
+            </code>
         </program>
 
         <p>
@@ -305,6 +244,14 @@ p &lt;- apply(y, 1, function(y_i) lm(y_i ~ q - 1)$coef)
             and multiply them:
         </p>
 
+<program language="r">
+<code>
+p &lt;- matrix(p)
+q &lt;- matrix(q)
+plot(p %*% t(q), y)
+</code>
+</program>
+
         <figure xml:id="fig-e-vs-pq">
             <caption>
                 Observed ratings versus a one-factor approximation
@@ -328,11 +275,11 @@ p &lt;- apply(y, 1, function(y_i) lm(y_i ~ q - 1)$coef)
             romance" effect, we still see correlation patterns:
         </p>
 
-        <console>
-            <input>
+        <program language="r">
+            <code>
 cor(y - p %*% t(q))
-            </input>
-            <output>
+            </code>
+            </program><pre>
                      Godfather Godfather 2 Goodfellas Scent of a Woman You've Got Mail Sleepless in Seattle
 Godfather                1.000       0.185     -0.545            0.557          -0.280               -0.198
 Godfather 2              0.185       1.000     -0.618            0.594          -0.186               -0.364
@@ -340,8 +287,8 @@ Goodfellas              -0.545      -0.618      1.000           -0.671          
 Scent of a Woman         0.557       0.594     -0.671            1.000          -0.641               -0.656
 You've Got Mail         -0.280      -0.186      0.619           -0.641           1.000                0.353
 Sleepless in Seattle    -0.198      -0.364      0.650           -0.656           0.353                1.000
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             Looking more closely, this structure appears to come from whether or
@@ -352,10 +299,10 @@ Sleepless in Seattle    -0.198      -0.364      0.650           -0.656          
         </p>
 
         <program language="r">
-            <input>
+            <code>
 q &lt;- cbind(c(1, 1, 1, -1, -1, -1),
            c(1, 1, -1, 1, -1, -1))
-            </input>
+            </code>
         </program>
 
         <p>
@@ -373,9 +320,9 @@ q &lt;- cbind(c(1, 1, 1, -1, -1, -1),
         </p>
 
         <program language="r">
-            <input>
+            <code>
 p &lt;- t(apply(y, 1, function(y_i) lm(y_i ~ q-1)$coef))
-            </input>
+            </code>
         </program>
 
         <p>
@@ -393,6 +340,12 @@ p &lt;- t(apply(y, 1, function(y_i) lm(y_i ~ q-1)$coef))
         <p>
             With two factors, our predictions improve:
         </p>
+
+<program language="r">
+<code>
+plot(p %*% t(q), y)
+</code>
+</program>
 
         <figure xml:id="fig-e-vs-pq-2">
             <caption>
@@ -413,11 +366,11 @@ p &lt;- t(apply(y, 1, function(y_i) lm(y_i ~ q-1)$coef))
             And now, if we look at the residual correlation
         </p>
 
-        <console>
-            <input>
+        <program language="r">
+            <code>
 cor(y - p %*% t(q))
-            </input>
-            <output>
+            </code>
+            </program><pre>
                      Godfather Godfather 2 Goodfellas Scent of a Woman You've Got Mail Sleepless in Seattle
 Godfather              1.00000     -0.3597    0.00716          0.00716          0.2412              0.41857
 Godfather 2           -0.35970      1.0000   -0.04429         -0.04429          0.4955              0.20741
@@ -425,8 +378,8 @@ Goodfellas             0.00716     -0.0443    1.00000          1.00000         -
 Scent of a Woman       0.00716     -0.0443    1.00000          1.00000         -0.0339             -0.00554
 You've Got Mail        0.24118      0.4955   -0.03395         -0.03395          1.0000             -0.27145
 Sleepless in Seattle   0.41857      0.2074   -0.00554         -0.00554         -0.2714              1.00000
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             there is no clear pattern left.
@@ -528,9 +481,9 @@ Sleepless in Seattle   0.41857      0.2074   -0.00554         -0.00554         -
             </p>
 
             <program language="r">
-                <input>
+                <code>
 p &lt;- t(qr.solve(crossprod(q)) %*% t(q) %*% t(y))
-                </input>
+                </code>
             </program>
 
             <p>
@@ -562,9 +515,9 @@ p &lt;- t(qr.solve(crossprod(q)) %*% t(q) %*% t(y))
         </p>
 
         <program language="r">
-            <input>
+            <code>
 pca &lt;- prcomp(y, center = FALSE)
-            </input>
+            </code>
         </program>
 
         <p>
@@ -572,30 +525,30 @@ pca &lt;- prcomp(y, center = FALSE)
             variability:
         </p>
 
-        <console>
-            <input>
+        <program language="r">
+            <code>
 pca$sdev^2/sum(pca$sdev^2)
-            </input>
-            <output>
+            </code>
+            </program><pre>
 [1] 0.6939 0.1790 0.0402 0.0313 0.0303 0.0253
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             Next, notice that the first column of <m>\mathbf{V}</m>:
         </p>
 
-        <console>
-            <input>
+        <program language="r">
+            <code>
 pca$rotation[,1]
-            </input>
-            <output>
+            </code>
+            </program><pre>
            Godfather          Godfather 2           Goodfellas
                0.306                0.261                0.581
     Scent of a Woman      You've Got Mail Sleepless in Seattle
               -0.570               -0.294               -0.300
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             is assigning positive values to the mob movies and negative values
@@ -606,17 +559,17 @@ pca$rotation[,1]
             The second column:
         </p>
 
-        <console>
-            <input>
+        <program language="r">
+            <code>
 pca$rotation[,2]
-            </input>
-            <output>
+            </code>
+            </program><pre>
            Godfather          Godfather 2           Goodfellas
                0.354                0.377               -0.382
     Scent of a Woman      You've Got Mail Sleepless in Seattle
                0.437               -0.448               -0.442
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             is coding for Al Pacino movies.
@@ -696,7 +649,7 @@ pca$rotation[,2]
             <p>
                 Even with the orthogonality constraint, the PCA solution is not
                 completely unique.
-                As pointed out in <xref ref="sec-dimension-reduction"/>, there
+                As pointed out in <xref ref="dimension-reduction"/>, there
                 remains a <em>sign indeterminacy</em>: we can flip the sign of
                 any column in <m>\mathbf{P}</m> and the corresponding column in
                 <m>\mathbf{Q}</m> (multiply one by <m>-1</m> and the other by
@@ -732,8 +685,8 @@ pca$rotation[,2]
             correlation matrix of these residuals:
         </p>
 
-        <console>
-            <input>
+        <program language="r">
+            <code>
 ow &lt;- options(width = 200)
 ms &lt;- c("Godfather, The", "Godfather: Part II, The", "Goodfellas",
             "Scent of a Woman",  "You've Got Mail", "Sleepless in Seattle")
@@ -746,8 +699,8 @@ colnames(r) &lt;- with(movie_map, title[match(colnames(r), movieId)]) |&gt;
 
 round(cor(r, use = "pairwise.complete.obs"), 2)
 options(ow)
-            </input>
-            <output>
+            </code>
+            </program><pre>
                      Godfather Godfather II Goodfellas Scent of a Woman You've Got Mail Sleepless in Seattle
 Godfather                 1.00         0.84       0.49             0.46           -0.36                -0.42
 Godfather II              0.84         1.00       0.47             0.21           -0.25                -0.43
@@ -755,8 +708,8 @@ Goodfellas                0.49         0.47       1.00             0.04         
 Scent of a Woman          0.46         0.21       0.04             1.00           -0.37                -0.50
 You've Got Mail          -0.36        -0.25      -0.27            -0.37            1.00                 0.43
 Sleepless in Seattle     -0.42        -0.43      -0.45            -0.50            0.43                 1.00
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             As in the simulated example, we see clear correlation patterns.
@@ -916,9 +869,9 @@ Sleepless in Seattle     -0.42        -0.43      -0.45            -0.50         
             </p>
 
             <program language="r">
-                <input>
+                <code>
 fit &lt;- with(train_set, fit_recommender_model(rating, userId, movieId, reltol=1e-6))
-                </input>
+                </code>
             </program>
 
             <p>
@@ -931,17 +884,17 @@ fit &lt;- with(train_set, fit_recommender_model(rating, userId, movieId, reltol=
                 test set and compute the RMSE:
             </p>
 
-            <console>
-                <input>
+            <program language="r">
+                <code>
 i &lt;- test_set$userId
 j &lt;- test_set$movieId
 resid &lt;- test_set$rating - with(fit, mu + a[i] + b[j] + rowSums(p[i,]*q[j,]))
 rmse(resid)
-                </input>
-                <output>
+                </code>
+                </program><pre>
 [1] 0.859
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 This improves accuracy beyond the regularized user + movie
@@ -978,9 +931,9 @@ rmse(resid)
             </p>
 
             <program language="r">
-                <input>
+                <code>
 factors &lt;- fit$q[fit$n_item &gt;= fit$min_ratings,]
-                </input>
+                </code>
             </program>
 
             <p>
@@ -989,9 +942,9 @@ factors &lt;- fit$q[fit$n_item &gt;= fit$min_ratings,]
             </p>
 
             <program language="r">
-                <input>
+                <code>
 rownames(factors) &lt;- movielens[match(rownames(factors), movieId)]$title
-                </input>
+                </code>
             </program>
 
             <p>
@@ -1027,66 +980,66 @@ rownames(factors) &lt;- movielens[match(rownames(factors), movieId)]$title
                 The first factor separates iconic dark classics
             </p>
 
-            <console>
-                <input>
+            <program language="r">
+                <code>
 names(sort(factors[,1], decreasing = TRUE)[1:5])
-                </input>
-                <output>
+                </code>
+                </program><pre>
 [1] "2001: A Space Odyssey"
 [2] "Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb"
 [3] "Clockwork Orange, A"
 [4] "Taxi Driver"
 [5] "Silence of the Lambs, The"
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 from Hollywood blockbusters
             </p>
 
-            <console>
-                <input>
+            <program language="r">
+                <code>
 names(sort(factors[,1])[1:5])
-                </input>
-                <output>
+                </code>
+                </program><pre>
 [1] "Armageddon"
 [2] "Pearl Harbor"
 [3] "Con Air"
 [4] "Star Wars: Episode I - The Phantom Menace"
 [5] "Mission: Impossible II"
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 The second factor separates weird cult movies
             </p>
 
-            <console>
-                <input>
+            <program language="r">
+                <code>
 names(sort(factors[,2], decreasing = TRUE)[1:5])
-                </input>
-                <output>
+                </code>
+                </program><pre>
 [1] "Showgirls"         "Scary Movie"       "Leaving Las Vegas"
 [4] "Dogma"             "Rosemary's Baby"
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 from big-budget epic historical and fantasy sagas
             </p>
 
-            <console>
-                <input>
+            <program language="r">
+                <code>
 names(sort(factors[,2])[1:5])
-                </input>
-                <output>
+                </code>
+                </program><pre>
 [1] "Lord of the Rings: The Two Towers, The"
 [2] "Lord of the Rings: The Return of the King, The"
 [3] "Lord of the Rings: The Fellowship of the Ring, The"
 [4] "Dances with Wolves"
 [5] "Matrix, The"
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 These results demonstrate that the latent factors capture
@@ -1195,8 +1148,8 @@ names(sort(factors[,2])[1:5])
             relationship to PCA:
         </p>
 
-        <console>
-            <input>
+        <program language="r">
+            <code>
 x &lt;- matrix(rnorm(1000), 100, 10)
 pca &lt;- prcomp(x, center = FALSE)
 s &lt;- svd(x)
@@ -1204,13 +1157,13 @@ s &lt;- svd(x)
 all.equal(pca$rotation, s$v, check.attributes = FALSE)
 all.equal(pca$sdev^2, s$d^2/(nrow(x) - 1))
 all.equal(pca$x, s$u %*% diag(s$d), check.attributes = FALSE)
-            </input>
-            <output>
+            </code>
+            </program><pre>
 [1] TRUE
 [1] TRUE
 [1] TRUE
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             As an optimization, note that <c>s$u %*% diag(s$d)</c> can be
@@ -1218,9 +1171,9 @@ all.equal(pca$x, s$u %*% diag(s$d), check.attributes = FALSE)
         </p>
 
         <program language="r">
-            <input>
+            <code>
 sweep(s$u, 2, s$d, "*")
-            </input>
+            </code>
         </program>
 
         <p>
@@ -1256,9 +1209,9 @@ sweep(s$u, 2, s$d, "*")
                 </p>
 
                 <program language="r">
-                    <input>
+                    <code>
 lambdas &lt;- expand.grid(lambda_1 = 10^-(3:6), lambda_2 = 10^-c(2:5))
-                    </input>
+                    </code>
                 </program>
 
                 <p>
@@ -1318,8 +1271,6 @@ lambdas &lt;- expand.grid(lambda_1 = 10^-(3:6), lambda_2 = 10^-c(2:5))
             </statement>
         </exercise>
 
-        <exercise>
-            <introduction>
                 <p>
                     In the next exercises, we use the singular value
                     decomposition (SVD) to estimate latent factors in a
@@ -1365,7 +1316,7 @@ lambdas &lt;- expand.grid(lambda_1 = 10^-(3:6), lambda_2 = 10^-c(2:5))
                 </p>
 
                 <program language="r">
-                    <input>
+                    <code>
 set.seed(1987)
 n &lt;- 100; k &lt;- 8
 s &lt;- 64*matrix(c(1, .85, .5,
@@ -1375,7 +1326,7 @@ m &lt;- MASS::mvrnorm(n, rep(0, 3), s)
 m &lt;- m[order(rowMeans(m), decreasing = TRUE), ] %x% matrix(rep(1, k), nrow = 1)
 y &lt;- m + matrix(rnorm(n * k * 3, 0, 3), n, k * 3)
 colnames(y) &lt;- paste(rep(c("Math", "Science", "Arts"), each = k), 1:k, sep = "_")
-                    </input>
+                    </code>
                 </program>
 
                 <p>
@@ -1398,7 +1349,7 @@ colnames(y) &lt;- paste(rep(c("Math", "Science", "Arts"), each = k), 1:k, sep = 
                 </p>
 
                 <program language="r">
-                    <input>
+                    <code>
 nice_image &lt;- function(x, zlim = range(x), cex.axis = 0.5, ...) {
   cols &lt;- seq_len(ncol(x))
   rows &lt;- seq_len(nrow(x))
@@ -1411,10 +1362,10 @@ nice_image &lt;- function(x, zlim = range(x), cex.axis = 0.5, ...) {
   abline(h = rows + 0.5, v = cols + 0.5)
   axis(1, at = cols, labels = colnames(x), las = 2, cex.axis = cex.axis)
 }
-                    </input>
+                    </code>
                 </program>
-            </introduction>
 
+        <exercise>
             <statement>
                 <p>
                     Use <c>nice_image(y)</c> to visualize the 24 test scores for
@@ -1450,10 +1401,10 @@ nice_image &lt;- function(x, zlim = range(x), cex.axis = 0.5, ...) {
                 </p>
 
                 <program language="r">
-                    <input>
+                    <code>
 nice_image(cor(y), zlim = c(-1, 1))
 axis(side = 2, at = 1:ncol(y), labels = rev(colnames(y)), las = 2, cex.axis = 0.5)
-                    </input>
+                    </code>
                 </program>
 
                 <p>
@@ -1488,9 +1439,9 @@ axis(side = 2, at = 1:ncol(y), labels = rev(colnames(y)), las = 2, cex.axis = 0.
                 </p>
 
                 <program language="r">
-                    <input>
+                    <code>
 tss_y &lt;- sum(colSums(y^2))
-                    </input>
+                    </code>
                 </program>
 
                 <p>
@@ -1597,10 +1548,10 @@ tss_y &lt;- sum(colSums(y^2))
                 </p>
 
                 <program language="r">
-                    <input>
+                    <code>
 s &lt;- svd(y)
 plot(1:ncol(y), s$d^2/sum(s$d^2)*100, xlab = "PC", ylab = "Variance explained (%)")
-                    </input>
+                    </code>
                 </program>
 
                 <p>
@@ -1610,10 +1561,10 @@ plot(1:ncol(y), s$d^2/sum(s$d^2)*100, xlab = "PC", ylab = "Variance explained (%
                 </p>
 
                 <program language="r">
-                    <input>
+                    <code>
 pc1 &lt;- s$u[, 1]*s$d[1]
 plot(rowMeans(y), pc1)
-                    </input>
+                    </code>
                 </program>
 
                 <p>
@@ -1706,11 +1657,11 @@ plot(rowMeans(y), pc1)
                 </p>
 
                 <program language="r">
-                    <input>
+                    <code>
 v &lt;- s$v
 rownames(v) &lt;- colnames(y)
 nice_image(t(v[, 1:3]))
-                    </input>
+                    </code>
                 </program>
 
                 <p>
