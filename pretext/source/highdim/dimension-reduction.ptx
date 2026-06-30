@@ -55,7 +55,7 @@
         </p>
 
         <program language="r">
-            <input>
+            <code>
 set.seed(1983)
 library(MASS)
 n &lt;- 100
@@ -64,7 +64,7 @@ sigma &lt;- 3
 s &lt;- sigma^2*matrix(c(1, rho, rho, 1), 2, 2)
 x &lt;- rbind(mvrnorm(n/2, c(69, 69), s),
            mvrnorm(n/2, c(60, 60), s))
-            </input>
+            </code>
         </program>
 
         <p>
@@ -95,10 +95,10 @@ x &lt;- rbind(mvrnorm(n/2, c(69, 69), s),
         </p>
 
         <program language="r">
-            <input>
+            <code>
 library(matrixStats)
 x &lt;- sweep(sweep(x, 2, colMeans(x)), 2, colSds(x), "/")
-            </input>
+            </code>
         </program>
 
         <p>
@@ -112,15 +112,15 @@ x &lt;- sweep(sweep(x, 2, colMeans(x)), 2, colSds(x), "/")
             We can compute these distances using <c>dist</c>:
         </p>
 
-        <console>
-            <input>
+        <program language = "r">
+            <code>
 d &lt;- as.matrix(dist(x))
 c(d[1, 2], d[2, 51])
-            </input>
-            <output>
+            </code>
+            </program><pre>
 [1] 0.5949407 1.3882750
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             This distance is based on two dimensions, and we need a distance
@@ -313,10 +313,10 @@ c(d[1, 2], d[2, 51])
         </p>
 
         <program language="r">
-            <input>
+            <code>
 theta &lt;- -45 * pi/180 #convert degrees to radians
 A &lt;- matrix(c(cos(theta), -sin(theta), sin(theta), cos(theta)), 2, 2)
-            </input>
+            </code>
         </program>
 
         <p>
@@ -325,13 +325,13 @@ A &lt;- matrix(c(cos(theta), -sin(theta), sin(theta), cos(theta)), 2, 2)
         </p>
 
         <program language="r">
-            <input>
+            <code>
 rotate &lt;- function(x, theta){
   theta &lt;- theta * pi/180
   A &lt;- matrix(c(cos(theta), -sin(theta), sin(theta), cos(theta)), 2, 2)
   x %*% A
 }
-            </input>
+            </code>
         </program>
 
         <p>
@@ -391,14 +391,14 @@ rotate &lt;- function(x, theta){
             any angle:
         </p>
 
-        <console>
-            <input>
+        <program language = "r">
+            <code>
 all.equal(as.matrix(dist(rotate(x, 30))), as.matrix(dist(x)))
-            </input>
-            <output>
+            </code>
+            </program><pre>
 [1] TRUE
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             The next section explains why this happens.
@@ -463,14 +463,14 @@ all.equal(as.matrix(dist(rotate(x, 30))), as.matrix(dist(x)))
             We can confirm using R:
         </p>
 
-        <console>
-            <input>
+        <program language = "r">
+            <code>
 all.equal(A %*% t(A), diag(2))
-            </input>
-            <output>
+            </code>
+            </program><pre>
 [1] TRUE
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             To understand where this name comes from, recall that in linear
@@ -524,18 +524,18 @@ all.equal(A %*% t(A), diag(2))
             We can confirm using R:
         </p>
 
-        <console>
-            <input>
+        <program language = "r">
+            <code>
 theta &lt;- -45
 z &lt;- rotate(x, theta) # works for any theta
 sum(x^2)
 sum(z^2)
-            </input>
-            <output>
+            </code>
+            </program><pre>
 [1] 198
 [1] 198
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             This can be interpreted as a consequence of the fact that an
@@ -551,27 +551,27 @@ sum(z^2)
             <em>variance captured</em> by each column, for <m>\mathbf{X}</m>:
         </p>
 
-        <console>
-            <input>
+        <program language = "r">
+            <code>
 colSums(x^2)/sum(x^2)
-            </input>
-            <output>
+            </code>
+            </program><pre>
 [1] 0.5 0.5
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             and <m>\mathbf{Z}</m>:
         </p>
 
-        <console>
-            <input>
+        <program language = "r">
+            <code>
 colSums(z^2)/sum(z^2)
-            </input>
-            <output>
+            </code>
+            </program><pre>
 [1] 0.98477912 0.01522088
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             In the next section, we describe how this last mathematical result
@@ -607,12 +607,12 @@ colSums(z^2)/sum(z^2)
         </p>
 
         <program language="r">
-            <input>
+            <code>
 angles &lt;- seq(0, -90)
 v &lt;- sapply(angles, function(angle) colSums(rotate(x, angle)^2))
 variance_explained &lt;- v[1,]/sum(x^2)
 plot(angles, variance_explained, type = "l")
-            </input>
+            </code>
         </program>
 
         <figure xml:id="fig-max-rotation">
@@ -638,10 +638,10 @@ plot(angles, variance_explained, type = "l")
         </p>
 
         <program language="r">
-            <input>
+            <code>
 theta &lt;- -45 * pi/180
 V &lt;- matrix(c(cos(theta), -sin(theta), sin(theta), cos(theta)), 2, 2)
-            </input>
+            </code>
         </program>
 
         <p>
@@ -652,9 +652,9 @@ V &lt;- matrix(c(cos(theta), -sin(theta), sin(theta), cos(theta)), 2, 2)
         </me>
 
         <program language="r">
-            <input>
+            <code>
 z &lt;- x %*% V
-            </input>
+            </code>
         </program>
 
         <p>
@@ -683,11 +683,11 @@ z &lt;- x %*% V
         </p>
 
         <program language="r">
-            <input>
+            <code>
 hist(x[,1], breaks = seq(-4,4,0.5))
 hist(x[,2], breaks = seq(-4,4,0.5))
 hist(z[,1], breaks = seq(-4,4,0.5))
-            </input>
+            </code>
         </program>
 
         <figure xml:id="fig-histograms-of-dimensions">
@@ -823,9 +823,9 @@ hist(z[,1], breaks = seq(-4,4,0.5))
         </p>
 
         <program language="r">
-            <input>
+            <code>
 pca &lt;- prcomp(x, center = FALSE)
-            </input>
+            </code>
         </program>
 
         <p>
@@ -845,16 +845,16 @@ pca &lt;- prcomp(x, center = FALSE)
             rotation obtained with -45 (remember the sign is arbitrary):
         </p>
 
-        <console>
-            <input>
+        <program language = "r">
+            <code>
 pca$rotation
-            </input>
-            <output>
+            </code>
+            </program><pre>
             PC1        PC2
 [1,] -0.7071068  0.7071068
 [2,] -0.7071068 -0.7071068
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             The square root of the variation of each column is included in the
@@ -862,31 +862,31 @@ pca$rotation
             This implies we can compute the variance explained by each PC using:
         </p>
 
-        <console>
-            <input>
+        <program language = "r">
+            <code>
 pca$sdev^2/sum(pca$sdev^2)
-            </input>
-            <output>
+            </code>
+            </program><pre>
 [1] 0.98477912 0.01522088
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             The function <c>summary</c> performs this calculation for us:
         </p>
 
-        <console>
-            <input>
+        <program language = "r">
+            <code>
 summary(pca)
-            </input>
-            <output>
+            </code>
+            </program><pre>
 Importance of components:
                           PC1     PC2
 Standard deviation     1.4034 0.17448
 Proportion of Variance 0.9848 0.01522
 Cumulative Proportion  0.9848 1.00000
-            </output>
-        </console>
+            </pre>
+        
 
         <p>
             We also see that we can rotate <c>x</c> ( <m>\mathbf{X}</m> ) and
@@ -894,16 +894,16 @@ Cumulative Proportion  0.9848 1.00000
             mathematical formulas above:
         </p>
 
-        <console>
-            <input>
+        <program language = "r">
+            <code>
 all.equal(pca$x, x %*% pca$rotation)
 all.equal(x, pca$x %*% t(pca$rotation))
-            </input>
-            <output>
+            </code>
+            </program><pre>
 [1] TRUE
 [1] TRUE
-            </output>
-        </console>
+            </pre>
+        
     </section>
 
     <section xml:id="pca-examples">
@@ -919,14 +919,14 @@ all.equal(x, pca$x %*% t(pca$rotation))
                 length, sepal width, petal length, and petal width:
             </p>
 
-            <console>
-                <input>
+            <program language = "r">
+                <code>
 names(iris)
-                </input>
-                <output>
+                </code>
+                </program><pre>
 [1] "Sepal.Length" "Sepal.Width"  "Petal.Length" "Petal.Width"  "Species"
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 If you inspect the species column using <c>iris$Species</c>,
@@ -943,11 +943,11 @@ names(iris)
             </p>
 
             <program language="r">
-                <input>
+                <code>
 x &lt;- as.matrix(iris[,1:4])
 d &lt;- dist(x)
 image(as.matrix(d), col = rev(RColorBrewer::brewer.pal(9, "RdBu")))
-                </input>
+                </code>
             </program>
 
             <figure xml:id="fig-iris-distances">
@@ -967,18 +967,18 @@ image(as.matrix(d), col = rev(RColorBrewer::brewer.pal(9, "RdBu")))
                 correlated:
             </p>
 
-            <console>
-                <input>
+            <program language = "r">
+                <code>
 cor(x)
-                </input>
-                <output>
+                </code>
+                </program><pre>
              Sepal.Length Sepal.Width Petal.Length Petal.Width
 Sepal.Length    1.0000000  -0.1175698    0.8717538   0.8179411
 Sepal.Width    -0.1175698   1.0000000   -0.4284401  -0.3661259
 Petal.Length    0.8717538  -0.4284401    1.0000000   0.9628654
 Petal.Width     0.8179411  -0.3661259    0.9628654   1.0000000
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 If we apply PCA to the <c>iris</c> dataset, we expect that the
@@ -995,19 +995,19 @@ Petal.Width     0.8179411  -0.3661259    0.9628654   1.0000000
                 is explained by each principal component:
             </p>
 
-            <console>
-                <input>
+            <program language = "r">
+                <code>
 pca &lt;- prcomp(x)
 summary(pca)
-                </input>
-                <output>
+                </code>
+                </program><pre>
 Importance of components:
                           PC1     PC2    PC3     PC4
 Standard deviation     2.0563 0.49262 0.2797 0.15439
 Proportion of Variance 0.9246 0.05307 0.0171 0.00521
 Cumulative Proportion  0.9246 0.97769 0.9948 1.00000
-                </output>
-            </console>
+                </pre>
+            
 
             <p>
                 The first two dimensions account for almost 98% of the
@@ -1019,10 +1019,10 @@ Cumulative Proportion  0.9246 0.97769 0.9948 1.00000
             </p>
 
             <program language="r">
-                <input>
+                <code>
 d_approx &lt;- dist(pca$x[, 1:2])
 plot(d, d_approx); abline(0, 1, col = "red")
-                </input>
+                </code>
             </program>
 
             <figure xml:id="fig-iris-distance-approximation">
@@ -1051,12 +1051,12 @@ plot(d, d_approx); abline(0, 1, col = "red")
             </p>
 
             <program language="r">
-                <input>
+                <code>
 data.frame(pca$x[,1:2], Species = iris$Species) |&gt;
   ggplot(aes(PC1, PC2, fill = Species)) +
   geom_point(cex = 3, pch = 21) +
   coord_fixed(ratio = 1)
-                </input>
+                </code>
             </program>
 
             <figure xml:id="fig-iris-pca">
@@ -1111,10 +1111,10 @@ data.frame(pca$x[,1:2], Species = iris$Species) |&gt;
             </p>
 
             <program language="r">
-                <input>
+                <code>
 library(dslabs)
 if (!exists("mnist")) mnist &lt;- read_mnist()
-                </input>
+                </code>
             </program>
 
             <p>
@@ -1130,10 +1130,10 @@ if (!exists("mnist")) mnist &lt;- read_mnist()
             </p>
 
             <program language="r">
-                <input>
+                <code>
 pca &lt;- prcomp(mnist$train$images)
 plot(pca$sdev^2/sum(pca$sdev^2), xlab = "PC", ylab = "Variance explained")
-                </input>
+                </code>
             </program>
 
             <figure xml:id="fig-mnist-pca-variance-explained">
@@ -1204,14 +1204,14 @@ plot(pca$sdev^2/sum(pca$sdev^2), xlab = "PC", ylab = "Variance explained")
                         predictors by plotting them.
                     </p>
 
-                    <console>
-                        <input>
+                    <program language = "r">
+                        <code>
 dim(tissue_gene_expression$x)
-                        </input>
-                        <output>
+                        </code>
+                        </program><pre>
 [1] 189 500
-                        </output>
-                    </console>
+                        </pre>
+                    
 
                     <p>
                         We hope to get an idea of which observations are close
