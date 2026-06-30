@@ -573,7 +573,6 @@ mean(predict(knn_pca, newdata, type = "class") == y_test)
 <p>
 To obtain an unbiased MSE estimate when training with PCA, we must recompute the PCA inside each cross-validation split and apply the resulting transformation to the corresponding validation fold.
 </p>
-<p>
       <p>
         Fortunately, the <term>caret</term> package can automate this. The <c>train</c> function includes PCA as one of its available preprocessing steps. We can request PCA with a fixed number of components using
       </p>
