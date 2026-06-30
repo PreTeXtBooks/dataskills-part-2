@@ -596,7 +596,8 @@ research_funding_rates
     <exercise>
       <statement>
         <p>
-          We see that the p-value is about 0.05. So there appears to be some evidence of an association. But can we infer causation here? Is gender bias causing this observed difference? The response to the original paper claims that what we see here is similar to the UC Berkeley admissions example. Specifically, they state that this "could be a prime example of Simpson's paradox; if a higher percentage of women apply for grants in more competitive scientific disciplines, then an analysis across all disciplines could incorrectly show 'evidence' of gender inequality." To settle this dispute, create a dataset with number of applications, awards, and success rate for each gender. Re-order the disciplines by their overall success rate. Hint: use the <c>reorder</c> function to re-order the disciplines in a first step, then use <c>pivot_longer</c>, <c>separate</c>, and <c>pivot_wider</c> to create the desired table.
+We see that the p-value is about 0.05. So there appears to be some evidence of an association. But can we infer causation here? Is gender bias causing this observed difference? The response to the original paper claims that what we see here is similar to the UC Berkeley admissions example. To settle this dispute, create a dataset with the number of applications, awards, and success rate for each gender. Re-order the disciplines by their overall success rate. 
+Hint: use the <c>reorder</c> function to re-order the disciplines in a first step, then use <c>pivot_longer</c>, <c>separate</c>, and <c>pivot_wider</c> to create the desired table.
         </p>
       </statement>
     </exercise>
@@ -612,11 +613,11 @@ research_funding_rates
     <exercise>
       <statement>
         <p>
-          We definitely do not see the same level of confounding as in the UC Berkeley example. It is hard to say that there is a clear confounder here. However, we do see that, based on the observed rates, some fields may favor men and others may favor women. We also see that the two fields with the largest difference favoring men are also the fields with the most applications. But, unlike the UC Berkeley example, women are not more likely to apply for the harder subjects. Is it possible some of the selection committees are biased and others are not?
+ We definitely do not see the same level of confounding as in the UC Berkeley example. It is hard to say that there is a clear confounder here. However, we do see that, based on the observed rates, some fields may favor men and others may favor women. We also see that the two fields with the largest difference favoring men are also the fields with the most applications. But, unlike the UC Berkeley example, women are not more likely to apply for the harder subjects. Is it possible that some of the selection committees are biased and others are not?
         </p>
 
         <p>
-          To answer this question we start by checking if any of the differences seen above are statistically significant. Remember that even when there is no bias, we will see differences due to random variability in the review process as well as random variability across candidates. Perform a Chi-square test for each discipline. Hint: define a function that receives the total of a two-by-two table and returns a data frame with the p-value. Use the 0.5 correction. Then use the <c>summarize</c> function.
+To answer this question we start by checking if any of the differences seen above are statistically significant. Remember that even when there is no bias, we will see differences due to random variability in the review process as well as random variability across candidates. Perform a Chi-square test for each discipline. Hint: define a function that receives the total of a two-by-two table and returns a data frame with the p-value. Use the 0.5 correction. Then use the <c>summarize</c> function.
         </p>
       </statement>
     </exercise>
@@ -624,8 +625,7 @@ research_funding_rates
     <exercise>
       <statement>
         <p>
-          In the medical sciences, there appears to be a statistically significant difference, but could this be a spurious correlation? We performed 9 tests. Reporting only the one case with a p-value less than 0.05 might be considered an example of cherry picking. Repeat the exercise above, but instead of a p-value, compute a log odds ratio divided by their standard error. Then use qq-plot to see how much these log odds ratios deviate from the normal distribution we would expect: a standard normal distribution.
-        </p>
+In the medical sciences, there appears to be a statistically significant difference, but could this be a spurious correlation? We performed 9 tests. Reporting only the one case with a p-value less than 0.05 might be considered an example of cherry picking. Repeat the exercise above, but instead of a p-value, compute a log odds ratio divided by its standard error. Then use qq-plot to see how much these log odds ratios deviate from the standard normal distribution we would expect.        </p>
       </statement>
     </exercise>
   </exercises>
