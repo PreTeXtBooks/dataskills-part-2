@@ -848,11 +848,11 @@ polls &lt;- polls_us_election_2016 |&gt;
         </p>
 
         <p>
-          The urn model theory says nothing about pollster effect. Under the urn model, both pollsters have the same expected value: the election day difference, that we call <m>\mu</m>.
+          The urn model theory says nothing about the pollster effect. Under the urn model, both pollsters have the same expected value: the election day difference, which we call <m>\mu</m>.
         </p>
 
         <p>
-          To answer the question "is there an urn model?" we will model the observed data <m>Y_{ij}</m> in the following way:
+          Our question “Is there a difference in pollster bias?” can be reframed as asking whether the data are consistent with an urn model (i.e., a model with equal pollster bias). To answer this, we will model the observed data <m>Y_{ij}</m> in the following way:
         </p>
 
         <me>
@@ -986,7 +986,7 @@ polls |&gt;
     <exercise number="19">
       <statement>
         <p>
-          The confidence interval tells us there is relatively strong pollster effect resulting in a difference of about 5%. Random variability does not seem to explain it. We can compute a p-value to relay the fact that chance does not explain it. What is the p-value?
+The confidence interval tells us there is a relatively strong pollster effect resulting in a difference of about 5%. Random variability does not seem to explain it. We can compute a p-value to indicate that chance does not explain it. What is the p-value?
         </p>
       </statement>
     </exercise>
@@ -1002,7 +1002,7 @@ polls |&gt;
         </me>
 
         <p>
-          Now notice that we have more than two pollsters. We can also test for pollster effect using all pollsters, not just two. The idea is to compare the variability across polls to variability within polls.
+Now notice that we have more than two pollsters. We can also test for the pollster effect using all pollsters, not just two. The idea is to compare the variability across polls to the variability within polls.
         </p>
 
         <p>
@@ -1022,7 +1022,7 @@ polls &lt;- polls_us_election_2016 |&gt;
         </program>
 
         <p>
-          Compute the average and standard deviation for each pollster and examine the variability across the averages. Compare this to the variability within the pollsters, summarized by the standard deviation.
+Compute the average and standard deviation for each pollster and examine the variability across the averages. Compare this to the variability within the pollsters, summarized by the standard deviation.
         </p>
       </statement>
     </exercise>
