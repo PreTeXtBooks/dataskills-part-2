@@ -38,7 +38,7 @@
       Obama won the election.
     </p>
     <p>
-      In 2016, Silver was not as certain and gave Hillary Clinton only a 71% of winning. In contrast, many
+      In 2016, Silver was not as certain and gave Hillary Clinton only a 71% chance of winning. In contrast, many
       other forecasters were almost certain she would win. She lost. But 71% is still more than 50%, so was
       Mr. Silver wrong? And what does probability mean in this context anyway?
     </p>
@@ -50,22 +50,15 @@
     </p>
     <p>
       We begin by learning how to define estimates and margins of error for the popular vote and how these lead
-      naturally to <xref ref="sec-parameters-and-estimates"/>. We then extend this framework by aggregating data
-      from multiple pollsters to examine the limitations of traditional models and explore improvements. To
-      interpret probabilistic statements about the likelihood of a candidate winning, we introduce
-      <xref ref="sec-bayesian-statistics"/>, and finally, we combine these ideas through
-      <xref ref="sec-election-forecasting"/> to build a simplified version of the FiveThirtyEight election
+      naturally to confidence intervals. We then extend this framework by aggregating data from multiple pollsters
+      to examine the limitations of traditional models and explore improvements. To interpret probabilistic
+      statements about the likelihood of a candidate winning, we introduce Bayesian modeling, and finally, we
+      combine these ideas through hierarchical models to build a simplified version of the FiveThirtyEight election
       model and apply it to the 2016 election.
     </p>
     <p>
       We conclude with two widely taught topics that, while not required for the case study, are central to
-      statistical practice: statistical power and p-values. The part ends with a brief introduction to
-      <xref ref="sec-bootstrap"/>, an inferential method we will revisit in the machine learning part.
-    </p>
-    <p>
-      For an applied example of uncertainty quantification in public forecasting, see FiveThirtyEight's
-      explanation of its election forecast
-      <fn><url href="https://fivethirtyeight.com/features/how-fivethirtyeights-election-forecast-works/">online</url></fn>.
+      statistical practice: statistical power and p-values. This part of the book ends with a brief introduction to the bootstrap, an inferential method we will revisit in the machine learning part.
     </p>
   </introduction>
 

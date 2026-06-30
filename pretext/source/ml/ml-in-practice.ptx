@@ -160,7 +160,7 @@ modelLookup("knn")
       
       
       <p>
-        To obtain all the details of how <term>caret</term> implements kNN you can use:
+        To obtain all the details of how <term>caret</term> implements kNN, you can use:
       </p>
       
       <program language="r">
@@ -192,7 +192,7 @@ ggplot(train_knn, highlight = TRUE)
       <figure xml:id="fig-ml-in-practice-caret-default-knn-cv">
         <caption>Cross-validation results for the default kNN tuning grid</caption>
         <image source="images/ml-in-practice-caret-default-knn-cv.png" width="70%">
-          <description>A line plot of caret's cross-validation accuracy for the default kNN tuning grid, with the best value of k highlighted.</description>
+          <description><p>A line plot of caret's cross-validation accuracy for the default kNN tuning grid, with the best value of k highlighted.</p></description>
         </image>
       </figure>
     
@@ -254,7 +254,7 @@ ggplot(train_knn, highlight = TRUE)
       <figure xml:id="fig-ml-in-practice-caret-tuned-knn-cv">
         <caption>Cross-validation results for an expanded kNN tuning grid</caption>
         <image source="images/ml-in-practice-caret-tuned-knn-cv.png" width="70%">
-          <description>A line plot of caret's cross-validation accuracy for a wider range of k values, with the best-performing k highlighted.</description>
+          <description><p>A line plot of caret's cross-validation accuracy for a wider range of k values, with the best-performing k highlighted.</p></description>
         </image>
       </figure>
       
@@ -262,7 +262,7 @@ ggplot(train_knn, highlight = TRUE)
 Resampling methods involve random sampling steps, so repeated runs of the same code can produce different outcomes. To ensure results can be reproduced exactly, we set the random seed at the start of the analysis.
         </p>
         <p>
-The results component of the train output includes several summary statistics related to the variability of the cross-validation estimates:
+        The <c>results</c> component of the <c>train</c> output includes several summary statistics related to the variability of the cross-validation estimates:
         </p>
 
 <program language="r"><code>
@@ -271,9 +271,9 @@ names(train_knn$results)
 <pre>
  [1] "k"          "Accuracy"   "Kappa"      "AccuracySD" "KappaSD"
 </pre>
-<p>
-You can learn many more details about the caret package from the manual<fn>https://topepo.github.io/caret/available-models.html</fn>.
-</p>
+      <p>
+        You can learn many more details about the <term>caret</term> package from the manual<fn><url href="https://topepo.github.io/caret/available-models.html"/></fn>.
+      </p>
 
       <p>
         To access the parameter that maximized the accuracy, you can use this:
@@ -300,7 +300,7 @@ train_knn$finalModel
         </program>      
       
       <p>
-        The function <c>predict</c> will use this best performing model. Here is the accuracy of the best model when applied to the test set, which we have not yet used because the cross validation was done on the training set:
+        The function <c>predict</c> will use this best-performing model. Here is the accuracy of the best model when applied to the test set, which we have not yet used because the cross-validation was done on the training set:
       </p>
       
       <program language="r">
@@ -432,7 +432,7 @@ hist(colSds(x), breaks = 256)
     <figure xml:id="fig-ml-in-practice-feature-sds-histogram">
       <caption>Histogram of pixel standard deviations in the MNIST subset</caption>
       <image source="images/ml-in-practice-feature-sds-histogram.png" width="70%">
-        <description>A histogram of pixel standard deviations across the sampled MNIST training images, showing many pixels with near-zero variability.</description>
+        <description><p>A histogram of pixel standard deviations across the sampled MNIST training images, showing many pixels with near-zero variability.</p></description>
       </image>
     </figure>
     
@@ -463,12 +463,12 @@ image(matrix(1:784 %in% nzv, 28, 28))
     <figure xml:id="fig-ml-in-practice-near-zero-variance-pixels">
       <caption>Pixels flagged for removal by <c>nearZeroVar</c></caption>
       <image source="images/ml-in-practice-near-zero-variance-pixels.png" width="50%">
-        <description>An image plot showing which of the 784 MNIST pixels are flagged as near-zero-variance predictors, concentrated near the edges of the digit image.</description>
+        <description><p>An image plot showing which of the 784 MNIST pixels are flagged as near-zero-variance predictors, concentrated near the edges of the digit image.</p></description>
       </image>
     </figure>
     
     <p>
-      If we use <c>nearZeroVar</c>, we end up removing <c>length(nzv)</c> = 532 predictors. We can see that the accuracy of kNN is about the same even after removing all these predictors.
+      If we use <c>nearZeroVar</c>, we end up removing <c>length(nzv)</c> = 532 predictors. We can see that the accuracy of kNN is about the same even after removing all these predictors:
     </p>
 
     <program language="r">
@@ -498,7 +498,7 @@ centered_subsetted_x_test &lt;- predict(pp, newdata = x_test)
       </program>    
 
 <p>
-      Additionally, the <c>train</c> function in caret includes a <c>preProcess</c> argument that allows users to specify which preprocessing steps to apply automatically during model training. Here is an example of how to use it to remove near-zero variance predictors. Because this is an illustrative example, we consider only one <m>k</m> and use five-fold cross-validation to estimate the MSE to reduce runtime. As we see in <xref ref="sec-knn-in-practice"/>, in practice you would want to optimize <m>k</m> and use more thorough resampling.
+      Additionally, the <c>train</c> function in <term>caret</term> includes a <c>preProcess</c> argument that allows users to specify which preprocessing steps to apply automatically during model training. Here is an example of how to use it to remove near-zero variance predictors. Because this is an illustrative example, we consider only one <m>k</m> and use five-fold cross-validation to estimate the MSE to reduce runtime. As we see in <xref ref="sec-knn-in-practice"/>, in practice you would want to optimize <m>k</m> and use more thorough resampling.
     </p>
 
     <program language="r">
@@ -535,7 +535,7 @@ p &lt;- which(cumsum(pca$sdev^2) / sum(pca$sdev^2) &gt;= 0.9)[1]
       </program>
       
       <p>
-We can run an algorithm using only these 87 transformed features. We will use knn3 from the caret package as an example with the default <c>k</c>
+        We can run an algorithm using only these <c>p</c> transformed features. We will use <c>knn3</c> from the caret package as an example with the default <c>k</c>
       </p>
       
       <program language="r">
@@ -559,7 +559,7 @@ newdata &lt;- sweep(x_test, 2, colMeans(x)) %*% pca$rotation[, 1:p]
       </program>
       
       <p>
-The resulting accuracy is similar to what we obtained with the full feature set, but using only 87 dimensions:
+        The resulting accuracy is similar to what we obtained with the full feature set, but using only <c>p</c> dimensions:
       </p>
       
       <program language="r">
@@ -573,25 +573,25 @@ mean(predict(knn_pca, newdata, type = "class") == y_test)
 <p>
 To obtain an unbiased MSE estimate when training with PCA, we must recompute the PCA inside each cross-validation split and apply the resulting transformation to the corresponding validation fold.
 </p>
-<p>
+
       <p>
         Fortunately, the <term>caret</term> package can automate this. The <c>train</c> function includes PCA as one of its available preprocessing steps. We can request PCA with a fixed number of components using
       </p>
-      
+
       <p>
         <c>preProcOptions = list(pcaComp = p)</c>
       </p>
-      
+
       <p>
-or ask caret to pick the number of components that explain a fixed fraction of variability, such as 90%, using
+        or ask <term>caret</term> to pick the number of components that explain a fixed fraction of variability, such as 90%, using
       </p>
-      
+
       <p>
         <c>preProcOptions = list(thresh = 0.9)</c>.
       </p>
-      
+
       <p>
-        Here is how we modify our earlier code to let caret perform PCA during preprocessing:
+        Here is how we modify our earlier code to let <term>caret</term> perform PCA during preprocessing:
       </p>
       
       <program language="r">
@@ -614,46 +614,39 @@ mean(y_hat_knn_pca == y_test)
       </p>
       
       <p>
-One limitation of this approach using caret is that we do not automatically optimize the number of PCs. To tune this quantity directly, just like we tune parameters such as 
-<m>k</m>, we would need to define our own model interface. The caret manual<fn>https://topepo.github.io/caret/using-your-own-model-in-train.html</fn> describes how to build custom models that allow full optimization of the PCA dimension.
-</p>
+        One limitation of this approach using <term>caret</term> is that we do not automatically optimize the number of PCs. To tune this quantity directly, just like we tune parameters such as <m>k</m>, we would need to define our own model interface. The caret manual<fn><url href="https://topepo.github.io/caret/using-your-own-model-in-train.html"/></fn> describes how to build custom models that allow full optimization of the PCA dimension.
+      </p>
     </subsection>
 </section>
 
   <section xml:id="sec-parallelization">
     <title>Parallelization</title>
-    
+
     <p>
-      During cross-validation or bootstrapping, the process of fitting models to different samples or using varying parameters can be performed independently. Imagine you are fitting 100 models; if you had access to 100 computers, you could theoretically speed up the process by a factor of 100 by fitting each model on a separate computer and then aggregating the results. In reality, most modern computers, including many personal computers, are equipped with multiple processors that allow for such parallel execution. This method, known as parallelization, leverages these multiple processors to conduct several computational tasks simultaneously, significantly accelerating the model training process. By distributing the workload across different processors, parallelization makes it feasible to manage large datasets and complex modeling procedures efficiently.
+      By default, the <c>train</c> function estimates model accuracy using 25 bootstrap resamples. This can be computationally expensive. For example, evaluating 75 values of a tuning parameter requires 25 × 75 = 1,875 model fits, which can take hours for slower algorithms.
     </p>
-    
+
     <p>
-      The <term>caret</term> package is designed to take advantage of parallel processing, but you need to explicitly tell R to run tasks in parallel. To do this, we use the <term>doParallel</term> package:
+      A simple way to approximate runtime is to time a single fit and multiply by the total number of fits. For example, with kNN:
     </p>
-    
+
     <program language="r">
       <code>
-library(doParallel)
-nc &lt;- detectCores() - 1   # it is convention to leave 1 core for the OS
-cl &lt;- makeCluster(nc)
-registerDoParallel(cl)
+system.time(predict(knn3(x[, -nzv], y), newdata = x_test[, -nzv]))
       </code>
     </program>
-    
+
     <p>
-      If you do use parallelization, once you are finished fitting your models, make sure to let R know you are done with the following lines of code:
+      On a typical laptop, this takes a few seconds, suggesting the full process could take over an hour.
     </p>
-    
-    <program language="r">
-      <code>
-stopCluster(cl)
-stopImplicitCluster()
-      </code>
-    </program>
-    
+
+    <p>
+      This cost can be reduced substantially using parallel computing. Modern computers have multiple processors that allow tasks to run simultaneously, and the <term>caret</term> package can take advantage of this. To enable parallelization, we use the <term>doParallel</term> package. We will demonstrate this setup in the next section.
+    </p>
+
     <warning>
       <p>
-        When parallelizing tasks across multiple processors, it is important to consider the risk of running out of memory. Each processor might require a copy of the data or substantial portions of it, which can multiply overall memory demands. This is especially challenging if the data or models are large.
+        Parallelization can increase memory usage, since each processor may require its own copy of the data. This can be a limitation for large datasets.
       </p>
     </warning>
   </section>
@@ -662,235 +655,259 @@ stopImplicitCluster()
     <title>Model tuning and diagnostics</title>
     
     <p>
-      In <xref ref="sec-knn-cv-intro"/> and <xref ref="sec-random-forests"/>, we introduced the k-nearest neighbors (kNN) and random forest algorithms, along with their intuition and formulation. In this section, we use these two methods as working examples to illustrate the process of model selection and tuning. Specifically, we demonstrate how to train and evaluate models in R, choose appropriate hyperparameters, such as <m>k</m> for kNN and tree-related parameters for random forests, and assess performance using cross-validation.
+      In Sections <xref ref="sec-knn-cv-intro"/> and <xref ref="sec-random-forests"/>, we introduced the k-nearest neighbors (kNN) and random forest algorithms, along with their intuition and formulation. In this section, we use these two methods as working examples to illustrate the process of model selection and tuning. Specifically, we demonstrate how to train and evaluate models in R, choose appropriate hyperparameters, such as <m>k</m> for kNN and tree-related parameters for random forests, and assess performance using cross-validation.
     </p>
 
     <subsection xml:id="subsec-optimizing-k">
       <title>Optimizing tuning parameters</title>
-      
+
       <p>
-        The first step is to optimize for <m>k</m>.
+        We start by demonstrating how we select the tuning parameter <m>k</m> in the kNN algorithm. In <term>caret</term>, this is done using the <c>tuneGrid</c> argument in the <c>train</c> function. The grid of candidate values must be provided as a data frame, with column names matching those returned by <c>modelLookup</c>. For kNN, this means a column named <c>k</c>. The default values are 5, 7, and 9, which is a very limited range.
       </p>
-      
+
+      <p>
+        In practice, selecting the grid and resampling strategy involves a tradeoff. Using fewer cross-validation folds reduces computation time but yields noisier estimates of prediction error, while more folds provide more precise estimates at greater runtime cost.
+      </p>
+
+      <p>
+        Because of this tradeoff, it is inefficient to search over a fine grid from the start. Instead, we begin with a coarse grid over a broad range and a faster resampling scheme to identify a promising region. Once we have a rough idea of where the optimal <m>k</m> lies, we refine the search with a finer grid and more thorough resampling.
+      </p>
+
+      <p>
+        Throughout this process, we use parallel computation to reduce runtime, since each combination of tuning parameters and resamples can be evaluated independently. Note that once clusters are registered, the <c>train</c> function automatically uses them for parallel processing, so we do not need to modify our code to take advantage of parallelization.
+      </p>
+
       <program language="r">
         <code>
-train_knn &lt;- train(x, y, method = "knn", 
-                   preProcess = "nzv",
-                   trControl = trainControl("cv", number = 20, p = 0.95),
+library(doParallel)
+nc &lt;- detectCores() - 1   # it is convention to leave 1 core for the OS
+cl &lt;- makeCluster(nc)
+registerDoParallel(cl)
+set.seed(1991)
+knn &lt;- train(x, y, method = "knn", preProcess = c("nzv", "pca"),
+                   trControl = trainControl(method = "cv", number = 5,
+                           preProcOptions = list(thresh = 0.9)),
+                   tuneGrid = data.frame(k = seq(1, 25, 4)))
+plot(knn, highlight = TRUE)
+        </code>
+      </program>
+
+      <p>
+        Based on these results, we can infer that the best <m>k</m> is between 1 and 5. We now refine the search with a finer grid and 20-fold cross-validation:
+      </p>
+
+      <program language="r">
+        <code>
+set.seed(1992)
+knn &lt;- train(x, y, method = "knn", preProcess = c("nzv", "pca"),
+                   trControl =  trainControl(method = "cv", number = 20,
+                           preProcOptions = list(thresh = 0.9)),
                    tuneGrid = data.frame(k = seq(1, 7, 2)))
+knn$bestTune
         </code>
       </program>
-      
+
       <p>
-        Once we optimize our algorithm, the <c>predict</c> function defaults to using the best performing algorithm fit with the entire training data:
+        to choose <m>k</m> = <c>knn$bestTune$k</c>. Now that we have optimized our algorithm, the <c>predict</c> function defaults to using the best-performing model fit with the entire training data:
       </p>
-      
+
       <program language="r">
         <code>
-y_hat_knn &lt;- predict(train_knn, x_test, type = "raw")
+y_hat_knn &lt;- predict(knn, x_test, type = "raw")
         </code>
       </program>
-      
+
       <p>
         We achieve relatively high accuracy:
       </p>
-      
+
       <program language="r">
         <code>
 mean(y_hat_knn == y_test)
         </code>
-        </program><pre>
-[1] 0.953
-        </pre>
-      
+      </program>
+
+      <p>
+        Once done with parallelization, it is good practice to stop the cluster:
+      </p>
+
+      <program language="r">
+        <code>
+stopCluster(cl)
+stopImplicitCluster()
+        </code>
+      </program>
+
+      <note>
+        <p>
+          To verify that parallel processing is active, you can check your system's process monitor (Activity Monitor, Task Manager, or <c>top</c>) and confirm that multiple R processes are using CPU.
+        </p>
+      </note>
+
     </subsection>
   </section>
 
   <section xml:id="sec-random-forest-practice">
-    <title>Random Forest</title>
-    
+    <title>Improving computational efficiency</title>
+
     <p>
-      With the random forest algorithm several parameters can be optimized, but the main one is <c>mtry</c>, the number of predictors that are randomly selected for each tree. This is also the only tuning parameter that the <term>caret</term> function <c>train</c> permits when using the default implementation from the <term>randomForest</term> package.
+      With the random forest algorithm, several parameters can be optimized, but the main one is <c>mtry</c>, the number of predictors that are randomly selected for each tree. This is also the only tuning parameter that the <term>caret</term> function <c>train</c> permits when using the default implementation from the <term>randomForest</term> package.
     </p>
-    
+
     <program language="r">
       <code>
 library(randomForest)
-train_rf &lt;- train(x, y, method = "rf", 
-                  preProcess = "nzv",
-                  tuneGrid = data.frame(mtry = seq(5, 15)))
-y_hat_rf &lt;- predict(train_rf, x_test, type = "raw")
       </code>
     </program>
-    
+
     <p>
-      Now that we have optimized our algorithm, we are ready to fit our final model:
+      The random forest algorithm is computationally more intensive than kNN and can require substantially longer training times. As a result, tuning its hyperparameters requires a more deliberate strategy. In this example, we adopt several approaches to reduce computation time: we use parallelization, decrease the number of bootstrap resamples, limit the number of trees grown in each fit, and perform an initial search over a coarse grid before refining the search in a narrower region.
     </p>
-    
+
+    <p>
+      We start by fitting the default model and checking
+    </p>
+
     <program language="r">
       <code>
-y_hat_rf &lt;- predict(train_rf, x_test, type = "raw")
+rf &lt;- randomForest(x[, -nzv], y)
+plot(rf)
       </code>
     </program>
-    
+
+    <figure xml:id="fig-ml-in-practice-random-forest-error-rate">
+      <caption>Random forest error rate versus number of trees</caption>
+      <image source="images/ml-in-practice-random-forest-error-rate.png" width="70%">
+        <description><p>A random forest diagnostic plot showing how the out-of-bag error rate changes as the number of trees increases and stabilizes after roughly 200 trees.</p></description>
+      </image>
+    </figure>
+
+    <p>
+      We see that accuracy begins to level off at around 200 trees. So for our coarse search, we limit the number of trees to 200, use five-fold cross-validation instead of 25 bootstrap samples, and consider a coarse grid of <c>mtry</c> values. This reduction in the number of trees and the size of the resampling allows us to reduce the runtime by a factor of 10, which allows us to identify a promising region for <c>mtry</c> relatively quickly:
+    </p>
+
     <program language="r">
       <code>
-library(randomForest)
+library(doParallel)
+cl &lt;- makeCluster(detectCores() - 1)
+registerDoParallel(cl)
+set.seed(1993)
+rf &lt;- train(x, y, method = "rf", ntree = 250, preProcess = "nzv",
+  trControl = trainControl(method = "cv", n = 5),
+  tuneGrid = data.frame(mtry = seq(3, 53, 10)))
+ggplot(rf, highlight = TRUE)
       </code>
     </program>
-    
+
+    <p>
+      We see that the optimal <c>mtry</c> is between 5 and 20.
+    </p>
+
+    <note>
+      <p>
+        Note that with smaller values of <c>mtry</c>, individual trees tend to be weaker because each split considers fewer predictors. As a result, more trees are typically required for performance to stabilize. In contrast, larger values of <c>mtry</c> produce stronger but more correlated trees, so fewer trees may suffice.
+      </p>
+      <p>
+        When reducing the number of trees to speed up tuning, keep this tradeoff in mind: using too few trees can bias comparisons across <c>mtry</c> values, particularly disadvantaging smaller <c>mtry</c>. It is therefore advisable to use enough trees to obtain stable performance when selecting the range of <c>mtry</c>.
+      </p>
+    </note>
+
+    <p>
+      We now refine the search using a finer grid and the default resampling settings. Note that the code below uses 500 trees and 25 bootstrap resamples, so it may take several minutes to run.
+    </p>
+
     <program language="r">
       <code>
-library(randomForest)
-nzv &lt;- nearZeroVar(x)
-fit_rf &lt;- randomForest(x[, -nzv], y,  mtry = 9)
-y_hat_rf &lt;- predict(fit_rf, x_test[,-nzv])
+set.seed(1994)
+rf &lt;- train(x, y, method = "rf", preProcess = "nzv",
+  tuneGrid = data.frame(mtry = 5:20))
       </code>
     </program>
-    
+
+    <program language="r">
+      <code>
+y_hat_rf &lt;- predict(rf, x_test, type = "raw")
+      </code>
+    </program>
+
     <p>
       As with kNN, we also achieve high accuracy:
     </p>
-    
+
     <program language="r">
       <code>
 mean(y_hat_rf == y_test)
       </code>
-      </program><pre>
-[1] 0.956
-      </pre>
-    
-    
-    <p>
-      By optimizing some of the other algorithm parameters, we can achieve even higher accuracy.
-    </p>
-    
-    <subsection xml:id="subsec-computation-time">
-      <title>Testing and improving computation time</title>
-      
-      <p>
-        The default method for estimating accuracy used by the <c>train</c> function is to test prediction on 25 bootstrap samples. This can result in long compute times. For example, if we are considering several values, say 10, of the tuning parameters, we will fit the algorithm 250 times. We can use the <c>system.time</c> function to estimate how long it takes to run the algorithm once:
-      </p>
-      
-      <program language="r">
-        <code>
-nzv &lt;- nearZeroVar(x)
-system.time({fit_rf &lt;- randomForest(x[, -nzv], y,  mtry = 9)})
-        </code>
-        </program><pre>
-   user  system elapsed 
- 61.657   0.598  62.356
-        </pre>
-      
-      
-      <p>
-        and use this to estimate the total time for the 250 iterations. In this case it will be several hours.
-      </p>
-      
-      <p>
-        One way to reduce run time is to use k-fold cross validation with a smaller number of test sets. A popular choice is leaving out 5 test sets with 20% of the data. To use this we set the <c>trControl</c> argument in train to <c>trainControl(method = "cv", number = 5, p = .8)</c>.
-      </p>
-      
-      <p>
-        For random forest, we can also speed up the training step by running less trees per fit. After running the algorithm once, we can use the <c>plot</c> function to see how the error rate changes as the number of trees grows.
-      </p>
-      
-      <p>
-        Here we can see that error rate stabilizes after about 200 trees:
-      </p>
-      
-      <program language="r">
-        <code>
-plot(fit_rf)
-        </code>
-      </program>
-      
-      <figure xml:id="fig-ml-in-practice-random-forest-error-rate">
-        <caption>Random forest error rate versus number of trees</caption>
-        <image source="images/ml-in-practice-random-forest-error-rate.png" width="70%">
-          <description>A random forest diagnostic plot showing how the out-of-bag error rate changes as the number of trees increases and stabilizes after roughly 200 trees.</description>
-        </image>
-      </figure>
-      
-      <p>
-        We can use this finding to speed up the cross validation procedure. Specifically, because the default is 500, by adding the argument <c>ntree = 200</c> to the call to <c>train</c> above, the procedure will finish 2.5 times faster.
-      </p>
-    </subsection>
+    </program>
 
-    <subsection xml:id="subsec-variable-importance">
-      <title>Variable importance</title>
-      
-      <p>
-        We described variable importance in <xref ref="sec-variable-importance"/>. The following function computes the importance of each feature:
-      </p>
-      
-      <program language="r">
-        <code>
-imp &lt;- varImp(fit_rf)
-        </code>
-      </program>
-      
-      <p>
-        We can see which features are being used most by plotting an image:
-      </p>
-      
-      <program language="r">
-        <code>
-mat &lt;- rep(0, ncol(x))
-mat[-nzv] &lt;- imp$Overall
-image(matrix(mat, 28, 28))
-        </code>
-      </program>
-      
-      <figure xml:id="fig-ml-in-practice-random-forest-variable-importance">
-        <caption>Random forest variable importance across image pixels</caption>
-        <image source="images/ml-in-practice-random-forest-variable-importance.png" width="50%">
-          <description>An image plot mapping random forest variable importance back onto the 28 by 28 pixel grid, with the most informative pixels concentrated around the digit strokes.</description>
-        </image>
-      </figure>
-    </subsection>
+    <p>
+      Note that by optimizing some of the other algorithm parameters, we could achieve even higher accuracy.
+    </p>
+
+    <p>
+      To end, we turn off the use of parallel:
+    </p>
+
+    <program language="r">
+      <code>
+stopCluster(cl)
+stopImplicitCluster()
+      </code>
+    </program>
+
   </section>
 
   <section xml:id="sec-diagnostics">
     <title>Diagnostics</title>
-    
+
     <p>
       An important part of data analysis is visualizing results to better understand our model fit and also determine why we are failing. How we do this depends on the application but below we provide some examples for the example of handwritten digit recognition.
     </p>
 
-<p>
-The black box nature of many machine learning algorithms can make it difficult to understand how they are making predictions. However, there are tools available to help us interpret these models and gain insights into their behavior. For example, with random forests we can examine whether variable importance, described in Section 30.5.1, is consistent with our expectations given the context. The following function computes the importance of each feature:
-</p>
+    <p>
+      The black box nature of many machine learning algorithms can make it difficult to understand how they are making predictions. However, there are tools available to help us interpret these models and gain insights into their behavior. For example, with random forests we can examine whether variable importance, described in <xref ref="sec-variable-importance"/>, is consistent with our expectations given the context.
+    </p>
 
-<program language="r"><code>
+    <p>
+      The following function computes the importance of each feature:
+    </p>
+
+    <program language="r">
+      <code>
 imp &lt;- varImp(rf)$importance[,1]
-</code></program>
+      </code>
+    </program>
 
-<p>We can see which features are being used most by plotting an image:</p>
+    <p>
+      We can see which features are being used most by plotting an image:
+    </p>
 
-<program language="r"><code>
+    <program language="r">
+      <code>
 mat &lt;- rep(0, ncol(x))
 mat[-nzv] &lt;- imp
 image(matrix(mat, 28, 28))
-</code></program>
+      </code>
+    </program>
 
     <figure xml:id="fig-ml-importance-image-1">
-      <caption>High-confidence random forest misclassifications</caption>
-      <image source="images/importance-image-1.png" width="100%">
+      <caption>Variable importance image for random forest</caption>
+      <image source="images/importance-image-1.png" width="50%">
+        <description><p>An image plot showing which pixels are most important for the random forest classifier.</p></description>
       </image>
     </figure>
 
     <p>
       A common diagnostic tool is to examine the errors. By looking at the cases where the model made incorrect predictions, we can often identify specific weaknesses in the algorithm or parameter choices and try to correct them. Below we show the images of digits for which we made an incorrect prediction. Here are some errors for the random forest:
     </p>
-    
+
     <figure xml:id="fig-ml-in-practice-random-forest-errors">
       <caption>High-confidence random forest misclassifications</caption>
       <image source="images/rf-images-1.png" width="100%">
-        <description>A row of four MNIST test images that the random forest misclassified with high confidence, each labeled with the predicted class probability and the true digit.</description>
+        <description><p>A row of four MNIST test images that the random forest misclassified with high confidence, each labeled with the predicted class probability and the true digit.</p></description>
       </image>
     </figure>
-    
+
     <p>
       By examining errors like this, we often find specific weaknesses in algorithms or parameter choices and can try to correct them.
     </p>
@@ -1226,7 +1243,7 @@ with(mnist_27$true_p, plot_cond_prob(x_1, x_2, p))
         <figure xml:id="fig-ml-in-practice-true-conditional-probability">
           <caption>True conditional probability for the 2-or-7 example</caption>
           <image source="images/ml-in-practice-true-conditional-probability.png" width="70%">
-            <description>A raster plot of the true conditional probability for the 2-versus-7 example over the two-feature grid, with a contour marking the 0.5 decision boundary.</description>
+            <description><p>A raster plot of the true conditional probability for the 2-versus-7 example over the two-feature grid, with a contour marking the 0.5 decision boundary.</p></description>
           </image>
         </figure>
         

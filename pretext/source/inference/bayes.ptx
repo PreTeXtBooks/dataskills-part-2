@@ -87,11 +87,11 @@ tmp_2 |>
     </figure>
 
     <p>
-      But what does this mean in the context of the theory we have previously covered, in which these percentages are considered fixed? Furthermore, election forecasters make probabilistic statements such as "Obama has a 90% chance of winning the election." Note that in the context of an urn model, this would be equivalent to stating that the probability of <m>p>0.5</m> is 90%. However, in the urn model <m>p</m> is a fixed parameter and it does not make sense to talk about probability. With Bayesian statistics, we assume <m>p</m> is a random variable, and thus, a statement such as "90% chance of winning" is consistent with the mathematical approach. Forecasters also use models to describe variability at different levels. For example, sampling variability, pollster to pollster variability, day to day variability, and election to election variability. One of the most successful approaches used for this are hierarchical models, which can be explained in the context of Bayesian statistics.
+      But what does this mean in the context of the theory we have previously covered, in which these percentages are considered fixed? Furthermore, election forecasters make probabilistic statements such as "Obama has a 90% chance of winning the election." Note that in the context of an urn model, this would be equivalent to stating that the probability of <m>p>0.5</m> is 90%. However, in the urn model, <m>p</m> is a fixed parameter, and it does not make sense to talk about probability. With Bayesian statistics, we assume <m>p</m> is a random variable, and thus, a statement such as "90% chance of winning" is consistent with the mathematical approach. Forecasters also use models to describe variability at different levels. For example, sampling variability, pollster-to-pollster variability, day-to-day variability, and election-to-election variability. One of the most successful approaches used for this is hierarchical modeling, which can be explained in the context of Bayesian statistics.
     </p>
 
     <p>
-      In this chapter, we will briefly describe Bayesian statistics. We use three cases studies: 1) interpreting diagnostic tests for a rare disease, and 2) estimating the probability of Hillary Clinton winning the popular vote in 2016 using pre-election poll data.
+      In this chapter, we will briefly describe Bayesian statistics. We use three case studies: 1) interpreting diagnostic tests for a rare disease, and 2) estimating the probability of Hillary Clinton winning the popular vote in 2016 using pre-election poll data.
     </p>
 
     <note>
@@ -118,6 +118,10 @@ tmp_2 |>
 
     <p>
       with <m>+</m> meaning a positive test and <m>D</m> representing if you actually have the disease (1) or not (0).
+    </p>
+
+    <p>
+      Recall that <m>\Pr(A \mid B)</m> denotes the probability of event <m>A</m> given that event <m>B</m> has occurred (see <xref ref="sec-conditional-probability"/>). In this context, <m>\Pr(+ \mid D = 1)</m> represents the probability that the test result is positive given that the individual has the disease. Similarly, <m>\Pr(- \mid D = 0)</m> represents the probability that the test result is negative given that the individual does not have the disease.
     </p>
 
     <p>
@@ -150,7 +154,7 @@ tmp_2 |>
     </me>
 
     <p>
-      According to the above, despite the test having 0.99 accuracy, the probability of having the disease given a positive test is only 0.02. This might seem counter-intuitive to some, but it is because we must factor in the very rare probability that a randomly chosen person has the disease. To illustrate this, we run a Monte Carlo simulation.
+      According to the above, despite the test having 0.99 accuracy, the probability of having the disease given a positive test is only 0.02. This might seem counterintuitive to some, but it is because we must factor in the very rare probability that a randomly chosen person has the disease. To illustrate this, we run a Monte Carlo simulation.
     </p>
 
     <p>
@@ -187,7 +191,7 @@ cat(N_1, "with disease, and", N_0, "without.")
     </console>
 
     <p>
-      This makes it more probable that we will see some false positives given that the test is not perfect. Now, each person gets the test, which is correct 99% of the time:
+      This makes it more probable that we will see some false positives, given that the test is not perfect. Now, each person gets the test, which is correct 99% of the time:
     </p>
 
     <program language="r">
@@ -216,7 +220,7 @@ D       -     +
     </console>
 
     <p>
-      From this table, we see that the proportion of positive tests that have the disease is about 2%. We can run this over and over again to see that, in fact, the probability converges to about 0.02.
+      From this table, we see that the proportion of positive tests that have the disease is 23 out of 988. We can run this over and over again to see that, in fact, the probability converges to about 0.02.
     </p>
   </section>
 
@@ -224,7 +228,7 @@ D       -     +
     <title>Priors and posteriors</title>
 
     <p>
-      In the previous chapter, we computed an estimate and margin of error for the difference in popular votes between Hillary Clinton and Donald Trump. We denoted the parameter, the difference in popular votes, with <m>\theta</m>. The estimate was between 2 and 4 percent, and the confidence interval did not include 0. A forecaster would use this to predict Hillary Clinton would win the popular vote. But to make a probabilistic statement about winning the election, we need to use a Bayesian approach.
+      In the previous chapter, we computed an estimate and margin of error for the difference in popular votes between Hillary Clinton and Donald Trump. We denoted the parameter, the difference in popular votes, with <m>\theta</m>. The estimate was between 2 and 4 percent, and the confidence interval did not include 0. A forecaster would use this to predict that Hillary Clinton would win the popular vote. But to make a probabilistic statement about winning the election, we need to use a Bayesian approach.
     </p>
 
     <p>
@@ -240,7 +244,7 @@ D       -     +
     </p>
 
     <p>
-      The data is used to update our initial guess or <em>prior belief</em>. This can be done mathematically if we define the distribution for the observed data for any given <m>\theta</m>. In our particular example, we would write down a model for the average of our polls. If we fixed <m>\theta</m>, this model is the same we used in the previous chapter:
+      The data is used to update our initial guess or <em>prior belief</em>. This can be done mathematically if we define the distribution for the observed data for any given <m>\theta</m>. In our particular example, we would write down a model for the average of our polls. If we fixed or conditioned on <m>\theta</m>, this model is the same as the one we used in the previous chapter:
     </p>
 
     <me>
@@ -248,31 +252,31 @@ D       -     +
     </me>
 
     <p>
-      As before, <m>\sigma</m> describes randomness due to sampling and the pollster effects. In the Bayesian contexts, this is referred to as the sampling distribution. Note that we write the conditional <m>\bar{Y} \mid \theta</m> because <m>\theta</m> is now considered a random variable.
+      As before, <m>\sigma</m> describes randomness due to sampling and the pollster effects. In the Bayesian context, this is referred to as the sampling distribution. Note that we write the conditional <m>\bar{Y} \mid \theta</m> because <m>\theta</m> is now considered a random variable.
     </p>
 
     <p>
-      We do not show the derivations here, but we can now use calculus and a version of Bayes' Theorem to derive the conditional distribution of <m>\theta</m> given the observed data, referred to as the posterior distribution. Specifically, we can show that <m>\theta \mid \bar{Y}</m> follows a normal distribution with expected value:
-    </p>
-
-    <me>
-      \mathrm{E}[\theta \mid \bar{Y}] = B \theta_0 + (1-B) \,\bar{Y} \mbox{ with } B = \frac{\sigma^2/N}{\sigma^2/N+\tau^2}
-    </me>
-
-    <p>
-      and standard error :
+      We do not show the derivations here, but we can now use calculus and a version of Bayes' Theorem to derive the conditional distribution of <m>\theta</m> given the observed data, referred to as the <em>posterior distribution</em>. Specifically, we can show that <m>\theta \mid \bar{Y}</m> follows a normal distribution with expected value:
     </p>
 
     <me>
-      \mathrm{SE}[\mu \mid \bar{Y}] = \sqrt{\frac{1}{N/\sigma^2+1/\tau^2}}.
+      \mathrm{E}[\theta \mid \bar{Y}] = B \theta_0 + (1-B) \,\bar{Y},\, \mbox{ with } \, B = \frac{\sigma^2/N}{\sigma^2/N+\tau^2}
     </me>
 
     <p>
-      Note that the expected value is a weighted average of our prior guess <m>\theta_0</m> and the observed data <m>\bar{Y}</m>. The weight depends on how certain we are about our prior belief, quantified by <m>\tau^2</m>, and the variance <m>\sigma^2/N</m> of the summary of our observed data.
+      and standard error:
+    </p>
+
+    <me>
+      \mathrm{SE}[\theta \mid \bar{Y}] = \sqrt{\frac{1}{N/\sigma^2+1/\tau^2}}.
+    </me>
+
+    <p>
+      Note that the expected value is a weighted average of our prior guess <m>\theta_0</m> and the observed data <m>\bar{Y}</m>. The weight depends on how certain we are about our prior belief, quantified by <m>\tau^2</m>, and the variance of the summary of our observed data <m>\sigma^2/N</m>.
     </p>
 
     <p>
-      This weighted average is sometimes referred to as <em>shrinking</em> because it <em>shrinks</em> estimates towards a prior value. To see this note that we can rewrite the weighted average as:
+      This weighted average is sometimes referred to as <em>shrinking</em> because it <em>shrinks</em> estimates towards a prior value. To see this, note that we can rewrite the weighted average as:
     </p>
 
     <me>
@@ -284,7 +288,7 @@ D       -     +
     </p>
 
     <p>
-      These formulas are useful way quantifying how we <em>update our beliefs</em>.
+      These formulas are a useful way of quantifying how we <em>update our beliefs</em>.
     </p>
   </section>
 
@@ -292,11 +296,11 @@ D       -     +
     <title>Credible intervals</title>
 
     <p>
-      We can also report intervals with high probability of occurring given our model. Specifically, for any probability value <m>\alpha</m> we can use the posterior distribution to construct intervals centered at our posterior mean and with <m>\alpha</m> chance of occurring. These are called <em>credible intervals</em>.
+      We can also report intervals with a high probability of occurring given our model. Specifically, for any probability value <m>\alpha</m>, we can use the posterior distribution to construct intervals centered at our posterior mean and with <m>\alpha</m> chance of occurring. These are called <em>credible intervals</em>.
     </p>
 
     <p>
-      As an example, we compute a posterior distribution and construct a credible interval for the popular vote difference, after defining a prior distribution with mean 0% and standard error 5%. This prior distribution can be interpreted as follows: before seeing polling data, we don't think any candidate has the advantage, and a difference of up to 10% either way is possible.
+      As an example, we compute a posterior distribution and construct a credible interval for the popular vote difference, after defining a prior distribution with mean 0% and standard error 5%. This prior distribution can be interpreted as follows: before seeing polling data, we don't think any candidate has the advantage, and a difference of up to 10% either way is plausible (about 95% of prior probability lies between -10% and +10%).
     </p>
 
     <program language="r">
@@ -325,7 +329,7 @@ posterior_mean + c(-1, 1)*qnorm(0.975)*posterior_se
     </console>
 
     <p>
-      Furthermore, we can now make the probabilistic statement that we could not make with the frequentists approach. Specifically, <m>\mathrm{Pr}(\mu>0 \mid \bar{X})</m> can be computed as follows:
+      Furthermore, we can now make the probabilistic statement that we could not make with the frequentist approach. Specifically, <m>\mathrm{Pr}(\theta>0 \mid \bar{Y})</m> can be computed as follows:
     </p>
 
     <console>
@@ -348,13 +352,13 @@ posterior_mean + c(-1, 1)*qnorm(0.975)*posterior_se
     <exercise>
       <statement>
         <p>
-          In 1999, in England, Sally Clark<fn>https://en.wikipedia.org/wiki/Sally_Clark</fn> was found guilty of the murder of two of her sons. Both infants were found dead in the morning, one in 1996 and another in 1998. In both cases, she claimed the cause of death was sudden infant death syndrome (SIDS). No evidence of physical harm was found on the two infants, so the main piece of evidence against her was the testimony of Professor Sir Roy Meadow, who testified that the chances of two infants dying of SIDS was 1 in 73 million. He arrived at this figure by finding that the rate of SIDS was 1 in 8,500, and then calculating that the chance of two SIDS cases was 8,500 <m>\times</m> 8,500 <m>\approx</m> 73 million. Which of the following do you agree with?
+          In 1999, in England, Sally Clark<fn>https://en.wikipedia.org/wiki/Sally_Clark</fn> was found guilty of the murder of two of her sons. Both infants were found dead in the morning, one in 1996 and another in 1998. In both cases, she claimed the cause of death was sudden infant death syndrome (SIDS). No evidence of physical harm was found on the two infants, so the main piece of evidence against her was the testimony of Professor Sir Roy Meadow, who testified that the chances of two infants dying of SIDS were 1 in 73 million. He arrived at this figure by finding that the rate of SIDS was 1 in 8,500, and then calculating that the chance of two SIDS cases was 8,500 <m>\times</m> 8,500 <m>\approx</m> 73 million. Which of the following do you agree with?
         </p>
         <p>
           <ol marker="a.">
             <li>
               <p>
-                Sir Meadow assumed that the probability of the second son being affected by SIDS was independent of the first son being affected, thereby ignoring possible genetic causes. If genetics plays a role then: <m>\mathrm{Pr}(\mbox{second case of SIDS} \mid \mbox{first case of SIDS}) > \mathrm{Pr}(\mbox{first case of SIDS})</m>.
+                Sir Meadow assumed that the probability of the second son being affected by SIDS was independent of the first son being affected, thereby ignoring possible genetic causes. If genetics plays a role, then: <m>\mathrm{Pr}(\mbox{second case of SIDS} \mid \mbox{first case of SIDS}) > \mathrm{Pr}(\mbox{first case of SIDS})</m>.
               </p>
             </li>
             <li>
@@ -402,7 +406,7 @@ posterior_mean + c(-1, 1)*qnorm(0.975)*posterior_se
           \mathrm{Pr}(A \mid B) = 0.50
         </me>
         <p>
-          with A = two of her children are found dead with no evidence of physical harm, and B = a mother is a son-murdering psychopath = 0.50. Assume that the rate of son-murdering psychopath mothers is 1 in 1,000,000. According to Bayes' Theorem, what is the probability of <m>\mathrm{Pr}(B \mid A)</m>?
+          with A = two of her children are found dead with no evidence of physical harm, and B = a mother is a son-murdering psychopath. Assume that the rate of son-murdering psychopathic mothers is 1 in 1,000,000. According to Bayes' Theorem, what is the probability of <m>\mathrm{Pr}(B \mid A)</m>?
         </p>
       </statement>
     </exercise>
@@ -421,7 +425,7 @@ posterior_mean + c(-1, 1)*qnorm(0.975)*posterior_se
             </li>
             <li>
               <p>
-                He made two mistakes. First, he misused the multiplication rule and did not take into account how rare it is for a mother to murder her children. After using Bayes' rule, we found a probability closer to 0.5 than 1 in 73 million.
+                He made two mistakes. First, he misused the multiplication rule, and second, he did not take into account how rare it is for a mother to murder her children. After using Bayes' rule, we found a probability closer to 0.5 than 1 in 73 million.
               </p>
             </li>
             <li>
@@ -442,7 +446,7 @@ posterior_mean + c(-1, 1)*qnorm(0.975)*posterior_se
     <exercise>
       <statement>
         <p>
-          Florida is one of the most closely watched states in U.S. elections because it has many electoral votes, giving it a large influence on the final result. Before 2016, Florida was a swing state where both Republicans and Democrats won implying it could affect a close elections.
+          Florida is one of the most closely watched states in U.S. elections because it has many electoral votes, giving it a large influence on the final result. Before 2016, Florida was a swing state where both Republicans and Democrats won, implying it could affect a close election.
         </p>
         <p>
           Create the following table with the polls taken during the last two weeks:
@@ -457,7 +461,7 @@ polls &lt;- polls_us_election_2016 |>
           </input>
         </program>
         <p>
-          Take the average spread of these polls. The CLT tells us this average is approximately normal. Calculate an average and provide an estimate of the standard error. Save your results in an object called <c>results</c>.
+          Take the average spread of these polls. The CLT tells us this average is approximately normal. Provide an estimate of the standard error.
         </p>
       </statement>
     </exercise>
@@ -465,7 +469,7 @@ polls &lt;- polls_us_election_2016 |>
     <exercise>
       <statement>
         <p>
-          Now assume a Bayesian model that sets the prior distribution for Florida's election night spread <m>\theta</m> to follow a normal distribution with expected value <m>\theta_0</m> and standard deviation <m>\tau</m>. What are the interpretations of <m>\theta</m> and <m>\tau</m>?
+          Now assume a Bayesian model that sets the prior distribution for Florida's election night spread <m>\theta</m> to follow a normal distribution with expected value <m>\theta_0</m> and standard deviation <m>\tau</m>. What are the interpretations of <m>\theta_0</m> and <m>\tau</m>?
         </p>
         <p>
           <ol marker="a.">
@@ -497,7 +501,7 @@ polls &lt;- polls_us_election_2016 |>
     <exercise>
       <statement>
         <p>
-          The CLT tells us that our estimate of the spread <m>\hat{\theta}</m> has normal distribution with expected value <m>\theta</m> and standard deviation <m>\sigma</m> calculated in exercise 6. Use the formulas we provided for the posterior distribution to calculate the expected value of the posterior distribution if we set <m>\theta_0 = 0</m> and <m>\tau = 0.01</m>.
+          The CLT tells us that our estimate of the spread <m>\hat{\theta}</m> has a normal distribution with expected value <m>\theta</m> and standard deviation <m>\sigma</m> calculated in exercise 6. Use the formulas we provided in <xref ref="sec-priors-posteriors"/> to calculate the expected value of the posterior distribution if we set <m>\theta_0 = 0</m> and <m>\tau = 0.01</m>.
         </p>
       </statement>
     </exercise>
@@ -521,7 +525,7 @@ polls &lt;- polls_us_election_2016 |>
     <exercise>
       <statement>
         <p>
-          According to this analysis, what was the probability that Trump wins Florida?
+          According to this analysis, what was the probability that Trump would win Florida?
         </p>
       </statement>
     </exercise>
@@ -529,7 +533,7 @@ polls &lt;- polls_us_election_2016 |>
     <exercise>
       <statement>
         <p>
-          Now use <c>sapply</c> function to change the prior variance from <c>seq(0.005, 0.05, len = 100)</c> and observe how the probability changes by making a plot.
+          Now use the <c>sapply</c> function to change the prior variance from <c>seq(0.005, 0.05, len = 100)</c> and observe how the probability changes by making a plot.
         </p>
       </statement>
     </exercise>

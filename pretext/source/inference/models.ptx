@@ -14,7 +14,7 @@
     </p>
     
     <p>
-      A more recent development since the original invention of opinion polls, is the use of computers to aggregate publicly available data from different sources and develop data-driven forecasting models. Here, we explore how poll aggregators collected and combined data reported by different experts to produce improved predictions. We will introduce ideas behind the statistical models used to improve election forecasts beyond the power of individual polls. Specifically, we introduce a useful model for constructing a confidence interval for the popular vote difference.
+      A more recent development since the original invention of opinion polls is the use of computers to aggregate publicly available data from different sources and develop data-driven forecasting models. Here, we explore how poll aggregators collect and combine data reported by different experts to produce improved predictions. We will introduce ideas behind the statistical models used to improve election forecasts beyond the power of individual polls. Specifically, we introduce a useful model for constructing a confidence interval for the popular vote difference.
     </p>
     
     <p>
@@ -142,7 +142,7 @@ polls &lt;- polls_us_election_2016 |>
       </program>
       
       <p>
-        Note we will focus on predicting the spread, not the proportion <m>p</m>. Since we are assuming there are only two parties, we know that the spread is <m>\theta = p - (1-p) = 2p - 1</m>. As a result, everything we have done can easily be adapted to an estimate of <m>\theta</m>. Once we have our estimate <m>\bar{X}</m> and <m>\widehat{\mathrm{SE}}[\bar{X}]</m>, we estimate the spread with <m>2\bar{X} - 1</m> and, since we are multiplying by 2, the standard error is <m>2\widehat{\mathrm{SE}}[\bar{X}]</m>. Remember that subtracting 1 does not add any variability, so it does not affect the standard error. Also, the CLT applies here because our estimate is a linear combination of a sample average, which itself follows approximately normal distributions.
+        Note that we will focus on predicting the spread, not the proportion <m>p</m>. Since we are assuming there are only two parties, we know that the spread is <m>\theta = p - (1-p) = 2p - 1</m>. As a result, everything we have done can easily be adapted to an estimate of <m>\theta</m>. Once we have our estimate <m>\bar{X}</m> and <m>\widehat{\mathrm{SE}}[\bar{X}]</m>, we estimate the spread with <m>2\bar{X} - 1</m> and, since we are multiplying by 2, the standard error is <m>2\widehat{\mathrm{SE}}[\bar{X}]</m>. Remember that subtracting 1 does not add any variability, so it does not affect the standard error. Also, the CLT applies here because our estimate is a linear combination of a sample average, which itself follows approximately normal distributions.
       </p>
       
       <note>
@@ -152,7 +152,7 @@ polls &lt;- polls_us_election_2016 |>
       </note>
       
       <p>
-        We have 21 estimates of the spread. The theory we learned from sampling models tells us that these estimates are a random variable with a probability distribution that is approximately normal. The expected value is the election night spread <m>\theta</m> and the standard error is <m>2\sqrt{p (1 - p) / N}</m>.
+        We have 21 estimates of the spread. The theory we learned from sampling models tells us that these estimates are realizations of a random variable with a probability distribution that is approximately normal. The expected value is the election night spread <m>\theta</m>, and the standard error is <m>2\sqrt{p (1 - p) / N}</m>.
       </p>
       
       <p>
@@ -267,7 +267,7 @@ polls |> group_by(pollster) |> filter(n() >= 5) |>
     </console>
     
     <p>
-      This agrees with the within-poll variation we see. However, there appear to be differences <em>across the polls</em>. Observe, for example, how the USC Dornsife/LA Times pollster is predicting a 4% lead for Trump, while Ipsos is predicting a lead larger than 5% for Clinton. The theory we learned says nothing about different pollsters producing polls with different expected values, instead it assumes all the polls have the same expected value. FiveThirtyEight refers to these differences as <em>house effects</em>. We also call them <em>pollster bias</em>. Nothing in our simple urn model provides an explanation for these pollster-to-pollster differences.
+      This agrees with the within-poll variation we see. However, there appear to be differences <em>across the polls</em>. Observe, for example, how the USC Dornsife/LA Times pollster is predicting a 4% lead for Trump, while Ipsos is predicting a lead larger than 5% for Clinton. The theory we learned says nothing about different pollsters producing polls with different expected values; instead, it assumes all the polls have the same expected value. FiveThirtyEight refers to these differences as <em>house effects</em>. We also call it <em>pollster bias</em>. Nothing in our simple urn model provides an explanation for these pollster-to-pollster differences.
     </p>
     
     <p>
@@ -307,11 +307,7 @@ hist(one_poll_per_pollster$spread, breaks = 10)
     </p>
     
     <p>
-      So our new statistical model is that <m>Y_1, \dots, Y_N</m> are a random sample with expected value <m>\theta</m> and standard deviation <m>\sigma</m>. The distribution, for now, is unspecified. 
-    </p>
-    
-    <p>
-      But we consider <m>N</m> to be large enough to assume that the sample average <m>\bar{Y} = \frac{1}{N}\sum_{i=1}^N Y_i</m> follows a normal distribution with expected value <m>\theta</m> and standard error <m>\sigma / \sqrt{N}</m>. We write:
+      So our new statistical model is that <m>Y_1, \dots, Y_N</m> are a random sample with expected <m>\theta</m> and standard deviation <m>\sigma</m>. The distribution, for now, is unspecified. But we consider <m>N</m> to be large enough to assume that the sample average <m>\bar{Y} = \sum_{i=1}^N Y_i</m> follows a normal distribution with expected value <m>\theta</m> and standard error <m>\sigma / \sqrt{N}</m> under the CLT. We write:
     </p>
     
     <me>
@@ -319,12 +315,12 @@ hist(one_poll_per_pollster$spread, breaks = 10)
     </me>
     
     <p>
-      Here the <m>\sim</m> symbol tells us that the random variable on the left of the symbol follows the distribution on the right. We use the notation <m>N(a,b)</m> to represent the normal distribution with mean <m>a</m> and standard deviation <m>b</m>.
+      Here, the <m>\sim</m> symbol tells us that the random variable on the left of the symbol follows the distribution on the right. We use the notation <m>N(a,b)</m> to represent the normal distribution with mean <m>a</m> and standard deviation <m>b</m>.
     </p>
-    
+
     <note>
       <p>
-        This model for the sample average will be used again the next chapter.
+        This model for the sample average will be used again in the next chapter.
       </p>
     </note>
     
@@ -399,28 +395,14 @@ round(results*100, 2)
       
       <aside>
         <p>
-          Note that 30 is a very general rule of thumb based on the case when the data come from a normal distribution. There are cases when a large sample size is needed as well as cases when smaller sample sizes are good enough.
+          Note that 30 is a very general rule of thumb based on the case when the data come from a normal distribution. There are cases when a larger sample size is needed, as well as cases when smaller sample sizes are good enough.
         </p>
       </aside>
       
       <p>
-        However, if the data in the urn is known to follow a normal distribution, then we actually have mathematical theory that tells us how much bigger we need to make the intervals to account for the estimation of <m>\sigma</m>. Applying this theory, we can construct confidence intervals for any <m>N</m>. <alert>This works only under the normality assumption.</alert> So for the 0, 1 data of our previous urn model, this theory definitely does not apply.
+        However, if the data in the urn is known to follow a normal distribution, then we actually have mathematical theory that tells us how much bigger we need to make the intervals to account for the estimation of <m>\sigma</m>. Applying this theory, we can construct confidence intervals for any <m>N</m>. But again, this <alert>works only if the data in the urn is known to follow a normal distribution</alert>. So, for the 0, 1 data of our previous urn model, this theory definitely does not apply.
       </p>
-      
-      <note>
-        <p>
-          The <em>t</em>-distribution approximation used for confidence intervals and hypothesis tests is exact only when the data are normally distributed. However, in practice, it works quite well more broadly. When the distribution of the data is <em>unimodal</em> and <alert>approximately symmetric</alert>, the <em>t</em>-based methods continue to give accurate results even if the data are not perfectly normal.
-        </p>
-        
-        <p>
-          This guidance is intentionally imprecise. With experience, you develop a sense for when the approximation is reliable. When the shape of the data is unclear, Monte Carlo simulations provide a practical check: you can simulate repeated samples under a proposed model and examine whether the resulting confidence interval or test behaves as expected.
-        </p>
-        
-        <p>
-          In short: normality is not required, but strong skew or heavy tails can break the approximation, so always look at the data.
-        </p>
-      </note>
-      
+
       <p>
         The statistic on which confidence intervals for <m>\theta</m> are based is:
       </p>
@@ -442,7 +424,7 @@ round(results*100, 2)
       </me>
       
       <p>
-        This is referred to as a <term>t-statistic</term>. By substituting <m>\sigma</m> with <m>s</m>, we introduce some variability. The theory tells us that <m>t</m> follows a <term>Student's t-distribution</term> with <m>N-1</m> <term>degrees of freedom</term>. The degrees of freedom is a parameter that controls the variability via fatter tails. Student's t-distribution has heavier tails than the normal distribution, especially for small degrees of freedom, and these tails account for the additional uncertainty from estimating <m>\sigma</m>. Here are three examples of t-distributions with three different degrees of freedom:
+        This is referred to as a <term>t-statistic</term>. By substituting <m>\sigma</m> with <m>s</m>, we introduce some variability. The theory tells us that <m>t</m> follows a <term>Student's t-distribution</term> with <m>N-1</m> <term>degrees of freedom</term>. The degrees of freedom is a parameter that controls the variability via fatter tails. Here are three examples of t-distributions with three different degrees of freedom:
       </p>
       
       <program language="r">
@@ -477,7 +459,18 @@ one_poll_per_pollster |> ggplot(aes(sample = spread)) + stat_qq()
       </figure>
       
       <p>
-        then <m>t</m> follows a t-distribution with <m>N-1</m> degrees of freedom. To construct a 95% confidence interval we simply use <c>qt</c> instead of <c>qnorm</c>: This results in a slightly larger confidence interval than we obtained before:
+        then <m>t</m> follows a t-distribution with <m>N-1</m> degrees of freedom.
+      </p>
+
+      <note>
+        <p>
+          Using the t-distribution and the t-statistic is the basis for <em>t-tests</em>, a widely used approach for computing p-values. To learn more about t-tests, you can consult any statistics textbook.
+        </p>
+      </note>
+
+      <p>
+        To construct a 95% confidence interval, we simply use <c>qt</c> instead of <c>qnorm</c>.
+        This results in a slightly larger confidence interval than we obtained before:
       </p>
       
       <console>
@@ -496,7 +489,7 @@ round(ttest_ci*100, 2)
       </console>
       
       <p>
-        This interval is a bit larger than the one using normal because the t-distribution has large tails, as seen in the densities. Specifically, the 97.5-th quantile value for the t distribution
+        This interval is a bit larger than the one using normal because the t-distribution has large tails, as seen in the densities.  Specifically, the 97.5th quantile value for the t distribution
       </p>
       
       <console>
@@ -523,12 +516,20 @@ qnorm(0.975)
       
       <note>
         <p>
-          Using the t-distribution and the t-statistic is the basis for <em>t-tests</em>, a widely used approach for computing p-values. To learn more about t-tests, you can consult any statistics textbook.
+          The <em>t</em>-distribution approximation used for confidence intervals and hypothesis tests is exact only when the data are normally distributed. However, in practice, it works quite well more broadly. When the distribution of the data is <em>unimodal</em> and <alert>approximately symmetric</alert>, the <em>t</em>-based methods continue to give accurate results even if the data are not perfectly normal.
+        </p>
+
+        <p>
+          This guidance is intentionally imprecise. With experience, you develop a sense for when the approximation is reliable. When the shape of the data is unclear, Monte Carlo simulations provide a practical check: you can simulate repeated samples under a proposed model and examine whether the resulting confidence interval or test behaves as expected.
+        </p>
+
+        <p>
+          In short, normality is not required, but strong skew or heavy tails can break the approximation, so always look at the data.
         </p>
       </note>
-      
+
       <p>
-        The t-distribution can also be used to model errors in bigger deviations that are more likely than with the normal distribution. In their Monte Carlo simulations, FiveThirtyEight uses the t-distribution to generate errors that better model the deviations we see in election data. For example, in Wisconsin, the average of six high quality polls was 7% in favor of Clinton with a standard deviation of 3%, but Trump won by 0.8%. Even after taking into account the overall bias, this 7.7% residual is more in line with t-distributed data than the normal distribution.
+        The t-distribution can also be used to model errors in bigger deviations that are more likely than with the normal distribution. In their Monte Carlo simulations, FiveThirtyEight uses the t-distribution to generate errors that better model the deviations we see in election data. For example, in Wisconsin, the average of six high-quality polls was 7% in favor of Clinton with a standard deviation of 3%, but Trump won by 0.8%. Even after taking into account the overall bias, this 7.7% residual is more in line with t-distributed data than the normal distribution.
       </p>
       
       <console>
@@ -552,13 +553,13 @@ polls_us_election_2016 |>
     <title>Exercises</title>
     
     <p>
-      We have been using urn models to motivate the use of probability models. Yet, most data science applications are not related to data obtained from urns. More common are data that come from individuals. The reason probability plays a role here is because the data come from a random sample. The random sample is taken from a population, and the urn serves as an analogy for the population.
+      We have been using urn models to motivate the use of probability models. Yet, most data science applications are not related to data obtained from urns. More common are data that come from individuals. The reason probability plays a role here is that the data come from a random sample. The random sample is taken from a population, and the urn serves as an analogy for the population.
     </p>
-    
+
     <p>
-      Define the males that replied to the height survey as the population
+      To answer the following questions, define the males who replied to the height survey as the population:
     </p>
-    
+
     <program language="r">
       <input>
 library(dslabs)
@@ -566,10 +567,6 @@ x &lt;- heights |> filter(sex == "Male") |>
   pull(height)
       </input>
     </program>
-    
-    <p>
-      to answer the following questions.
-    </p>
     
     <exercise>
       <statement>
