@@ -688,7 +688,7 @@ olive &lt;- select(olive, -area)
       </figure>
 
       <p>
-        Decision trees like this are often used in practice. For example, to decide on a person's risk of poor outcome after having a heart attack, doctors use the following <fn>Source: Walton 2010 Informal Logic, Vol. 30, No. 2, pp. 159-1842 https://papers.ssrn.com/sol3/Delivery.cfm/SSRN_ID1759289_code1486039.pdf?abstractid = 1759289&mirid = 1&type = 2</fn>:
+        Decision trees like this are often used in practice. For example, to decide on a person's risk of poor outcome after having a heart attack, doctors use the following <fn>Source: Walton 2010 Informal Logic, Vol. 30, No. 2, pp. 159-1842 https://papers.ssrn.com/sol3/Delivery.cfm/SSRN_ID1759289_code1486039.pdf?abstractid = 1759289&amp;mirid = 1&amp;type = 2</fn>:
       </p>
 
       <figure xml:id="fig-heart-attack-tree">
