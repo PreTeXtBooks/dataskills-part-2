@@ -481,28 +481,28 @@ HR 1.5700181 0.04954621 31.68796 2.388915e-153
     <title>Case study continued: Moneyball</title>
 
       <p>
-        In the previous section, we used multivariable regression to confirm that walks (BB) are a significant predictor of runs scored. In this section, we will take a data-driven approach to develop a metric for ranking the offensive production of baseball players. Specifically, we will construct a regression model to predict the number of runs a player contributes based on their offensive statistics. By incorporating salary information into this analysis, we can identify players in 2002 who were projected to generate runs but were under-compensated. Importantly, this analysis uses data that excludes the 2002 season to mimic the challenge of building a team for the upcoming season.
+In the previous section, we used multivariable regression to confirm that walks (BB) are a significant predictor of runs scored. In this section, we will take a data-driven approach to develop a metric for ranking the offensive production of baseball players. Specifically, we will construct a regression model to predict the number of runs a player contributes based on their offensive statistics. By incorporating salary information into this analysis, we can identify players in 2002 who were projected to generate runs but were undercompensated. Importantly, this analysis uses data that excludes the 2002 season to mimic the challenge of building a team for the upcoming season.
       </p>
 
       <p>
-        At the individual player level, distinguishing between <em>runs scored</em> and <em>runs produced</em> is crucial for accurately assessing offensive contributions. While <em>runs scored</em> are directly recorded, they don't fully capture the extent of a player's impact. For instance, if player X hits a single and later scores on a teammate's home run, the run is attributed to player X, but the teammate's effort was essential in making it happen. This overlap highlights the shared nature of offensive production, complicating individual performance analysis.
+At the individual player level, distinguishing between runs scored and runs produced is crucial for accurately assessing offensive contributions. While runs scored are directly recorded, they don’t fully capture the extent of a player’s impact. For instance, if player X hits a single and later scores on a teammate’s home run, the run is attributed to player X, but the teammate’s effort was essential in making it happen. This overlap highlights the shared nature of offensive production, complicating individual performance analysis.
       </p>
 
         <subsection xml:id="sec-run-production-model">
           <title>Modeling team run production</title>
 
         <p>
-          To address this, we will first fit the model at the <em>team level</em>, where such individual-level nuances average out and do not affect overall results. Once the model is validated for teams, we will apply it to estimate contributions at the player level.
+To address this, we will first fit the model at the team level, where such individual-level nuances average out and do not affect overall results. Once the model is validated for teams, we will apply it to estimate contributions at the player level.
         </p>
 
         <note>
           <p>
-            Teams are divided into two leagues, American and National. Since they had slightly different rules during the period in question, we will fit the model only to the American League (AL), where the Oakland A's played.
+Teams are divided into two leagues, American and National. Since they had slightly different rules during the period in question, we will fit the model only to the American League (AL), where the Oakland A’s played.
           </p>
         </note>
 
         <p>
-          Since teams accumulate significantly more plate appearances than individual players, we will model <em>per plate appearance (PA) rates</em>. This allows us to generalize the model fit to teams and apply it to players. Additionally, since triples are relatively rare, we will combine them with doubles into a single category, <em>extra bases (XB)</em>, to simplify the model. Stolen bases will be excluded because prior analyses suggest they do not reliably correlate with increased scoring. As a result, the predictors in the model will include: base on balls (BB), singles, extra bases (XB) and home runs (HR). The data preparation step for this model is shown below:
+Since teams accumulate significantly more plate appearances than individual players, we will model per plate appearance (PA) rates. This allows us to generalize the model fit to teams and apply it to players. Additionally, since triples are relatively rare, we will combine them with doubles into a single category, extra bases (XB), to simplify the model. Stolen bases will be excluded because prior analyses suggest they do not reliably correlate with increased scoring. As a result, the predictors in the model will include: base on balls (BB), singles, extra bases (XB), and home runs (HR). The data preparation step for this model is shown below:
         </p>
 
         <program language="r">
@@ -516,7 +516,7 @@ HR 1.5700181 0.04954621 31.68796 2.388915e-153
         </program>
 
         <p>
-          To build the model, we make a reasonable assumption that our outcome variable (runs per plate appearance) and the four predictor variables (BB, singles, extra bases, and home runs) are <em>jointly normal</em>. This implies that for any one predictor, the relationship with the outcome is linear when the other predictors are held constant. Under this assumption, the linear regression model can be expressed as:
+To build the model, we make a reasonable assumption that our outcome variable (runs per plate appearance) and the four predictor variables (BB, singles, extra bases, and home runs) are jointly normal. This implies that for any one predictor, the relationship with the outcome is linear when the other predictors are held constant. Under this assumption, the linear regression model can be expressed as:
         </p>
 
         <me>
@@ -528,7 +528,7 @@ HR 1.5700181 0.04954621 31.68796 2.388915e-153
         </p>
 
         <p>
-          We can fit the model to data before the 2002 season, since we are building a team for 2002 with the information we had before the season started:
+We can fit the model to the data before the 2002 season, since we are building a team for 2002 with the information we had before the season started:
         </p>
 
         <program language="r">
@@ -538,7 +538,7 @@ HR 1.5700181 0.04954621 31.68796 2.388915e-153
         </program>
 
         <p>
-          We note that the fitted model assigns similar weights to base on balls (BB) and singles:
+We note that the fitted model assigns similar weights to base on balls (BB) and singles:
         </p>
 
         <console>
@@ -552,7 +552,7 @@ HR 1.5700181 0.04954621 31.68796 2.388915e-153
         </console>
 
         <p>
-          This confirms our suspicion that walks are nearly as valuable as singles in contributing to a team’s run production.
+This confirms our suspicion that walks are nearly as valuable as singles in contributing to a team’s run production.
         </p>
 
         </subsection>
@@ -561,11 +561,11 @@ HR 1.5700181 0.04954621 31.68796 2.388915e-153
           <title>Model diagnostics</title>
 
         <p>
-          Because this model is not derived from any underlying physical law, it is essential to check whether it adequately fits the data and can be used for prediction. We leave a full diagnostic assessment as an exercise, but we demonstrate here one key evaluation: testing whether a model fit to data before 2002 can successfully predict team performance in 2002.
+Because this model is not derived from any underlying physical law, it is essential to check whether it adequately fits the data and can be used for prediction. We leave a full diagnostic assessment as an exercise, but we demonstrate here one key evaluation: testing whether a model fit to data before 2002 can successfully predict team performance in 2002.
         </p>
 
         <p>
-          To do this, we use the fitted model to estimate each team's expected number of runs for the 2002 season:
+To do this, we use the fitted model to estimate each team’s expected number of runs for the 2002 season:
         </p>
 
         <program language="r">
@@ -575,17 +575,8 @@ HR 1.5700181 0.04954621 31.68796 2.388915e-153
         </program>
 
         <p>
-          The results show that the model, trained on data from 1962–2001, predicts 2002 team runs remarkably well:
+The results show that the model, trained on data from 1962–2001, predicts 2002 team runs remarkably well:
         </p>
-
-        <program language="r">
-          <input>
-        filter(dat, yearID == 2002) |&gt;
-          ggplot(aes(R_hat, R, label = teamID)) +
-          geom_abline() +
-          geom_text()
-          </input>
-        </program>
 
         <figure xml:id="fig-multivariable-regression-team-predicted-observed">
           <caption>Predicted versus observed runs for American League teams in 2002</caption>
@@ -600,7 +591,7 @@ HR 1.5700181 0.04954621 31.68796 2.388915e-153
           <title>A model-based metric for players</title>
 
         <p>
-          Now let's apply the model to players. The <c>Batting</c> data frame includes player specific statistics. We prepare the data so that we save the same per-PA rates the model was fit to. Because players abilities change through time we only use data close to 2002 but to improve the precision of our estimates we use data from the three years before 2002, rather than just 2001. We also remove players with less than 100 PA to avoid imprecise summaries:
+Now let’s apply the model to players. The <c>Batting</c> data frame includes player-specific statistics. We prepare the data so that we save the same per-PA rates the model was fit to. Because players’ abilities change through time, we only use data close to 2002, but to improve the precision of our estimates, we use data from the three years before 2002, rather than just 2001. We also remove players with less than 100 PA to avoid imprecise summaries:
         </p>
 
         <program language="r">
@@ -616,7 +607,7 @@ HR 1.5700181 0.04954621 31.68796 2.388915e-153
         </program>
 
         <p>
-          Now that statistics are in per-PA rates, we can use the model fitted to team-level data to predict how many runs per plate appearce each player will produce:
+Now that statistics are in per-PA rates, we can use the model fitted to team-level data to predict how many runs per plate appearance each player will produce:
         </p>
 
         <program language="r">
@@ -625,25 +616,30 @@ HR 1.5700181 0.04954621 31.68796 2.388915e-153
           </input>
         </program>
 
+<p>
+Because each team has, on average, 37.5 plate appearances a game, we covert the predicted runs per plate appearance to predicted runs per game by multiplying by 37.5. This allows us to compare players’ contributions on a per-game basis, which is more intuitive and relevant for team-building decisions.
+</p>
+
         </subsection>
 
         <subsection xml:id="moneyball-in-practice">
           <title>Moneyball in practice</title>
 
         <p>
-          In the previous scatterplot showing predicted and observed runs we see that Oakland, despite operating with one of the lowest payrolls in the league, performed as an above-average offensive team. Here we describe some of the details of how they achieved this.
+In the previous scatterplot showing predicted and observed runs, we see that Oakland, despite operating with one of the lowest payrolls in the league, performed as an above-average offensive team. Here we describe some of the details of how they achieved this.
         </p>
 
         <p>
-          Having built a model to estimate each player's expected run contribution, we can now apply it to real-world decision-making, just as the Oakland A’s did during the 2002 season. To put our predictions into context, we need to combine the performance metrics with additional information about the players, including their salaries and playing status. This allows us to identify not only who is most productive, but who offers the greatest <em>value</em> for the team's limited budget.
+Having built a model to estimate each player’s expected run contribution, we can now apply it to real-world decision-making, just as the Oakland A’s did during the 2002 season. To put our predictions into context, we need to combine the performance metrics with additional information about the players, including their salaries and playing status. This allows us to identify not only who is most productive, but who offers the greatest value for the team’s limited budget.
         </p>
 
         <p>
-          To do this, we will merge our player-level performance estimates with data from the <c>Salary</c>, <c>People</c>, and <c>Appearances</c> tables. These datasets include contract information, biographical details, and position data, which together provide the foundation for evaluating and comparing players in a realistic team-building scenario.
-        </p>
+          To do this, we will merge our player-level performance estimates with data from the <c>Salary</c>, <c>People</c>, and <c>Appearances</c> tables. 
+These datasets include contract information, biographical details, and position data, which together provide the foundation for evaluating and comparing players in a realistic team-building scenario.
+</p>
 
         <p>
-          We begin by adding the salary each player earned in 2002 and removing players who did not appear in that season:
+We begin by adding the salary each player earned in 2002 and removing players who did not appear in that season:
         </p>
 
         <program language="r">
@@ -657,7 +653,7 @@ HR 1.5700181 0.04954621 31.68796 2.388915e-153
         </program>
 
         <p>
-          We then add their first and last names for context. Additionally, because Major League Baseball players cannot negotiate their contracts or choose the team they play for until they have accumulated six years of playing time and become <em>free agents</em>, we include their debut year as we need to take this into consideration in our analysis.
+We then add their first and last names for context. Additionally, because Major League Baseball players cannot negotiate their contracts or choose the team they play for until they have accumulated six years of playing time and become free agents, we include their debut year, as we need to take this into consideration in our analysis.
         </p>
 
         <program language="r">
@@ -670,7 +666,7 @@ HR 1.5700181 0.04954621 31.68796 2.388915e-153
         </program>
 
         <p>
-          Finally, we remove pitchers since we are only interested in batters.
+Finally, we remove pitchers since we are only interested in batters.
         </p>
 
         <program language="r">
@@ -684,7 +680,7 @@ HR 1.5700181 0.04954621 31.68796 2.388915e-153
         </program>
 
         <p>
-          If you followed baseball during the era in question you will recognize the top run producers and not be surprised that garnered high salaries:
+If you followed baseball during the era in question, you will recognize the top run producers and not be surprised that they garnered high salaries:
         </p>
 
         <console>
@@ -701,36 +697,16 @@ HR 1.5700181 0.04954621 31.68796 2.388915e-153
 3 Manny     Ramirez  0.216 15462727
 4 Jason     Giambi   0.215 10428571
 5 Larry     Walker   0.213 12666667
-6 Sammy     Sosa     0.212 15000000
           </output>
         </console>
 
         <p>
-          Note that because each team has, on average, 37.5 plate appearances a game, a rate of 0.24 runs per plate appearance translates to 9 runs a game, almost double the league average!
+Note that 9 runs a game is almost double the league average!
         </p>
 
         <p>
-          If we plot predicted runs produced versus salary we can see that there is substantial variation across players in predicted runs produced and that, not surprisingly, players that produce runs garner higher salaries.
+If we plot predicted runs produced versus salary, we can see that there is substantial variation across players in predicted runs produced and that, not surprisingly, players who produce runs garner higher salaries.
         </p>
-
-        <program language="r">
-          <input>
-        library(ggrepel)
-        league_avg &lt;- Teams |&gt; filter(yearID == 2002) |&gt; summarize(a = sum(R)/sum(G)) |&gt; pull(a)
-        lost &lt;- filter(players, playerID %in% c("damonjo01", "giambja01"))
-        added &lt;- filter(players, playerID %in% c("justida01", "hattesc01"))
-        players |&gt;
-          filter(debut &lt;= 1996) |&gt;
-          ggplot(aes(salary/10^6, R_hat*37.5)) +
-          geom_point(alpha = 0.35) +
-          geom_point(data = added, color = "darkgreen") +
-          geom_point(data = lost, color = "darkred") +
-          geom_text_repel(aes(label = nameLast), data = added, color = "darkgreen") +
-          geom_text_repel(aes(label = nameLast), data = lost, color = "darkred") +
-          geom_smooth(method = "lm", formula = "y~x", se = FALSE) +
-          geom_hline(yintercept = league_avg, lty = 2)
-          </input>
-        </program>
 
         <figure xml:id="fig-multivariable-regression-runs-salary">
           <caption>Predicted runs versus salary for 2002 position players</caption>
@@ -740,7 +716,7 @@ HR 1.5700181 0.04954621 31.68796 2.388915e-153
         </figure>
 
         <p>
-          The plot also highlights four players. Before the 2002 season Oakland lost their best run producer, Jason Giambi, because they could not compete with the New York Yankees offer of over 10 million salary. Johnny Damon, another above average run producers (the dashed line shows the average) also left as Oakland was not willing to pay the 7.25 million salary the Boston Red Sox offered him. Oakland had to make up for this run production, but with a very limited budget. To do this, their first addition was Scott Hatterberg, whose salary was only $900,000, one of the lowest in the league, yet was predicted to produce more than average runs. Note that among the players in our data frame, Hatterberg while having a below league average AVG, ranked near the top 10% in BB per plate appearance. Similarly, David Justice had a near league average AVG, but ranked near the top 5% in terms of BB per plate appearance. These savings permitted the As to upgrade one of their current players, Frank Menechino, for Ray Durham.
+The plot also highlights four players. Before the 2002 season, Oakland lost their best run producer, Jason Giambi, because it could not compete with the New York Yankees offer of over $10 million in salary. Johnny Damon, another above-average run producer (the dashed line shows the average), also left as Oakland was not willing to pay the 7.25 million salary the Boston Red Sox offered him. Oakland had to make up for this run production, but with a very limited budget. To do this, their first addition was Scott Hatterberg, whose salary was only $900,000, one of the lowest in the league, yet he was predicted to produce more than average runs. Note that among the players in our data frame, Hatterberg, while having a below league average AVG, ranked near the top 10% in BB per plate appearance. Similarly, David Justice had a near league average AVG, but ranked near the top 5% in terms of BB per plate appearance. These savings permitted the A’s to upgrade one of their current players, Frank Menechino, for Ray Durham.
         </p>
 
         <console>
@@ -763,7 +739,7 @@ HR 1.5700181 0.04954621 31.68796 2.388915e-153
         </console>
 
         <p>
-          Despite losing two star players, the A's predicted runs per game (<c>R_hat</c>) dropped only slightly, from 0.482 to 0.431, and the savings allowed them to acquire pitcher Billy Koch, who helped reduce opponents' scoring.
+Despite losing two star players, the A’s predicted runs per game (R_hat) dropped only slightly and the savings allowed them to acquire pitcher Billy Koch, who helped reduce opponents’ scoring.
         </p>
 
         </subsection>
@@ -772,26 +748,26 @@ HR 1.5700181 0.04954621 31.68796 2.388915e-153
           <title>Summary</title>
 
         <p>
-          Through the Moneyball example, we've seen how multivariable regression allows us to disentangle relationships among correlated variables and estimate the effect of one factor while holding others constant. This approach permitted us to identify undervalued players who contributed meaningfully to their teams, even when traditional statistics failed to capture their value. More broadly, multivariable regression is an widely used tool for adjusting for confounding and revealing patterns that would otherwise remain hidden in complex, real-world data.
+Through the Moneyball example, we’ve seen how multivariable regression allows us to disentangle relationships among correlated variables and estimate the effect of one factor while holding others constant. This approach permitted us to identify undervalued players who contributed meaningfully to their teams, even when traditional statistics failed to capture their value. More broadly, multivariable regression is a widely used tool for adjusting for confounding and revealing patterns that would otherwise remain hidden in complex, real-world data.
         </p>
 
         <p>
-          However, as we have discussed, as powerful as regression models are, they only describe associations, they do not prove causation. A statistically significant relationship between two variables does not necessarily mean that one causes the other. The Moneyball story illustrates this well: while data analysis revealed new insights, those conclusions were credible only because they were supported by baseball's underlying mechanisms.
+However, as we have discussed, as powerful as regression models are, they only describe associations; they do not prove causation. A statistically significant relationship between two variables does not necessarily mean that one causes the other. The Moneyball story illustrates this well: while data analysis revealed new insights, those conclusions were credible only because they were supported by baseball’s underlying mechanisms.
         </p>
 
         <p>
-          The A’s success with Moneyball went far beyond recognizing that players with high on-base percentages were undervalued. Their staff collected, cleaned, and analyzed vast amounts of data, not just from professional games, but also from college and minor-league players, to uncover undervalued players. They used statistical models to forecast future performance, data wrangling to organize scattered records into usable formats, and quantitative analysis to guide player recruitment and strategy. Data analysis even informed coaching decisions, such as which pitches to favor or how to adjust batting approaches. What began as an experiment in baseball has since spread across nearly every major sport, transforming how teams make decisions and evaluate performance.
+The A’s success with Moneyball went far beyond recognizing that players with high on-base percentages were undervalued. Their staff collected, cleaned, and analyzed vast amounts of data, not just from professional games, but also from college and minor-league players, to uncover undervalued players. They used statistical models to forecast future performance, data wrangling to organize scattered records into usable formats, and quantitative analysis to guide player recruitment and strategy. Data analysis even informed coaching decisions, such as which pitches to favor or how to adjust batting approaches. What began as an experiment in baseball has since spread across nearly every major sport, transforming how teams make decisions and evaluate performance.
         </p>
 
         <p>
-          This case study illustrates the power and versatility of multivariable regression. By extending the simple linear model framework, we were able to adjust for confounding variables and estimate the contribution of each factor while holding others constant. The same mathematical ideas introduced earlier, expectation, standard deviation, conditional distributions, underpin this analysis, and the same <c>lm</c> function in R provides the computational machinery to fit these models. In short, the Moneyball example demonstrates how the linear modeling tools we have developed throughout this part of the book can be applied to real-world data to make informed, evidence-based decisions.
+This case study illustrates the power and versatility of multivariable regression. By extending the simple linear model framework, we were able to adjust for confounding variables and estimate the contribution of each factor while holding others constant. The same mathematical ideas introduced earlier, expectation, standard deviation, and conditional distributions, underpin this analysis, and the same <c>lm</c> function in R provides the computational machinery to fit these models. In short, the Moneyball example demonstrates how the linear modeling tools we have developed throughout this part of the book can be applied to real-world data to make informed, evidence-based decisions.
         </p>
 
         </subsection>
 
     </section>
 
-  <section xml:id="multivariable-regression-exercises">
+  <exercises xml:id="multivariable-regression-exercises">
     <title>Exercises</title>
 
       <p>
@@ -940,6 +916,6 @@ HR 1.5700181 0.04954621 31.68796 2.388915e-153
         21\. Perform a careful model diagnostics to assess if the model described in <xref ref="sec-run-production-model" />.
       </p>
 
-    </section>
+    </exercises>
 
 </chapter>
