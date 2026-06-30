@@ -16,7 +16,7 @@
     </p>
     
     <p>
-      Because random sampling and random assignment are fundamental to data analysis, <em>sampling models</em> appear everywhere in statistics. To build intuition, we start with <em>games of chance</em>, where randomness is explicit and the link between probability and real outcomes is perfectly clear. We now define a specific example.
+      Because random sampling and random assignment are fundamental to data analysis, <em>sampling models</em> appear everywhere in statistics. To build intuition, we start with <em>games of chance</em>, where randomness is explicit, and the link between probability and real outcomes is perfectly clear. We now define a specific example.
     </p>
     
     <subsection xml:id="roulette-example">
@@ -37,7 +37,7 @@ color &lt;- rep(c("Black", "Red", "Green"), times = c(18, 18, 2))
       </program>
       
       <p>
-        Each of the 1,000 outcomes is an independent draw from this urn. If black comes up, the gambler wins and the casino loses $1 (recorded as −1). Otherwise, the casino wins $1.
+        Each of the 1,000 outcomes is an independent draw from this urn. If black comes up, the gambler wins, and the casino loses $1 (recorded as −1). Otherwise, the casino wins $1.
       </p>
       
       <program language="r">
@@ -194,7 +194,7 @@ mean(s &lt; 0)
     </me>
     
     <p>
-      In the roulette example we obtain:
+      In the roulette example, we obtain:
     </p>
     
     <program language = "r">
@@ -316,7 +316,7 @@ In summary, the CLT explains why the normal distribution appears so often in sta
     <exercise>
       <statement>
         <p>
-          From the previous chapter, you have already computed the expected value, standard deviation, and probability distribution for betting on green 100 times (exercises 9-12 in <xref ref="random-variables"/>). Now apply the Central Limit Theorem to betting on green 1,000 times.
+          From the previous chapter, you have already computed the expected value, standard deviation, and probability distribution for betting on green 100 times (exercises 9-12 in <xref ref="sec-random-variables"/>). Now apply the Central Limit Theorem to betting on green 1,000 times.
         </p>
         <p>
           In American Roulette, you can bet on green. There are 18 reds, 18 blacks, and 2 greens (0 and 00). Create a random variable <m>S_n</m> that is the sum of your winnings after betting on green 1,000 times.

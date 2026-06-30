@@ -276,15 +276,14 @@ s &lt;- sd(x)
         <p>
             When using a continuous distribution such as the normal, we no
             longer assign probabilities to individual points <mdash/> each exact
-            value has probability zero <mdash/> but rather to intervals.
+            value has probability zero <mdash/> but rather to <em>intervals</em>.
             In <xref ref="sec-numeric-summaries"/>, we showed how theoretical
             normal distributions can approximate the distribution of height
             data.
         </p>
 
         <p>
-            The key idea is that theoretical distributions serve as useful
-            approximations.
+            The key idea is that theoretical distributions serve as <em>useful approximations</em>.
             They provide smooth mathematical descriptions that let us compute
             probabilities and reason about uncertainty.
             Even though real measurements are discrete, the continuous
@@ -471,17 +470,17 @@ mean(tallest &gt;= 7*12)
             outcome.
             In many applications, however, we are interested in several
             quantities at once.
-            In these cases, we work with multivariate random variables, written
-            as <m>(X_1, X_2, ..., X_k)</m>, where each <m>X_i</m> is a random
+            In these cases, we work with <em>multivariate</em> random variables, written
+            as <m>(X_1, X_2, \ldots, X_k)</m>, where each <m>X_i</m> is a random
             variable.
         </p>
 
         <p>
-            Just as in the univariate case, we can describe the joint
+            Just as in the univariate case, we can describe the <em>joint</em>
             distribution of these variables using a probability density
             function.
             The <em>joint probability density function</em>
-            <m>f(x_1, x_2, ..., x_k)</m> characterizes how probability is
+            <m>f(x_1, x_2, \ldots, x_k)</m> characterizes how probability is
             distributed across combinations of values.
             For continuous variables, probabilities are obtained by integrating
             this function over a region of the <m>k</m>-dimensional space.
@@ -489,15 +488,15 @@ mean(tallest &gt;= 7*12)
 
         <p>
             Once a joint density is defined, we can recover familiar quantities
-            such as marginal and conditional distributions.
-            Intuitively, a marginal distribution describes the behavior of one
+            such as <em>marginal</em> and <em>conditional</em> distributions.
+            Intuitively, a <em>marginal distribution</em> describes the behavior of one
             variable on its own, ignoring the others.
-            We obtain it by averaging out or integrating over the remaining
+            We obtain it by <em>averaging out</em> or integrating over the remaining
             variables.
-            A conditional distribution, on the other hand, describes the
+            A <em>conditional distribution</em>, on the other hand, describes the
             behavior of one variable given that we know the value of another.
             This extends the idea of conditional probability introduced in
-            Section 5.5 to the continuous setting.
+            <xref ref="sec-conditional-probability"/> to the continuous setting.
         </p>
 
         <p>
@@ -512,7 +511,7 @@ mean(tallest &gt;= 7*12)
             These ideas extend naturally from the one-dimensional case and allow
             us to study relationships between variables, such as dependence and
             correlation.
-            We will revisit these concepts later, in Section 15.3, particularly
+            We will revisit these concepts later, in  <xref ref="sec-conditional-expectation"/>, particularly
             in the context of regression, where we use conditional distributions
             to describe how an outcome variable behaves given one or more
             predictors.
@@ -571,15 +570,15 @@ mean(tallest &gt;= 7*12)
         <exercise>
             <statement>
                 <p>
-                    Notice that the answer to the question does not change when
-                    you change units.
+                    Notice that the answers to the previous two exercises are
+                    identical even when you change units.
                     This makes sense since the standard deviations from the
                     average for an entry in a list are not affected by what
                     units we use.
                     In fact, if you look closely, you notice that 61 and 67 are
                     both 1 SD away from the average.
                     Compute the probability that a randomly picked, normally
-                    distributed random variable is within 1 SD from the average.
+                    distributed random outcome is within 1 SD of the average.
                 </p>
             </statement>
         </exercise>
@@ -600,10 +599,10 @@ mean(tallest &gt;= 7*12)
                 </me>
 
                 <p>
-                    Remember from Chapter 2’s discussion of standardized units
+                    Remember from <xref ref="sec-numeric-summaries"/>’s discussion of standardized units
                     that <m>a</m> is <m>(a - \mu)/\sigma</m> standard deviations
                     <m>s</m> away from the average <m>\mu</m>.
-                    In our probability statement, we can subtract <m>\mu</m> to
+                    In our probability statement, we can subtract <m>\mu</m> from
                     both sides and then divide both sides by <m>\sigma</m>:
                 </p>
                 <me>
@@ -627,7 +626,7 @@ mean(tallest &gt;= 7*12)
                 </p>
 
                 <p>
-                    If <c>m</c> is the average and <c>s</c> the standard error,
+                    If <c>m</c> is the average and <c>s</c> the standard deviation,
                     which of the following R code would give us the right answer
                     in every situation?
                 </p>
@@ -644,13 +643,10 @@ mean(tallest &gt;= 7*12)
         <exercise>
             <statement>
                 <p>
-                    magine the distribution of male adults is approximately
+                    Imagine the distribution of male adults is approximately
                     normal with a mean of 69 and a standard deviation of 3.
                     How tall is the male in the 99th percentile?
-                </p>
-
-                <p>
-                    Hint: use <c>pnorm</c>.
+                    Hint: use <c>qnorm</c>.
                 </p>
             </statement>
         </exercise>

@@ -96,7 +96,7 @@
                 on the same fundamental idea: random assignment creates
                 conditions where probability can be used to infer causation.
                 In these examples, as in coin or urn examples (described in
-                <xref ref="discrete-probability"/>), the link between probability and data is clear.
+                <xref ref="sec-discrete-probability"/>), the link between probability and data is clear.
             </p>
         </subsection>
 
@@ -336,7 +336,7 @@
             <statement>
                 <p>
                     For each of the following, identify the primary source of
-                    randomness being modeled: <em>sampling variation</em>,
+                    randomness being modeled,  <em>sampling variation</em>,
                     <em>measurement error</em>, <em>natural variation</em>, or
                     <em>random assignment</em>:
                 </p>

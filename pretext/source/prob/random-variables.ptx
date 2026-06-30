@@ -105,7 +105,7 @@ s &lt;- sum(sample(c(0,1), n, replace = TRUE))
         <p>
             Not all random variables are discrete.
             Some can take on a continuum of values, as in
-            <xref ref="continuous-probability"/>.
+            <xref ref="sec-continuous-probability"/>.
             For example, the height of a randomly selected person or the result
             of a physical measurement can be viewed as a
             <em>continuous random variable</em>.
@@ -120,7 +120,7 @@ x &lt;- rnorm(10, mean = 70, sd = 3)
         </program>
 
         <p>
-            Here each value of <c>x</c> represents one realization of a random
+            Here, each value of <c>x</c> represents one realization of a random
             variable drawn from a normal distribution with mean 70 and standard
             deviation 3.
             Repeating the simulation produces slightly different numbers each
@@ -324,15 +324,15 @@ rbinom(100000, n, 1/2)
             <m>x_1,\dots,x_n</m>, the expected value is defined as:
         </p>
         <me>
-            \mathrm{E}[X] = \sum_{i=1}^n x_i ,\mathrm{Pr}(X = x_i)
+            \mathrm{E}[X] = \sum_{i=1}^n x_i \,\mathrm{Pr}(X = x_i).
         </me>
 
         <p>
             For a continuous random variable with probability density function
-            <m>f(x)</m> and range <m>(a, b)</m>, the sum becomes an integral:
+            <m>f(x)</m> and range <m>(a, b)</m>, this becomes an integral:
         </p>
         <me>
-            \mathrm{E}[X] = \int_a^b x f(x), dx
+            \mathrm{E}[X] = \int_a^b x f(x)\, dx.
         </me>
 
         <p>
@@ -372,10 +372,10 @@ mean(x)
         <p>
             The <em>standard deviation</em> (SD) describes the typical deviation
             of <m>X</m> from its expected value.
-            It is defined as:
+            For a discrete random variable, it is defined as:
         </p>
         <me>
-            \mathrm{SD}[X] = \sqrt{\sum_{i=1}^n (x_i - \mathrm{E}[X])^2 ,\mathrm{Pr}(X = x_i)}.
+            \mathrm{SD}[X] = \sqrt{\sum_{i=1}^n (x_i - \mathrm{E}[X])^2\, \mathrm{Pr}(X = x_i)}.
         </me>
 
         <p>
@@ -383,7 +383,7 @@ mean(x)
             becomes:
         </p>
         <me>
-            \mathrm{SD}[X] = \sqrt{\int_a^b (x - \mathrm{E}[X])^2 f(x), dx}.
+            \mathrm{SD}[X] = \sqrt{\int_a^b (x - \mathrm{E}[X])^2 f(x) \, dx}.
         </me>
 
         <note>
@@ -404,8 +404,8 @@ mean(x)
         </note>
 
         <p>
-            When all outcomes <m>x_i</m> are equally likely, the standard
-            deviation reduces to the standard deviation:
+            When all possible outcomes <m>x_i</m> are equally likely, the standard
+            deviation reduces to the formula we introduced in <xref ref="sec-numeric-summaries"/> for the standard deviation of a one variable dataset:
         </p>
         <me>
             \mathrm{SD}[X] = \sqrt{\frac{1}{n}\sum_{i=1}^n (x_i - \mathrm{E}[X])^2}, \quad \mathrm{E}[X] = \frac{1}{n}\sum_{i=1}^n x_i.
@@ -425,8 +425,7 @@ mean(x)
 
         <note>
             <p>
-                We use the Greek letters <m>\mu</m> and <m>\sigma</m> to denote
-                the expected value and standard deviation, respectively.
+                We sometimes use the Greek letters <m>\mu</m> and <m>\sigma</m> to denote a random variable's expected value and standard deviation, respectively.
                 However, we often prefer <m>\mathrm{E}[X]</m> and
                 <m>\mathrm{SD}[X]</m> notation because it generalizes more
                 clearly to mathematical expressions involving sums or
@@ -454,9 +453,9 @@ mean(x)
         </me>
 
         <p>
-            If <m>X_i</m> represent independent draws from the urn, then they all
+            If <m>X_i</m> represent independent draws from an urn, then they all
             have the same expected value.
-            Let's denote the expected value with <m>\mu_X</m> and rewrite the
+            Let's denote each expected value by <m>\mu_X</m> and rewrite the
             equation as:
         </p>
         <me>
@@ -464,21 +463,16 @@ mean(x)
         </me>
 
         <p>
-            which is another way of writing the result we show above for the sum
-            of draws.
-        </p>
-
-        <p>
             2.
             The expected value of a non-random constant times a random variable
             is the non-random constant times the expected value of a random
             variable.
             If we shift the random variable by adding or subtracting, the expected value shifts by that
-            amount.
+            amount as well.
             This is easier to explain with symbols:
         </p>
         <me>
-            \mathrm{E}[aX+b] =  a\times\mathrm{E}[X] + b
+            \mathrm{E}[aX+b] =  a\,\mathrm{E}[X] + b
         </me>
 
         <p>
@@ -493,7 +487,7 @@ mean(x)
             value of the urn, denoted as <m>\mu_X</m> again:
         </p>
         <me>
-            \mathrm{E}[(X_1+X_2+\dots+X_n) / n]=   \mathrm{E}[X_1+X_2+\dots+X_n] / n = n\mu_X/n = \mu_X
+            \mathrm{E}[\bar X] = \mathrm{E}[(X_1+X_2+\dots+X_n) / n]=   \mathrm{E}[X_1+X_2+\dots+X_n] / n = n\mu_X/n = \mu_X
         </me>
 
         <p>
@@ -524,14 +518,13 @@ mean(x)
             The standard deviation of a non-random constant times a random
             variable is the absolute value of the non-random constant times
             the random variable’s standard deviation. As with the expectation:
-            As with the expectation:
         </p>
         <me>
-            \mathrm{SD}[aX] =  a \times \mathrm{SD}[X]
+            \mathrm{SD}[aX] =  |a| \, \mathrm{SD}[X]
         </me>
 
         <p>
-            To see why this is intuitive, again think of units.
+            To see why this is intuitive, think back to units.
         </p>
 
         <p>
@@ -540,13 +533,13 @@ mean(x)
             So it has no effect on the standard deviation:
         </p>
         <me>
-            \mathrm{SD}[aX+b] =  a \times \mathrm{SD}[X]
+            \mathrm{SD}[aX+b] =  |a| \times \mathrm{SD}[X]
         </me>
 
         <p>
             A consequence of 3 and 4 is that the standard deviation of the
             average of independent draws from the same urn is the standard
-            deviation of the urn, call it <m>\sigma_X</m> divided by the
+            deviation of the urn, call it <m>\sigma_X</m>, divided by the
             square root of <m>n</m> (the number of draws):
         </p>
         <md>
@@ -561,8 +554,8 @@ mean(x)
             <title>The assumption of independence is important</title>
 
             <p>
-                The given equation reveals crucial insights for practical scenarios. Specifically, it suggests that the standard deviation of the average of independent draws can be minimized by increasing the number of observations <m>n</m>,
-nd we can quantify this reduction. However, this principle holds true only when the variables
+                The given equation reveals crucial insights for practical scenarios. Specifically, it suggests that the standard deviation of the average of independent draws can be minimized by increasing the number of observations, <m>n</m>,
+                and we can quantify this reduction. However, this principle holds true only when the variables
                 <m>X_1, X_2, ... X_n</m> are independent.
                 If they are not, the estimated standard deviation can be
                 significantly off.
@@ -572,7 +565,7 @@ nd we can quantify this reduction. However, this principle holds true only when 
                 In <xref ref="sec-corr-coef"/>, we introduce the concept of
                 correlation, which quantifies the degree to which variables are
                 interdependent.
-                If the correlation coefficient between each pair of variables <m>X_i</m>, <m>X_j</m> is
+                If the correlation coefficient between each pair of variables <m>X_i,X_j</m> is
                 <m>\rho</m>, the standard deviation of their average is:
             </p>
             <me>
@@ -583,17 +576,9 @@ nd we can quantify this reduction. However, this principle holds true only when 
                 The key observation here is that as <m>\rho</m> approaches its
                 upper limit of 1, the standard deviation increases.
                 Notably, in the situation where <m>\rho = 1</m>, the standard
-                deviation, <m>\mathrm{SD}[\bar{X}]</m>, equals <m>\sigma_X</m>,
-                and it becomes unaffected by the sample size <m>n</m>.
+                deviation <m>\mathrm{SD}[\bar{X}]</m> equals <m>\sigma_X</m>,
+                and it becomes unaffected by the number of observations  <m>n</m>.
             </p>
-<p>
-Specifically, properties 2 and 4 tell us that if <m>X</m> is normally distributed with mean <m>/mu</m>
- and standard deviation <m>/sigma</m> then <m>aX + b</m> is normally distributed with mean
-<m>a \mu + b</m> and standard deviation <m>|a|\sigma</m>.
-</p>
-<p>
-While multiplication and addition always have this effect on the expected value and standard deviation, they do not in general preserve the form of the distribution. Property 5 is specific to the normal distribution.
-</p>
         </warning>
 
         <p>
@@ -603,6 +588,16 @@ While multiplication and addition always have this effect on the expected value 
             also a normally distributed random variable.
             All we are doing is changing the units of the random variable by
             multiplying by <m>a</m>, then shifting the center by <m>b</m>.
+        </p>
+
+        <p>
+            Specifically, properties 2 and 4 tell us that if <m>X</m> is normally distributed with mean <m>\mu</m>
+            and standard deviation <m>\sigma</m>, then <m>aX + b</m> is normally distributed with mean
+            <m>a\mu + b</m> and standard deviation <m>|a|\sigma</m>.
+        </p>
+
+        <p>
+            While multiplication and addition always have this effect on the expected value and standard deviation, they do not in general preserve the form of the distribution. Property 5 is specific to the normal distribution.
         </p>
     </section>
 
@@ -614,7 +609,7 @@ While multiplication and addition always have this effect on the expected value 
             deviation of the average becomes smaller and smaller as <m>n</m>
             grows larger.
             When <m>n</m> is very large, then the standard deviation is
-            practically 0 and the average of the draws converges to the average
+            practically 0, and the average of the draws converges to the average
             of the urn.
             This is known in statistical textbooks as the law of large numbers
             or the law of averages.
@@ -633,7 +628,7 @@ While multiplication and addition always have this effect on the expected value 
         <title>Data distributions versus probability distributions</title>
 
         <p>
-            Before moving on, it is important to reiterate the distinguish between
+            Before moving on, it is important to reiterate the distinction between
             the <term>distribution of a dataset</term> and a
             <term>probability distribution</term>.
         </p>
@@ -641,8 +636,8 @@ While multiplication and addition always have this effect on the expected value 
         <p>
             Any list of numbers <m>x_1, \dots, x_n</m>, or any dataset, has a
             distribution that describes how the observed values are spread out.
-            This was the topic of <xref ref = "sec-numeric-summaries"/>. For
-            example, we can summarize it with simple statistics such as the mean
+            This was the topic of <xref ref="sec-numeric-summaries"/>. For
+            example, we can summarize the data with simple statistics such as the mean
             and standard deviation:
         </p>
 
@@ -666,8 +661,8 @@ s &lt;- sd(x)
             relative frequencies define the probability distribution of
             <m>X</m>.
             The average and standard deviation of the numbers in the urn
-            correspond to the <term>expected value</term> <m>E[X] = \mu</m> and
-            <term>standard deviation</term> <m>SD[X] = \sigma</m> of the random variable.
+            correspond to the <term>expected value</term> <m>\mathrm{E}[X] = \mu</m> and
+            <term>standard deviation</term> <m>\mathrm{SD}[X] = \sigma</m> of the random variable.
         </p>
 
         <p>
@@ -675,7 +670,7 @@ s &lt;- sd(x)
             standard deviation, and every random variable has a standard
             deviation, but the standard deviation of a random variable is the
             <em>standard deviation of its probability distribution</em>, not of
-            a particular dataset.
+            a particular observed dataset.
         </p>
     </section>
     <exercises xml:id="exercises-random-variables">

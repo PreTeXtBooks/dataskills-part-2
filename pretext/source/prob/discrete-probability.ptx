@@ -36,10 +36,10 @@
             what is the probability of picking a red one?
             Our intuition tells us that the answer is 2/5 or 40%—this is the
             proportion of beads in the urn that are red, referred to as the
-            relative frequency of that category.
+            <em>relative frequency</em> of that category.
             A precise definition can be given by noting that there are five
             possible outcomes, of which two satisfy the condition necessary for
-            the event pick a red bead.
+            the event <em>pick a red bead</em>.
             Since each of the five outcomes has an equal chance of occurring, we
             conclude that the probability is 0.4 for red and 0.6 for blue.
         </p>
@@ -500,7 +500,7 @@ mean(results)
 
         <p>
             If <m>A</m> and <m>B</m> are events and <m>\Pr(B) &gt; 0</m>, the
-            conditional probability of <m>A</m> given <m>B</m> is defined as:
+            conditional probability of <m>A</m> given <m>B</m> is defined as
         </p>
 
         <p>
@@ -880,8 +880,9 @@ abline(h = eprob[25], lty = 2)
                     A box contains 3 cyan balls, 5 magenta balls, and 7 yellow
                     balls.
                     One ball is drawn at random.
-                    Write a Monte Carlo simulation to estimate and confirm the
-                    probability that the ball drawn is cyan.
+                    Write a Monte Carlo simulation to estimate the probability
+                    that the ball drawn is cyan.
+                    Confirm this by computing the exact probability.
                 </p>
             </statement>
         </exercise>
@@ -890,7 +891,7 @@ abline(h = eprob[25], lty = 2)
             <statement>
                 <p>
                     Do the same for the probability that the ball will not be
-                    cyan?
+                    cyan.
                 </p>
             </statement>
         </exercise>
@@ -901,7 +902,7 @@ abline(h = eprob[25], lty = 2)
                     Instead of taking just one draw, consider taking two draws.
                     You take the second draw without returning the first draw to
                     the box.
-                    We call this sampling without replacement.
+                    We call this sampling <term>without</term> replacement.
                     Write a Monte Carlo simulation to estimate the probability
                     of the first draw being cyan and the second draw not being
                     cyan.
@@ -916,21 +917,7 @@ abline(h = eprob[25], lty = 2)
                     Now repeat the experiment, but this time, after taking the
                     first draw and recording the color, return it to the box and
                     shake the box.
-                    We call this sampling <em>with</em> replacement.
-                    Write a Monte Carlo simulation to estimate and confirm the
-                    probability of the first draw being cyan and the second draw
-                    not being cyan?
-                </p>
-            </statement>
-        </exercise>
-
-        <exercise>
-            <statement>
-                <p>
-                    Now repeat the experiment, but this time, after taking the
-                    first draw and recording the color, return it to the box and
-                    shake the box.
-                    We call this sampling with replacement.
+                    We call this sampling <term>with</term> replacement.
                     Write a Monte Carlo simulation to estimate the probability
                     of the first draw being cyan and the second draw not being
                     cyan.
@@ -968,7 +955,7 @@ abline(h = eprob[25], lty = 2)
                     The first to win four games, therefore, wins the series.
                     The Cavaliers are a better team and have a 60% chance of
                     winning each game.
-                    What is the probability that the Celtics will win at least
+                    What is the probability that the Celtics will win <term>at least</term>
                     one game?
                 </p>
             </statement>
@@ -1025,10 +1012,9 @@ celtic_wins &lt;- sample(c(0,1), 4, replace = TRUE, prob = c(0.6, 0.4))
                     series.
                     Team <m>A</m> is better than team <m>B</m> and has a
                     <m>p&gt;0.5</m> chance of winning each game.
-                    Given a value <m>p</m>, the probability of winning the
-                    series for the underdog team <m>B</m> winning the series can
-                    be estimated with a Monte Carlo simulation using the
-                    following function:
+                    Given a value <m>p</m>, the probability of the underdog
+                    team <m>B</m> winning the series can be estimated with a
+                    Monte Carlo simulation using the following function:
                 </p>
 
                 <program language="r">
