@@ -12,10 +12,10 @@
     </p>
 
     <program language="r">
-      <input>
+      <code>
 library(caret)
 library(dslabs)
-      </input>
+      </code>
     </program>
   </introduction>
 
@@ -128,7 +128,7 @@ library(dslabs)
       </p>
 
       <p>
-        In <xref ref="sec-ml-conditionals"/>, we saw that logistic regression was not flexible enough to approximate <m>p(\mathbf{x})</m> well for the two-digit example. In the next sections, we introduce algorithms that improve on this by providing the needed flexibility, each using a different approach to estimating the conditional class probabilities.
+        In <xref ref="sec-ml-conditionals"/>, we saw that logistic regression was not flexible enough to approximate <m>p(\mathbf{x})</m> well for the two-digit example: its accuracy was only 0.775. In the next sections, we introduce algorithms that improve on this by providing the needed flexibility, each using a different approach to estimating the conditional class probabilities.
       </p>
     </subsection>
   </section>
@@ -137,8 +137,13 @@ library(dslabs)
     <title>k-nearest neighbors</title>
 
     <p>
-      We introduced the kNN algorithm in <xref ref="sec-knn-cv-intro"/>. In <xref ref="sec-mse-estimates"/>, we noted that <m>k=65</m> provided the highest estimated accuracy. Using <m>k=65</m>, we obtain an improved accuracy over regression. A plot of the estimated conditional probability shows that the kNN estimate is flexible enough and does indeed capture the shape of the true conditional probability.
+      We introduced the kNN algorithm in <xref ref="sec-knn-cv-intro"/>. In <xref ref="sec-mse-estimates"/>, we noted that <m>k=65</m> provided the highest estimated accuracy. Using <m>k=65</m>,  we obtain an accuracy 0.825, an improvement over regression. A plot of the estimated conditional probability shows that the kNN estimate is flexible enough and does indeed capture the shape of the true conditional probability.
     </p>
+
+    <figure xml:id="fig-knn-tcp">
+      <image source="images/best-knn-fit-1.png" width="90%">
+      </image>
+    </figure>
 
     <note>
       <p>
@@ -152,7 +157,9 @@ library(dslabs)
 
     <introduction>
       <p>
-        We have described how, when using squared loss, the conditional expectation provides the best approach to developing a decision rule. In a binary case, the smallest true error we can achieve is determined by Bayes' rule, which is a decision rule based on the true conditional probability: <m>p(\mathbf{x}) = \mathrm{Pr}(Y = 1 \mid \mathbf{X}=\mathbf{x})</m>. We have described several approaches to estimating <m>p(\mathbf{x})</m>. In all these approaches, we estimate the conditional probability directly and do not consider the distribution of the predictors. In machine learning, these are referred to as <em>discriminative</em> approaches.
+        We have described how, when using squared loss, the conditional expectation provides the best approach to developing a decision rule. In a binary case, the smallest true error we can achieve is determined by Bayes' rule, which is a decision rule based on the true conditional probability:</p>
+<me>p(\mathbf{x}) = \mathrm{Pr}(Y = 1 \mid \mathbf{X}=\mathbf{x})</me>. 
+<p>We have described several approaches to estimating <m>p(\mathbf{x})</m>. In all these approaches, we estimate the conditional probability directly and do not consider the distribution of the predictors. In machine learning, these are referred to as <em>discriminative</em> approaches.
       </p>
 
       <p>
@@ -183,13 +190,13 @@ library(dslabs)
       </p>
 
       <program language="r">
-        <input>
+        <code>
 set.seed(1995)
 y &lt;- heights$height
 train_index &lt;- createDataPartition(y, times = 1, p = 0.5, list = FALSE)
 train_set &lt;- heights[train_index,]
 test_set &lt;- heights[-train_index,]
-        </input>
+        </code>
       </program>
 
       <p>
@@ -197,10 +204,10 @@ test_set &lt;- heights[-train_index,]
       </p>
 
       <program language="r">
-        <input>
+        <code>
 param &lt;- train_set |> group_by(sex) |>
   summarize(m = mean(height), s = sd(height))
-        </input>
+        </code>
       </program>
 
       <p>
@@ -208,9 +215,9 @@ param &lt;- train_set |> group_by(sex) |>
       </p>
 
       <program language="r">
-        <input>
+        <code>
 pi &lt;- mean(train_set$sex == "Female")
-        </input>
+        </code>
       </program>
 
       <p>
@@ -218,17 +225,22 @@ pi &lt;- mean(train_set$sex == "Female")
       </p>
 
       <program language="r">
-        <input>
+        <code>
 x &lt;- test_set$height
 f0 &lt;- dnorm(x, param$m[2], param$s[2])
 f1 &lt;- dnorm(x, param$m[1], param$s[1])
 p_hat_bayes &lt;- f1*pi / (f1*pi + f0*(1 - pi))
-        </input>
+        </code>
       </program>
 
       <p>
         Our Naive Bayes estimate <m>\hat{p}(x)</m> looks a lot like a logistic regression estimate.
       </p>
+
+    <figure xml:id="fig-conditional-prob-glm-fit-2-1">
+      <image source="images/conditional-prob-glm-fit-2-1.png" width="90%">
+      </image>
+    </figure>
 
       <p>
         In fact, we can show that the Naive Bayes approach is similar to the logistic regression prediction mathematically. However, we leave the demonstration to a more advanced text, such as the Elements of Statistical Learning<fn>https://web.stanford.edu/~hastie/Papers/ESLII.pdf</fn>.
@@ -250,21 +262,27 @@ p_hat_bayes &lt;- f1*pi / (f1*pi + f0*(1 - pi))
       </p>
 
       <program language="r">
-        <input>
+        <code>
 y_hat_bayes &lt;- ifelse(p_hat_bayes > 0.5, "Female", "Male")
 sensitivity(data = factor(y_hat_bayes), reference = factor(test_set$sex))
-        </input>
+        </code>
       </program>
+<pre>
+[1] 0.324
+</pre>
 
       <p>
         Again, this is because the algorithm gives more weight to specificity to account for the low prevalence:
       </p>
 
       <program language="r">
-        <input>
+        <code>
 specificity(data = factor(y_hat_bayes), reference = factor(test_set$sex))
-        </input>
+        </code>
       </program>
+<pre>
+[1] 0.947
+</pre>
 
       <p>
         This is mainly due to the fact that <m>\hat{\pi}</m> is substantially less than 0.5, so we tend to predict <c>Male</c> more often. It makes sense for a machine learning algorithm to do this in our sample because we do have a higher percentage of males. But if we were to extrapolate this to a general population, our overall accuracy would be affected by the low sensitivity.
@@ -275,10 +293,10 @@ specificity(data = factor(y_hat_bayes), reference = factor(test_set$sex))
       </p>
 
       <program language="r">
-        <input>
+        <code>
 p_hat_bayes_unbiased &lt;- f1 * 0.5 / (f1 * 0.5 + f0 * (1 - 0.5))
 y_hat_bayes_unbiased &lt;- ifelse(p_hat_bayes_unbiased > 0.5, "Female", "Male")
-        </input>
+        </code>
       </program>
 
       <p>
@@ -286,15 +304,25 @@ y_hat_bayes_unbiased &lt;- ifelse(p_hat_bayes_unbiased > 0.5, "Female", "Male")
       </p>
 
       <program language="r">
-        <input>
+        <code>
 sensitivity(factor(y_hat_bayes_unbiased), factor(test_set$sex))
 specificity(factor(y_hat_bayes_unbiased), factor(test_set$sex))
-        </input>
+        </code>
       </program>
+
+<pre>
+ [1] 0.775
+ [1] 0.717
+</pre>
 
       <p>
         The new rule also gives us a very intuitive cutoff between 66-67, which is about the middle of the female and male average heights.
       </p>
+
+    <figure xml:id="fig-naive-with-good-prevalence-1">
+      <image source="images/naive-with-good-prevalence-1.png" width="90%">
+      </image>
+    </figure>
     </subsection>
 
     <subsection xml:id="sec-qda">
@@ -312,18 +340,23 @@ specificity(factor(y_hat_bayes_unbiased), factor(test_set$sex))
         { \hat{f}_{\mathbf{X}|Y = 0}(x)(1-\hat{\pi}) + \hat{f}_{\mathbf{X}|Y = 1}(\mathbf{x})\hat{\pi} }
       </me>
       <p>
-        Note that the densities <m>f</m> are bivariate normal distributions. Here we provide a visual way of showing the approach. We plot the data and use contour plots to give an idea of what the two estimated normal densities look like (we show the curve representing a region that includes 95% of the points).
+        Note that the densities <m>f</m> are bivariate normal distributions. Here we provide a visual way of showing the approach. We plot the data and use contour plots to give an idea of what the two estimated normal densities look like (we show the curve representing a region that includes 95% of the points):
       </p>
+
+    <figure xml:id="fig-qda-explained-1">
+      <image source="images/conditional-qda-explained-1.png" width="90%">
+      </image>
+    </figure>
 
       <p>
         We can fit QDA using the <c>qda</c> function in the <term>MASS</term> package:
       </p>
 
       <program language="r">
-        <input>
+        <code>
 train_qda &lt;- MASS::qda(y ~ ., data = mnist_27$train)
 y_hat &lt;- predict(train_qda, mnist_27$test)$class
-        </input>
+        </code>
       </program>
 
       <p>
@@ -331,14 +364,24 @@ y_hat &lt;- predict(train_qda, mnist_27$test)$class
       </p>
 
       <program language="r">
-        <input>
+        <code>
 confusionMatrix(y_hat, mnist_27$test$y)$overall["Accuracy"]
-        </input>
+        </code>
       </program>
+
+    <figure xml:id="fig-qda-estimate-1">
+      <image source="images/conditional-qda-estimate-1.png" width="90%">
+      </image>
+    </figure>
 
       <p>
         One reason QDA does not work as well as the kernel methods is that the assumption of normality does not quite hold. Although for the 2s it seems reasonable, for the 7s it does seem to be off. Notice the slight curvature in the points for the 7s.
       </p>
+
+    <figure xml:id="fig-qda-does-not-fit-1">
+      <image source="images/qda-does-not-fit-1.png" width="90%">
+      </image>
+    </figure>
 
       <p>
         QDA can work ok here, but it becomes harder to use as the number of predictors increases. Here we have 2 predictors and had to compute 4 means, 4 SDs, and 2 correlations. Notice that if we have 10 predictors, we need to estimate 45 correlations for each class. In general, the formula for the number of correlations we have to estimate is <m>p(p-1)/2</m> for each class, which grows quickly. Once the number of parameters approaches the size of our data, the method becomes impractical due to overfitting.
@@ -352,20 +395,44 @@ confusionMatrix(y_hat, mnist_27$test$y)$overall["Accuracy"]
         A relatively simple solution to QDA's problem of having too many parameters is to assume that the correlation structure is the same for all classes, which reduces the number of parameters we need to estimate.
       </p>
 
+    <figure xml:id="fig-lda-explained-1">
+      <image source="images/lda-explained-1.png" width="90%">
+      </image>
+    </figure>
+
       <p>
         We can fit LDA using the <term>MASS</term> <c>lda</c> function:
       </p>
 
       <program language="r">
-        <input>
+        <code>
 train_lda &lt;- MASS::lda(y ~ ., data = mnist_27$train)
 y_hat &lt;- predict(train_lda, mnist_27$test)$class
-        </input>
+        </code>
       </program>
 
       <p>
         Now the size of the ellipses as well as the angles are the same. This is because they are assumed to have the same standard deviations and correlations. Although this added constraint lowers the number of parameters, the rigidity lowers our accuracy. When we force this assumption, we can show mathematically that the boundary is a line, just as with logistic regression. For this reason, we call the method <em>linear</em> discriminant analysis (LDA). Similarly, for QDA, we can show that the boundary must be a quadratic function.
       </p>
+
+      <program language="r">
+        <code>
+confusionMatrix(y_hat, mnist_27$test$y)$overall["Accuracy"]
+        </code>
+      </program>
+<pre>
+ Accuracy 
+    0.775
+</pre>
+
+<p>
+When we force this assumption, we can show mathematically that the boundary is a line, just as with logistic regression. For this reason, we call the method linear discriminant analysis (LDA). Similarly, for QDA, we can show that the boundary must be a quadratic function.
+</p>
+
+    <figure xml:id="fig-lda-estimate-1">
+      <image source="images/lda-estimate-1.png" width="90%">
+      </image>
+    </figure>
 
       <p>
         Although LDA often works well for simple datasets, in this case, the lack of flexibility does not permit us to capture the non-linearity in the true conditional probability function.
@@ -524,9 +591,9 @@ y_hat &lt;- predict(train_lda, mnist_27$test)$class
       </p>
 
       <program language="r">
-        <input>
+        <code>
 names(olive)
-        </input>
+        </code>
       </program>
 
       <p>
@@ -534,9 +601,9 @@ names(olive)
       </p>
 
       <program language="r">
-        <input>
+        <code>
 table(olive$region)
-        </input>
+        </code>
       </program>
 
       <p>
@@ -544,9 +611,9 @@ table(olive$region)
       </p>
 
       <program language="r">
-        <input>
+        <code>
 olive &lt;- select(olive, -area)
-        </input>
+        </code>
       </program>
 
       <p>
@@ -566,12 +633,12 @@ olive &lt;- select(olive, -area)
       </p>
 
       <program language="r">
-        <input>
+        <code>
 library(rpart)
 train_rpart &lt;- train(region ~ ., method = "rpart", data = olive)
 plot(train_rpart$finalModel, margin = 0.1)
 text(train_rpart$finalModel, cex = 0.75)
-        </input>
+        </code>
       </program>
 
       <p>
@@ -628,10 +695,10 @@ text(train_rpart$finalModel, cex = 0.75)
       </p>
 
       <program language="r">
-        <input>
+        <code>
 library(rpart)
 fit &lt;- rpart(margin ~ ., data = polls_2008)
-        </input>
+        </code>
       </program>
 
       <p>
@@ -639,10 +706,10 @@ fit &lt;- rpart(margin ~ ., data = polls_2008)
       </p>
 
       <program language="r">
-        <input>
+        <code>
 plot(fit, margin = 0.1)
 text(fit, cex = 0.75)
-        </input>
+        </code>
       </program>
 
       <p>
@@ -654,9 +721,9 @@ text(fit, cex = 0.75)
       </p>
 
       <program language="r">
-        <input>
+        <code>
 summary(fit)
-        </input>
+        </code>
       </program>
 
       <p>
@@ -684,10 +751,10 @@ summary(fit)
       </p>
 
       <program language="r">
-        <input>
+        <code>
 fit &lt;- rpart(margin ~ ., data = polls_2008, control = rpart.control(cp = 0))
 pruned_fit &lt;- prune(fit, cp = 0.01)
-        </input>
+        </code>
       </program>
     </subsection>
 
@@ -728,10 +795,10 @@ pruned_fit &lt;- prune(fit, cp = 0.01)
       </p>
 
       <program language="r">
-        <input>
+        <code>
 fit_rpart &lt;- rpart(y ~ ., data = mnist_27$train, method = "class")
 y_hat &lt;- predict(fit_rpart, newdata = mnist_27$test, type = "class")
-        </input>
+        </code>
       </program>
 
       <p>
@@ -789,10 +856,10 @@ y_hat &lt;- predict(fit_rpart, newdata = mnist_27$test, type = "class")
     </p>
 
     <program language="r">
-      <input>
+      <code>
 library(randomForest)
 fit &lt;- randomForest(margin ~ ., data = polls_2008)
-      </input>
+      </code>
     </program>
 
     <p>
@@ -800,9 +867,9 @@ fit &lt;- randomForest(margin ~ ., data = polls_2008)
     </p>
 
     <program language="r">
-      <input>
+      <code>
 plot(fit)
-      </input>
+      </code>
     </program>
 
     <p>
@@ -814,9 +881,9 @@ plot(fit)
     </p>
 
     <program language="r">
-      <input>
+      <code>
 y_hat &lt;-  predict(fit, newdata = polls_2008)
-      </input>
+      </code>
     </program>
 
     <p>
@@ -832,10 +899,10 @@ y_hat &lt;-  predict(fit, newdata = polls_2008)
     </p>
 
     <program language="r">
-      <input>
+      <code>
 library(randomForest)
 train_rf &lt;- randomForest(y ~ ., data = mnist_27$train)
-      </input>
+      </code>
     </program>
 
     <p>
@@ -867,12 +934,12 @@ train_rf &lt;- randomForest(y ~ ., data = mnist_27$train)
         </p>
 
         <program language="r">
-          <input>
+          <code>
 n &lt;- 100
 Sigma &lt;- 9*matrix(c(1.0, 0.5, 0.5, 1.0), 2, 2)
 dat &lt;- MASS::mvrnorm(n = 100, c(69, 69), Sigma) |>
   data.frame() |> setNames(c("x", "y"))
-          </input>
+          </code>
         </program>
 
         <p>
@@ -880,7 +947,7 @@ dat &lt;- MASS::mvrnorm(n = 100, c(69, 69), Sigma) |>
         </p>
 
         <program language="r">
-          <input>
+          <code>
 library(caret)
 y &lt;- dat$y
 test_index &lt;- createDataPartition(y, times = 1, p = 0.5, list = FALSE)
@@ -889,7 +956,7 @@ test_set &lt;- dat[-train_index,]
 fit &lt;- lm(y ~ x, data = train_set)
 y_hat &lt;- fit$coef[1] + fit$coef[2]*test_set$x
 sqrt(mean((y_hat - test_set$y)^2))
-          </input>
+          </code>
         </program>
 
         <p>
@@ -927,12 +994,12 @@ sqrt(mean((y_hat - test_set$y)^2))
         </p>
 
         <program language="r">
-          <input>
+          <code>
 n &lt;- 100
 Sigma &lt;- 9*matrix(c(1, 0.95, 0.95, 1), 2, 2)
 dat &lt;- MASS::mvrnorm(n = 100, c(69, 69), Sigma) |>
   data.frame() |> setNames(c("x", "y"))
-          </input>
+          </code>
         </program>
 
         <p>
@@ -962,12 +1029,12 @@ dat &lt;- MASS::mvrnorm(n = 100, c(69, 69), Sigma) |>
         </p>
 
         <program language="r">
-          <input>
+          <code>
 n &lt;- 1000
 Sigma &lt;- matrix(c(1, 3/4, 3/4, 3/4, 1, 0, 3/4, 0, 1), 3, 3)
 dat &lt;- MASS::mvrnorm(n = 100, c(0, 0, 0), Sigma) |>
   data.frame() |> setNames(c("y", "x_1", "x_2"))
-          </input>
+          </code>
         </program>
 
         <p>
@@ -975,9 +1042,9 @@ dat &lt;- MASS::mvrnorm(n = 100, c(0, 0, 0), Sigma) |>
         </p>
 
         <program language="r">
-          <input>
+          <code>
 cor(dat)
-          </input>
+          </code>
         </program>
 
         <p>
@@ -993,12 +1060,12 @@ cor(dat)
         </p>
 
         <program language="r">
-          <input>
+          <code>
 n &lt;- 1000
 Sigma &lt;- matrix(c(1.0, 0.75, 0.75, 0.75, 1.0, 0.95, 0.75, 0.95, 1.0), 3, 3)
 dat &lt;- MASS::mvrnorm(n = 100, c(0, 0, 0), Sigma) |>
   data.frame() |> setNames(c("y", "x_1", "x_2"))
-          </input>
+          </code>
         </program>
 
         <p>
@@ -1028,7 +1095,7 @@ dat &lt;- MASS::mvrnorm(n = 100, c(0, 0, 0), Sigma) |>
         </p>
 
         <program language="r">
-          <input>
+          <code>
 make_data &lt;- function(n = 1000, p = 0.5,
                       mu_0 = 0, mu_1 = 2,
                       sigma_0 = 1,  sigma_1 = 1){
@@ -1042,7 +1109,7 @@ make_data &lt;- function(n = 1000, p = 0.5,
        test = data.frame(x = x, y = as.factor(y)) |>
          slice(test_index))
 }
-          </input>
+          </code>
         </program>
 
         <p>
@@ -1050,9 +1117,9 @@ make_data &lt;- function(n = 1000, p = 0.5,
         </p>
 
         <program language="r">
-          <input>
+          <code>
 dat$train |> ggplot(aes(x, color = y)) + geom_density()
-          </input>
+          </code>
         </program>
 
         <p>
@@ -1084,10 +1151,10 @@ dat$train |> ggplot(aes(x, color = y)) + geom_density()
         </p>
 
         <program language="r">
-          <input>
+          <code>
 library(dslabs)
 mnist_127$train |> ggplot(aes(x_1, x_2, color = y)) + geom_point()
-          </input>
+          </code>
         </program>
 
         <p>
@@ -1123,7 +1190,7 @@ mnist_127$train |> ggplot(aes(x_1, x_2, color = y)) + geom_point()
         </p>
 
         <program language="r">
-          <input>
+          <code>
 GS &lt;- 150
 new_x &lt;- with(mnist_127$train,
   expand.grid(
@@ -1131,7 +1198,7 @@ new_x &lt;- with(mnist_127$train,
     x_2 = seq(min(x_2), max(x_2), length.out = GS)
   )
 )
-          </input>
+          </code>
         </program>
 
         <p>
@@ -1189,13 +1256,13 @@ new_x &lt;- with(mnist_127$train,
         </p>
 
         <program language="r">
-          <input>
+          <code>
 n &lt;- 1000
 sigma &lt;- 0.25
 x &lt;- rnorm(n, 0, 1)
 y &lt;- 0.75 * x + rnorm(n, 0, sigma)
 dat &lt;- data.frame(x = x, y = y)
-          </input>
+          </code>
         </program>
 
         <p>
@@ -1251,10 +1318,10 @@ dat &lt;- data.frame(x = x, y = y)
         </p>
 
         <program language="r">
-          <input>
+          <code>
 library(dslabs)
 dim(tissue_gene_expression$x)
-          </input>
+          </code>
         </program>
 
         <p>
@@ -1262,9 +1329,9 @@ dim(tissue_gene_expression$x)
         </p>
 
         <program language="r">
-          <input>
+          <code>
 table(tissue_gene_expression$y)
-          </input>
+          </code>
         </program>
 
         <p>
