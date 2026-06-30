@@ -416,7 +416,8 @@ colnames(x_test) &lt;- colnames(x)
     <p>
       Examples of preprocessing steps include standardizing predictors, applying transformations such as the logarithm, reducing the dimensionality of the feature space, removing highly correlated predictors, and excluding predictors with little variability, for example, those with near-zero variance.
     </p>
-
+<subsection>
+<title>Feature Filtering</title>
     <p>
       As a first example, we focus on this last type of preprocessing by examining the variability of each predictor. Specifically, we compute the standard deviation of each feature and observe that many have values close to zero, indicating minimal variation:
     </p>
@@ -467,8 +468,18 @@ image(matrix(1:784 %in% nzv, 28, 28))
     </figure>
     
     <p>
-      If we use <c>nearZeroVar</c>, we end up removing <c>length(nzv)</c> predictors. We can see that the accuracy of kNN is about the same even after removing all these predictors.
+      If we use <c>nearZeroVar</c>, we end up removing <c>length(nzv)</c> = 532 predictors. We can see that the accuracy of kNN is about the same even after removing all these predictors.
     </p>
+
+    <program language="r">
+      <code>
+mean(predict(knn3(x, y), x_test, type = "class") == y_test)
+mean(predict(knn3(x[, -nzv], y), x_test[, -nzv], type = "class") == y_test)
+      </code>
+      </program><pre>
+ [1] 0.952
+ [1] 0.951
+      </pre>
     
     <p>
       The <term>caret</term> package features the <c>preProcess</c> function, which allows users to establish a predefined set of preprocessing operations based on a training set. This function is designed to apply these operations to new datasets without recalculating anything on the validation set, ensuring that all preprocessing steps are consistent and derived solely from the training data.
@@ -482,17 +493,132 @@ image(matrix(1:784 %in% nzv, 28, 28))
       <code>
 pp &lt;- preProcess(x, method = c("nzv", "center"))
 centered_subsetted_x_test &lt;- predict(pp, newdata = x_test)
-dim(centered_subsetted_x_test)
+
       </code>
-      </program><pre>
-[1] 1000  252
-      </pre>
-    
-    
-    <p>
+      </program>    
+
+<p>
       Additionally, the <c>train</c> function in caret includes a <c>preProcess</c> argument that allows users to specify which preprocessing steps to apply automatically during model training. Here is an example of how to use it to remove near-zero variance predictors. Because this is an illustrative example, we consider only one <m>k</m> and use five-fold cross-validation to estimate the MSE to reduce runtime. As we see in <xref ref="sec-knn-in-practice"/>, in practice you would want to optimize <m>k</m> and use more thorough resampling.
     </p>
-  </section>
+
+    <program language="r">
+      <code>
+knn_nzv &lt;- train(x, y, method = "knn", preProcess = "nzv", 
+  trControl = trainControl(method = "cv", number = 5),
+  tuneGrid = data.frame(k = 5))
+mean(predict(knn_nzv, x_test, type = "raw") == y_test)
+      </code>
+      </program>    
+<pre>
+ [1] 0.955
+</pre>
+  </subsection>
+
+
+
+    <subsection xml:id="subsec-pca-dimension-reduction">
+      <title>Dimension reduction with PCA</title>
+      
+      <p>
+An alternative to filtering features directly is to reduce the dimension of the feature matrix using Principal Component Analysis (PCA). For this dataset, a large fraction of the total variability in the predictors can be captured using only a small number of principal components (PCs).
+      </p>
+      
+      <p>
+        As an example, suppose we want to retain the smallest number of PCs that explain at least 90% of the variability:
+      </p>
+      
+      <program language="r">
+        <code>
+pca &lt;- prcomp(x)
+p &lt;- which(cumsum(pca$sdev^2) / sum(pca$sdev^2) &gt;= 0.9)[1]
+        </code>
+      </program>
+      
+      <p>
+We can run an algorithm using only these 87 transformed features. We will use knn3 from the caret package as an example with the default <c>k</c>
+      </p>
+      
+      <program language="r">
+        <code>
+fit_knn_pca &lt;- knn3(pca$x[, 1:p], y, k = train_knn$bestTune)
+        </code>
+      </program>
+      
+      <p>
+A critical point when using PCA for prediction is that the PCA transformation must be learned only from the training set. If we use the validation or test set to compute principal components, or even to compute the means used for centering, we inadvertently leak information from those sets into the training process, leading to overfitting.
+      </p>
+      
+      <p>
+To avoid this, we compute the necessary centering and rotation matrices on the training set and then apply the transformation to the test set:
+      </p>
+      
+      <program language="r">
+        <code>
+newdata &lt;- sweep(x_test, 2, colMeans(x)) %*% pca$rotation[, 1:p]
+        </code>
+      </program>
+      
+      <p>
+The resulting accuracy is similar to what we obtained with the full feature set, but using only 87 dimensions:
+      </p>
+      
+      <program language="r">
+        <code>
+mean(predict(knn_pca, newdata, type = "class") == y_test)
+        </code>
+        </program><pre>
+[1] 0.0.953
+        </pre>
+
+<p>
+To obtain an unbiased MSE estimate when training with PCA, we must recompute the PCA inside each cross-validation split and apply the resulting transformation to the corresponding validation fold.
+</p>
+<p>
+      <p>
+        Fortunately, the <term>caret</term> package can automate this. The <c>train</c> function includes PCA as one of its available preprocessing steps. We can request PCA with a fixed number of components using
+      </p>
+      
+      <p>
+        <c>preProcOptions = list(pcaComp = p)</c>
+      </p>
+      
+      <p>
+or ask caret to pick the number of components that explain a fixed fraction of variability, such as 90%, using
+      </p>
+      
+      <p>
+        <c>preProcOptions = list(thresh = 0.9)</c>.
+      </p>
+      
+      <p>
+        Here is how we modify our earlier code to let caret perform PCA during preprocessing:
+      </p>
+      
+      <program language="r">
+        <code>
+train_knn_pca &lt;- train(x, y, method = "knn", 
+                       preProcess = c("nzv", "pca"),
+                       trControl = trainControl("cv", number = 20, p = 0.95,
+                                                preProcOptions = list(thresh = 0.9)),
+                       tuneGrid = data.frame(k = seq(1, 7, 2)))
+y_hat_knn_pca &lt;- predict(train_knn_pca, x_test, type = "raw")
+mean(y_hat_knn_pca == y_test)
+        </code>
+        </program><pre>
+[1] 0.955
+        </pre>
+      
+      
+      <p>
+        This raises a natural question: why did we choose 0.9? Could another threshold lead to better performance?
+      </p>
+      
+      <p>
+One limitation of this approach using caret is that we do not automatically optimize the number of PCs. To tune this quantity directly, just like we tune parameters such as 
+<m>k</m>, we would need to define our own model interface. The caret manual<fn>https://topepo.github.io/caret/using-your-own-model-in-train.html</fn> describes how to build custom models that allow full optimization of the PCA dimension.
+</p>
+    </subsection>
+</section>
 
   <section xml:id="sec-parallelization">
     <title>Parallelization</title>
@@ -533,28 +659,14 @@ stopImplicitCluster()
   </section>
 
   <section xml:id="sec-knn-in-practice">
-    <title>k-nearest neighbors</title>
+    <title>Model tuning and diagnostics</title>
     
     <p>
       In <xref ref="sec-knn-cv-intro"/> and <xref ref="sec-random-forests"/>, we introduced the k-nearest neighbors (kNN) and random forest algorithms, along with their intuition and formulation. In this section, we use these two methods as working examples to illustrate the process of model selection and tuning. Specifically, we demonstrate how to train and evaluate models in R, choose appropriate hyperparameters, such as <m>k</m> for kNN and tree-related parameters for random forests, and assess performance using cross-validation.
     </p>
-    
-    <warning>
-      <p>
-        Before starting this section, note that the first two calls to the <c>train</c> function in the code below can take several hours to run. This is a common challenge when training machine learning algorithms since we have to run the algorithm for each cross validation split and each set of tuning parameters being considered. In the next section, we will provide some suggestions on how to predict the duration of the process and ways to reduce.
-      </p>
-    </warning>
-    
-    <subsection xml:id="subsec-bootstrap-limitations">
-      <title>Limitations of Bootstrapping for kNN</title>
-      
-      <p>
-        As we will see soon, the optimal <m>k</m> for the MNIST data is between 1 and 7. For small values of <m>k</m>, bootstrapping can be problematic for estimating MSE for a k-Nearest Neighbors (kNN). This is because bootstrapping involves sampling with replacement from the original dataset which implies the closest neighbor will often appear twice but considered two independent observations by kNN. This is a unrealistic scenario that can distort the estimate MSE when, for example, <m>k=3</m>. We therefore use cross-validation to estimate our MSE.
-      </p>
-    </subsection>
 
     <subsection xml:id="subsec-optimizing-k">
-      <title>Optimizing <m>k</m></title>
+      <title>Optimizing tuning parameters</title>
       
       <p>
         The first step is to optimize for <m>k</m>.
@@ -591,110 +703,6 @@ mean(y_hat_knn == y_test)
 [1] 0.953
         </pre>
       
-    </subsection>
-
-    <subsection xml:id="subsec-pca-dimension-reduction">
-      <title>Dimension reduction with PCA</title>
-      
-      <p>
-        An alternative to removing low‐variance columns directly is to reduce the dimension of the feature matrix using Principal Component Analysis (PCA). For this dataset, a large fraction of the total variability in the predictors can be captured using only a small number of principal components (PCs).
-      </p>
-      
-      <p>
-        As an example, suppose we want to retain the smallest number of PCs that explain at least 90% of the variability:
-      </p>
-      
-      <program language="r">
-        <code>
-pca &lt;- prcomp(x)
-p &lt;- which(cumsum(pca$sdev^2) / sum(pca$sdev^2) &gt;= 0.9)[1]
-        </code>
-      </program>
-      
-      <p>
-        We can now re-run our algorithm using only these transformed features:
-      </p>
-      
-      <program language="r">
-        <code>
-fit_knn_pca &lt;- knn3(pca$x[, 1:p], y, k = train_knn$bestTune)
-        </code>
-      </program>
-      
-      <p>
-        A critical point when using PCA for prediction is that the PCA transformation must be learned only from the training set. If we use the validation or test set to compute principal components, or even to compute the means used for centering, we inadvertently leak information from those sets into the training process, leading to overtraining.
-      </p>
-      
-      <p>
-        To avoid this, we compute the necessary centering and rotation matrices on the training set:
-      </p>
-      
-      <program language="r">
-        <code>
-newdata &lt;- sweep(x_test, 2, colMeans(x)) %*% pca$rotation[, 1:p]
-y_hat_knn_pca &lt;- predict(fit_knn_pca, newdata, type = "class")
-        </code>
-      </program>
-      
-      <p>
-        The resulting accuracy is similar to what we obtained with the full feature set, but using only a reduced number of dimensions:
-      </p>
-      
-      <program language="r">
-        <code>
-mean(y_hat_knn_pca == y_test)
-        </code>
-        </program><pre>
-[1] 0.954
-        </pre>
-      
-      
-      <p>
-        In this example, we used the value of <m>k</m> optimized for the raw data, not the PCA-transformed data. To obtain an unbiased MSE estimate when using PCA, we must recompute the PCA inside each cross-validation split and apply the resulting transformation to the corresponding validation fold.
-      </p>
-      
-      <p>
-        Fortunately, the <term>caret</term> package can automate this. The <c>train</c> function includes PCA as one of its available preprocessing steps. We can request PCA with a fixed number of components using
-      </p>
-      
-      <p>
-        <c>preProcOptions = list(pcaComp = p)</c>
-      </p>
-      
-      <p>
-        or ask caret to pick the number of components that explain a fixed fraction of variability, such as 90%, using
-      </p>
-      
-      <p>
-        <c>preProcOptions = list(thresh = 0.9)</c>.
-      </p>
-      
-      <p>
-        Here is how we modify our earlier code to let caret perform PCA during preprocessing:
-      </p>
-      
-      <program language="r">
-        <code>
-train_knn_pca &lt;- train(x, y, method = "knn", 
-                       preProcess = c("nzv", "pca"),
-                       trControl = trainControl("cv", number = 20, p = 0.95,
-                                                preProcOptions = list(thresh = 0.9)),
-                       tuneGrid = data.frame(k = seq(1, 7, 2)))
-y_hat_knn_pca &lt;- predict(train_knn_pca, x_test, type = "raw")
-mean(y_hat_knn_pca == y_test)
-        </code>
-        </program><pre>
-[1] 0.955
-        </pre>
-      
-      
-      <p>
-        This raises a natural question: why did we choose 0.9? Could another threshold lead to better performance?
-      </p>
-      
-      <p>
-        One limitation of this approach is that caret does <em>not</em> automatically optimize the number of PCs. To tune this quantity directly, just like we tune parameters such as <m>k</m>, we would need to define our own model interface. The caret manual<fn><url href="https://topepo.github.io/caret/using-your-own-model-in-train.html"/></fn> describes how to build custom models that allow full optimization of the PCA dimension.
-      </p>
     </subsection>
   </section>
 
@@ -850,31 +858,35 @@ image(matrix(mat, 28, 28))
       An important part of data analysis is visualizing results to better understand our model fit and also determine why we are failing. How we do this depends on the application but below we provide some examples for the example of handwritten digit recognition.
     </p>
 
+<p>
+The black box nature of many machine learning algorithms can make it difficult to understand how they are making predictions. However, there are tools available to help us interpret these models and gain insights into their behavior. For example, with random forests we can examine whether variable importance, described in Section 30.5.1, is consistent with our expectations given the context. The following function computes the importance of each feature:
+</p>
+
+<program language="r"><code>
+imp &lt;- varImp(rf)$importance[,1]
+</code></program>
+
+<p>We can see which features are being used most by plotting an image:</p>
+
+<program language="r"><code>
+mat &lt;- rep(0, ncol(x))
+mat[-nzv] &lt;- imp
+image(matrix(mat, 28, 28))
+</code></program>
+
+    <figure xml:id="fig-ml-importance-image-1">
+      <caption>High-confidence random forest misclassifications</caption>
+      <image source="images/importance-image-1.png" width="100%">
+      </image>
+    </figure>
+
     <p>
       A common diagnostic tool is to examine the errors. By looking at the cases where the model made incorrect predictions, we can often identify specific weaknesses in the algorithm or parameter choices and try to correct them. Below we show the images of digits for which we made an incorrect prediction. Here are some errors for the random forest:
     </p>
     
-    <program language="r">
-      <code>
-p_max &lt;- predict(fit_rf, x_test[,-nzv], type = "prob") 
-p_max &lt;- p_max / rowSums(p_max)
-p_max &lt;- apply(p_max, 1, max)
-
-ind  &lt;- which(y_hat_rf != y_test)
-ind &lt;- ind[order(p_max[ind], decreasing = TRUE)]
-
-rafalib::mypar(1,4)
-for (i in ind[1:4]) {
-  image(matrix(x_test[i,], 28, 28)[, 28:1], 
-        main = paste0("Pr(",y_hat_rf[i],")=",round(p_max[i], 2), " but is a ",y_test[i]),
-        xaxt = "n", yaxt = "n")
-}
-      </code>
-    </program>
-    
     <figure xml:id="fig-ml-in-practice-random-forest-errors">
       <caption>High-confidence random forest misclassifications</caption>
-      <image source="images/ml-in-practice-random-forest-errors.png" width="100%">
+      <image source="images/rf-images-1.png" width="100%">
         <description>A row of four MNIST test images that the random forest misclassified with high confidence, each labeled with the predicted class probability and the true digit.</description>
       </image>
     </figure>
@@ -909,23 +921,16 @@ y_pred &lt;- factor(apply(p, 1, which.max) - 1)
 mean(y_pred == y_test)
       </code>
       </program><pre>
-[1] 0.963
+[1] 0.964
       </pre>
     
     
     <p>
       We have just built an ensemble with just two algorithms. By combining more similarly performing but uncorrelated algorithms, we can improve accuracy further.
     </p>
-    
-    <program language="r">
-      <code>
-stopCluster(cl)
-stopImplicitCluster()
-      </code>
-    </program>
   </section>
 
-  <section xml:id="sec-ml-practice-exercises">
+  <exercises xml:id="sec-ml-practice-exercises">
     <title>Exercises</title>
     
     <exercise>
@@ -1277,8 +1282,11 @@ modelLookup("gamLoess")
     <exercise>
       <statement>
         <p>
-          Using the models from the previous exercise, build an ensemble prediction based on <em>majority vote</em>. Compare the ensemble's accuracy to that of the individual models. Does the ensemble improve performance?
-        </p>
+          Using the models from the previous exercise, build an ensemble prediction based on <em>majority vote</em>.
+</p>
+<p>
+Compare the ensemble’s accuracy to that of the individual models. Does the ensemble improve performance?
+</p>
       </statement>
     </exercise>
 
@@ -1290,6 +1298,6 @@ modelLookup("gamLoess")
       </statement>
     </exercise>
 
-  </section>
+  </exercises>
 
 </chapter>
