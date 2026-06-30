@@ -105,7 +105,7 @@ s &lt;- sum(sample(c(0,1), n, replace = TRUE))
         <p>
             Not all random variables are discrete.
             Some can take on a continuum of values, as in
-            <xref ref="sec-continuous-probability"/>.
+            <xref ref="continuous-probability"/>.
             For example, the height of a randomly selected person or the result
             of a physical measurement can be viewed as a
             <em>continuous random variable</em>.
