@@ -4,28 +4,33 @@
 
   <introduction>
     <p>
-      Since Galton's original development, regression has become one of the most widely used tools in data analysis. One reason is that an adaptation of the original regression approach, based on linear models, permits us to find relationships between two variables taking into account the effects of other variables that affect both. This has been particularly popular in fields where randomized experiments are hard to run, such as economics and epidemiology.
+Since Galton’s original development, regression has become one of the most widely used tools in data analysis. One reason is that an adaptation of the original regression approach, based on linear models, permits us to find relationships between two variables, taking into account the effects of other variables that affect both. This has been particularly popular in fields where randomized experiments are hard to run, such as economics and epidemiology.
     </p>
 
     <p>
-      When we are unable to randomly assign each individual to a treatment or control groups, confounding becomes particularly prevalent. For instance, consider estimating the effect of eating fast foods on life expectancy using data collected from a random sample of people in New York City. Fast food consumers are more likely to be smokers, drinkers, and have lower incomes. Consequently, a naive regression model may lead to an overestimate of the negative health effects of fast food. So, how do we account for confounding in practice? In this chapter, we learn how <em>multivariable regression</em> can help with such situations and can be used to describe how one or more variables affect an outcome variable. We illustrate with a real-world example in which data was used to help pick under appreciated players to improve a resource-limited sports team.
+When we are unable to randomly assign each individual to a treatment or control group, confounding becomes particularly prevalent. For instance, consider estimating the effect of eating fast food on life expectancy using data collected from a random sample of people in New York City. Fast food consumers are more likely to be smokers, drinkers, and have lower incomes. Consequently, a naive regression model may lead to an overestimate of the negative health effects of fast food. So, how do we account for confounding in practice? In this chapter, we learn how multivariable regression can help with such situations and can be used to describe how one or more variables affect an outcome variable. We illustrate with a real-world example in which data was used to help pick underappreciated players to improve a resource-limited sports team.
     </p>
 
+<note>
+<title>Connection to Treatment Effects</title>
+<p>
+In Chapter 17, we introduced multivariable regression in the context of binary covariates (treatment groups and confounders). Here, we extend that framework to continuous predictors.,
+</p></note>
   </introduction>
 
   <section xml:id="case-study-moneyball">
     <title>Case study: Moneyball</title>
 
       <p>
-        <em>Moneyball: The Art of Winning an Unfair Game</em> by Michael Lewis focuses on the Oakland Athletics (A's) baseball team and its general manager, Billy Beane, the person tasked with building the team.
+        <em>Moneyball: The Art of Winning an Unfair Game</em> by Michael Lewis focuses on the Oakland Athletics (A’s) baseball team and its general manager, Billy Beane, the person tasked with building the team.
+</p>
+
+      <p>
+Traditionally, baseball teams had used <em>scouts</em> to help them decide what players to hire. These scouts evaluate players by observing them perform, tending to favor athletic players with observable physical abilities. For this reason, scouts generally agree on who the best players are and, as a result, these players are often in high demand. This, in turn, drives up their salaries.
       </p>
 
       <p>
-        Traditionally, baseball teams had used <em>scouts</em> to help them decide what players to hire. These scouts evaluate players by observing them perform, tending to favor athletic players with observable physical abilities. For this reason, scouts generally agree on who the best players are and, as a result, these players are often in high demand. This in turn drives up their salaries.
-      </p>
-
-      <p>
-        From 1989 to 1991, the A's had one of the highest payrolls in baseball. They were able to hire the best players and, during that time, were one of the best teams. However, in 1995, the A's team owner changed and the new management cut the budget drastically, leaving then general manager, Sandy Alderson, with one of the lowest payrolls in baseball: for example, in 2002, the Yankees' payroll of $125,928,583 more than tripled the Oakland A's payroll of $39,679,746. The A's could no longer afford the most sought-after players. As a result, Alderson began using a statistical approach to find inefficiencies in the market. Alderson was a mentor to Billy Beane, who succeeded him in 1998 and fully embraced data science, as opposed to relying exclusively on scouts, as a method for finding low-cost players that data predicted would help the team win. Today, this strategy has been adapted by most baseball teams. As we will see, regression plays a significant role in this approach. In this section, we will illustrate how data can be used to support this approach.
+From 1989 to 1991, the A’s had one of the highest payrolls in baseball. They were able to hire the best players and, during that time, were one of the best teams. However, in 1995, the A’s team owner changed, and the new management cut the budget drastically, leaving then general manager, Sandy Alderson, with one of the lowest payrolls in baseball: for example, in 2002, the Yankees’ payroll of $125,928,583 more than tripled the Oakland A’s payroll of $39,679,746. The A’s could no longer afford the most sought-after players. As a result, Alderson began using a statistical approach to find inefficiencies in the market. Alderson was a mentor to Billy Beane, who succeeded him in 1998 and fully embraced data science, as opposed to relying exclusively on scouts, as a method for finding low-cost players that data predicted would help the team win. Today, this strategy has been adopted by most baseball teams. As we will see, regression plays a significant role in this approach. In this section, we will illustrate how data can be used to support this approach.
       </p>
 
         <subsection xml:id="baseball-data">
@@ -246,7 +251,7 @@
         </console>
 
         <p>
-          The estimated slope is 1.84. This means that, on average, teams that hit one additional home run per game score 1.84 more runs per game than teams with the same number of games but fewer home runs. Considering that many games are decided by just one run, this difference can translate into a substantial increase in wins.  Not surprisingly, HR hitters are very expensive. Because the As were working on a budget, they needed to find some other way to increase wins. In the next section we examine this more carefully.
+          The estimated slope is 1.86. This means that, on average, teams that hit one additional home run per game score 1.86 more runs per game than teams with the same number of games but fewer home runs. Considering that many games are decided by just one run, this difference can translate into a substantial increase in wins.  Not surprisingly, HR hitters are very expensive. Because the As were working on a budget, they needed to find some other way to increase wins. In the next section we examine this more carefully.
         </p>
 
         </subsection>
@@ -272,7 +277,7 @@
       </console>
 
       <p>
-        Does this mean that if we go and hire low salary players with many BB, and who increase the number of walks per game by 2, our team will score 1.49 more runs per game? Association is not causation: although the data shows strong evidence that a team with two more BB per game than the average team, scores 1.49 more runs per game, this does not mean that BB are the cause.
+Does this mean that if we go and hire low salary players with many BB, and who increase the number of walks per game by 2, our team will score 1.5 more runs per game? Association is not causation: although the data shows strong evidence that a team with two more BB per game than the average team, scores 1.5 runs per game, this does not mean that BB are the cause.
       </p>
 
       <p>
@@ -290,11 +295,11 @@
       </console>
 
       <p>
-        which is a lower value than what we obtain for BB. Remember that a single gets you to first base just like a BB. Baseball fans will point out that with a single, runners on base have a better chance of scoring than with a BB. So how can BB be more predictive of runs? The reason is because of confounding.
+which is a lower value than what we obtain for BB. Remember that a single gets you to first base just like a BB. Baseball fans will point out that with a single, runners on base have a better chance of scoring than with a BB. So how can BB be more predictive of runs? The reason is because of confounding.
       </p>
 
       <p>
-        Here we show the correlation between HR, BB, and singles:
+Here we show the correlation between HR, BB, and singles:
       </p>
 
       <console>
@@ -310,11 +315,11 @@ HR      -0.17142432  0.40639779  1.0000000
       </console>
 
       <p>
-        HR and BB are highly correlated! Experts will point out that pitchers are intimidated by players that excel at hitting HR and this leads to the bad performance that awards batters BB. As a result, HR hitters tend to have more BB, and a team with many HR will also have more BB. Although it may appear that BB cause runs, it is actually the HR that cause most of these runs. BB are <em>confounded</em> with HR. Nonetheless, could it be that BB still help? To find out, we somehow have to adjust for the HR effect. Multivariable regression can help with this.
+HR and BB are highly correlated! Experts will point out that pitchers are intimidated by players who excel at hitting HR, and this leads to the bad performance that awards batters with BB. As a result, HR hitters tend to have more BB, and a team with many HR will also have more BB. Although it may appear that BB cause runs, it is actually the HR that cause most of these runs. BB are confounded with HR. Nonetheless, could it be that BB still help? To find out, we somehow have to adjust for the HR effect. Multivariable regression can help with this.
       </p>
 
       <p>
-        A first approach is to keep HR fixed at a certain value and then examine the relationship between BB and runs. As we did when we stratified fathers by rounding to the closest inch, here we can stratify HR per game to the closest tenth. We filter out the strata with few points, to avoid highly variable estimates, and then make a scatterplot for each strata:
+A first approach is to keep HR fixed at a certain value and then examine the relationship between BB and runs. As we did when we stratified fathers by rounding to the closest inch, here we can stratify HR per game to the closest tenth. We filter out the strata with few points, to avoid highly variable estimates, and then make a scatterplot for each strata:
       </p>
 
       <program language="r">
@@ -366,11 +371,11 @@ HR      -0.17142432  0.40639779  1.0000000
       </p>
 
       <p>
-        The slopes are reduced, but they are not 0, which indicates that BB are helpful for producing runs, just not as much as suggested by the single variable analysis. In fact, the values above are closer to the slope we obtained from singles, 0.45, which is more consistent with our intuition. Since both singles and BB get us to first base, they should have about the same predictive power.
+The slopes are reduced, but they are not 0, which indicates that BB are helpful for producing runs, just not as much as suggested by the single variable analysis. In fact, the values above are closer to the slope we obtained from singles, 0.5, which is more consistent with our intuition. Since both singles and BB get us to first base, they should have about the same predictive power.
       </p>
 
       <p>
-        Although our understanding of the application tells us that HR cause BB, but not the other way around, we can still check if stratifying by BB makes the effect of BB go down. To do this, we use the same code except that we swap HR and BB. In this case, the slopes do not change much from the original:
+Although our understanding of the application tells us that HR cause BB, but not the other way around, we can still check if stratifying by BB makes the effect of HR go down. To do this, we use the same code except that we swap HR and BB. In this case, the slopes do not change much from the original:
       </p>
 
       <console>
@@ -396,11 +401,11 @@ HR      -0.17142432  0.40639779  1.0000000
       </console>
 
       <p>
-        They are reduced slightly from 1.84, which is consistent with the fact that BB do in fact cause some runs.
+They are reduced slightly from 1.86, which is consistent with the fact that BB do in fact cause some runs.
       </p>
 
       <p>
-        Regardless, it seems that if we stratify by HR, we have bivariate distributions for runs versus BB. Similarly, if we stratify by BB, we have approximate bivariate normal distributions for HR versus runs.
+Regardless, it seems that if we stratify by HR, we have bivariate distributions for runs versus BB. Similarly, if we stratify by BB, we have approximate bivariate normal distributions for HR versus runs.
       </p>
 
     </section>
