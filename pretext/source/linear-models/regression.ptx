@@ -16,7 +16,7 @@
     </p>
 
     <program language="r">
-      <input>
+      <code>
 library(data.table)
 library(HistData)
 
@@ -24,22 +24,22 @@ set.seed(1983)
 galton &lt;- as.data.table(GaltonFamilies)
 galton &lt;- galton[gender == "male", .SD[sample(.N, 1)], by = family]
 galton &lt;- galton[, .(father, son = childHeight)]
-      </input>
+      </code>
     </program>
 
     <p>
       Suppose we were asked to summarize the father and son data. Since both distributions are well approximated by the normal distribution, we could use the two averages and two standard deviations as summaries:
     </p>
 
-    <console>
-      <input>
+    <program language = "r">
+      <code>
 galton[, .(f_avg=mean(father), f_sd=sd(father), s_avg=mean(son), s_sd=sd(son))]
-      </input>
-      <output>
+      </code>
+      </program><pre>
       f_avg     f_sd   s_avg     s_sd
 1: 69.09888 2.546555 69.1933 2.716917
-      </output>
-    </console>
+      </pre>
+    
 
     <p>
       However, this summary fails to describe an important characteristic of the data: the trend that the taller the father, the taller the son.
@@ -77,9 +77,9 @@ galton[, .(f_avg=mean(father), f_sd=sd(father), s_avg=mean(son), s_sd=sd(son))]
     </p>
 
     <program language="r">
-      <input>
+      <code>
 rho &lt;- mean(scale(x) * scale(y))
-      </input>
+      </code>
     </program>
 
     <p>
@@ -94,14 +94,14 @@ rho &lt;- mean(scale(x) * scale(y))
       For other pairs, the correlation is between -1 and 1. The correlation, computed with the function <c>cor</c>, between father and son's heights is about 0.5:
     </p>
 
-    <console>
-      <input>
+    <program language = "r">
+      <code>
 galton[, cor(father, son)]
-      </input>
-      <output>
+      </code>
+      </program><pre>
 [1] 0.4303697
-      </output>
-    </console>
+      </pre>
+    
 
     <warning>
       <p>
@@ -136,14 +136,22 @@ galton[, cor(father, son)]
       </p>
 
       <program language="r">
-        <input>
+        <code>
 r &lt;- galton[sample(.N, 25, replace = TRUE), cor(father, son)]
-        </input>
+        </code>
       </program>
 
       <p>
-        <c>r</c> is a random variable. We can run a Monte Carlo simulation to see its distribution:
+Because <c>r</c> is a random variable, we can run a Monte Carlo simulation to see its distribution:
       </p>
+
+      <program language="r">
+        <code>
+N &lt;- 25
+r &lt;- replicate(1000, galton[sample(.N, N, replace=TRUE), cor(father, son)])
+hist(r, breaks = 20)
+        </code>
+      </program>
 
       <figure xml:id="sample-correlation-distribution">
         <caption>Distribution of sample correlation</caption>
@@ -156,27 +164,27 @@ r &lt;- galton[sample(.N, 25, replace = TRUE), cor(father, son)]
         We see that the expected value of <c>r</c> is the population correlation:
       </p>
 
-      <console>
-        <input>
+      <program language = "r">
+        <code>
 mean(r)
-        </input>
-        <output>
+        </code>
+        </program><pre>
 [1] 0.4273407
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         and that it has a relatively high standard error relative to the range of values <c>r</c> can take:
       </p>
 
-      <console>
-        <input>
+      <program language = "r">
+        <code>
 sd(r)
-        </input>
-        <output>
+        </code>
+        </program><pre>
 [1] 0.1607791
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         So, when interpreting correlations, remember that correlations derived from samples are estimates containing uncertainty.
@@ -234,20 +242,20 @@ sd(r)
     </p>
 
     <p>
-      Therefore, without any information about the father, our best prediction for the son's height is simply the average height of sons in the population. In practice, we approximate this using the sample average.
+      Therefore, without any information about the father, our best prediction for the son's height is simply the average height of sons in the population. In practice, we approximate this using the sample average, <m>\hat{\mu}_y = 69.2</m>.
     </p>
 
     <p>
-      But what if we are told that the father is taller than average, say 72 inches tall, do we still guess <m>\mu_y</m> for the son?
+      But what if we are told that the father is taller than average, say 72 inches tall, do we still guess <m>\mu_y = 69.2</m> for the son?
     </p>
 
     <p>
-      It turns out that, if we were able to collect data from a very large number of fathers that are 72 inches, the distribution of their sons' heights would be normally distributed. This implies that the average of the distribution computed on this subset would be our best prediction.
+It turns out that, if we were able to collect data from a very large number of fathers who are 72 inches, the distribution of their sons’ heights would be normally distributed. This implies that the average of the distribution computed on this subset would be our best prediction.
     </p>
 
     <p>
-      In general, we call this approach <em>conditioning</em>. The idea is that we divide a population into groups, or strata, based on the value of one variable, and then compute summaries of the other variable within each group.
-    </p>
+      In general, we call this approach <em>conditioning</em>. 
+The idea is that we divide a population into groups, or strata, based on the value of one variable, and then compute summaries of the other variable within each group.    </p>
 
     <p>
       To describe this mathematically, suppose we have a population of pairs <m>(x_1, y_1), \dots, (x_n, y_n)</m>, such as all father and son height pairs in England. We learned that if we pick a random pair <m>(X, Y)</m> from this population, the expected value and best predictor of <m>Y</m> is <m>\mathrm{E}[Y] = \mu_y</m>.
@@ -285,48 +293,58 @@ sd(r)
       So to obtain a prediction we want to estimate <m>E[Y|X=72]</m> using the sample collected by Galton. When using continuous data we often have the challenge that there are not that many data points where <m>X = 72</m>:
     </p>
 
-    <console>
-      <input>
+    <program language = "r">
+      <code>
 sum(galton$father == 72)
-      </input>
-      <output>
+      </code>
+      </program><pre>
 [1] 8
-      </output>
-    </console>
+      </pre>
+    
 
     <p>
       If we change the number to 72.5, we get even fewer data points:
     </p>
 
-    <console>
-      <input>
+    <program language = "r">
+      <code>
 sum(galton$father == 72.5)
-      </input>
-      <output>
+      </code>
+      </program><pre>
 [1] 1
-      </output>
-    </console>
+      </pre>
+    
 
     <p>
-      A practical way to improve estimates of the conditional expectations is to define strata of observations with similar value of <m>x</m>. In our example, we can round father heights to the nearest inch and assume that they are all 72 inches. If we do this, we end up with the following prediction for the son of a father that is 72 inches tall:
+      A practical way to improve estimates of the conditional expectations is to define strata of observations with similar value of <m>x</m>. 
+In our example, we can round father heights to the nearest inch to pool observations with father heights close to 72 inches. If we do this, we end up with the following prediction for the son of a father who is 72 inches tall:
     </p>
 
-    <console>
-      <input>
+    <program language = "r">
+      <code>
 mean(galton[round(father) == 72]$son)
-      </input>
-      <output>
+      </code>
+      </program><pre>
 [1] 70.5
-      </output>
-    </console>
+      </pre>
+    
 
     <p>
-      Note that a 72 inch father is taller than average, specifically standard deviations taller than the average father. Our prediction is also taller than average, but only standard deviations larger than the average son. The predicted height for sons of 72 inch fathers have <em>regressed</em> some to the average height. We notice that the reduction in how many SDs taller is about 0.5, which happens to be close to the sample correlation. As we will see in a later section, this is not a coincidence.
+Note that a 72-inch father is taller than average, specifically (72.0 - 69.1)/2.5 = 1.1 standard deviations taller than the average father. Our prediction 70.5 is also taller than average, but only 0.48 standard deviations larger than the average son. The predicted height for sons of 72-inch fathers has regressed towards the average height. We notice that the reduction in how many SDs taller is about 0.5, which happens to be close to the sample correlation. As we will see in a later section, this is not a coincidence.
     </p>
 
     <p>
-      If we want to make a prediction of any height, not just 72 inches, we could apply the same approach to each strata. Stratification followed by boxplots lets us see the distribution of each group:
+If we want to make a prediction of any height, not just 72 inches, we could apply the same approach to each stratum. Stratification followed by boxplots lets us see the distribution of each group:
     </p>
+
+<program language="r">
+<code>
+galton[, .(father_strata = factor(round(father)), son)] |&gt;
+ggplot(aes(father_strata, son)) + 
+  geom_boxplot() + 
+  geom_point()
+</code>
+</program>
 
     <figure xml:id="boxplot-1">
       <caption>Boxplot of son heights by father height strata</caption>
@@ -336,7 +354,7 @@ mean(galton[round(father) == 72]$son)
     </figure>
 
     <p>
-      Not surprisingly, the centers of the groups are increasing with height. Furthermore, these centers appear to follow a linear relationship. Below, we plot the averages of each group. If we take into account that these averages are random variables with standard errors, the data is consistent with these points following a straight line:
+Not surprisingly, the centers of the groups are increasing with height. Furthermore, these centers appear to follow a linear relationship. Below, we plot the averages of each group. If we take into account that these averages are random variables with standard errors, the data are consistent with these points following a straight line:
     </p>
 
     <figure xml:id="conditional-averages-follow-line">
@@ -347,7 +365,7 @@ mean(galton[round(father) == 72]$son)
     </figure>
 
     <p>
-      Note that while we divided the data into one-inch groups, the sample size in each group is still small and not the same. The groups corresponding to taller fathers are much smaller, which makes their averages more variable.
+Note that while we divided the data into one-inch groups, the sample size in each group is still small and not the same. The groups corresponding to taller fathers are much smaller, which makes their averages more variable.
     </p>
 
     <p>
@@ -392,6 +410,16 @@ mean(galton[round(father) == 72]$son)
       We can add regression lines to plots by converting the formula above to the form <m>\hat{y} = m + bx</m>, which gives us a slope <m>m = \rho \frac{\sigma_y}{\sigma_x}</m> and intercept <m>b = \mu_y - m \mu_x</m>:
     </p>
 
+<program language="r"><code>
+params &lt;- galton[, .(mu_x = mean(father), mu_y = mean(son),
+                             s_x  = sd(father), s_y  = sd(son),
+                             r    = cor(father, son))]
+galton |&gt; ggplot(aes(father, son)) + 
+  geom_point(alpha = 0.5) +
+  geom_abline(slope = with(params, r*s_y/s_x), 
+              intercept = with(params, mu_y - r*s_y/s_x*mu_x))
+</code></program>
+
     <figure xml:id="regression-line">
       <caption>Regression line</caption>
       <image source="images/regression-regression-line.png" width="40%">
@@ -404,21 +432,20 @@ mean(galton[round(father) == 72]$son)
         With <c>ggplot</c> we don't need to calculate all these summaries and can easily add a regression line using the <c>geom_smooth</c> function:
       </p>
 
-      <figure xml:id="geom-smooth-regression-line">
-        <caption>Regression line added with <c>geom_smooth</c></caption>
-        <image source="images/regression-geom-smooth-line.png" width="40%">
-          <description>Scatterplot of father and son heights with a fitted linear regression line and confidence band added using geom_smooth.</description>
-        </image>
-      </figure>
-
       <p>
         In <xref ref="sec-lm-function" /> we explain what <c>lm</c> means here.
       </p>
     </note>
 
     <p>
-      Note that the regression formula implies that if we first standardize the variables, that is subtract the average and divide by the standard deviation, then the regression line has intercept 0 and slope equal to the correlation <m>\rho</m>. You can make same plot, but using standard units like this:
+      Note that the regression formula implies that if we first standardize the variables, that is, subtract the average and divide by the standard deviation, then the regression line has intercept 0 and slope equal to the correlation <m>\rho</m>. You can make same plot, but using standard units like this:
     </p>
+
+<program language="r"><code>
+galton |&gt; ggplot(aes(scale(father), scale(son))) + 
+  geom_point(alpha = 0.5) +
+  geom_abline(intercept = 0, slope = r) 
+</code></program>
 
     <figure xml:id="regression-line-standard-units">
       <caption>Regression line in standard units</caption>
@@ -436,17 +463,17 @@ mean(galton[round(father) == 72]$son)
 
       <p>
         <ol>
-          <li>Round fathers' heights to the nearest inch, stratify, and take the average within each group.</li>
-          <li>Compute the regression line and use it to predict.</li>
+          <li>Round fathers’ heights to the nearest inch, stratify, and take the average son’s height within each group.</li>
+          <li>Compute the regression line and use it to predict the son’s height.</li>
         </ol>
       </p>
 
       <p>
-        Our goal is to estimate the expected value and the standard error of the predictions obtained with each method. We want the expected value to be very close to the true population average and the standard error to be small. To do this, we use a Monte Carlo simulation. Specifically, we repeatedly draw random samples of size <m>N = 50</m> families from the population, compute both types of predictions for each sample, and then examine the distribution of these repeated estimates. The mean of this distribution provides an estimate of the expected value of each method, and its standard deviation provides an estimate of the standard error, which reflects how variable the prediction is across random samples.
-      </p>
+For each method, our goal is to estimate the expected value of a son’s height given that his father is 72 inches tall, as well as the standard error of these estimates. We want the estimated conditional expected value to be very close to the true conditional population average, and we want the standard error to be small. To do this, we use a Monte Carlo simulation. Specifically, we repeatedly draw random samples of size 
+<m>N=50</m> families from the population, compute both types of predictions for each sample, and then examine the distribution of these repeated estimates. The mean of this distribution provides an estimate of the expected value of each method, and its standard deviation provides an estimate of the standard error, which reflects how variable the prediction is across random samples.      </p>
 
       <program language="r">
-        <input>
+        <code>
 B &lt;- 1000
 N &lt;- 50
 
@@ -459,45 +486,45 @@ linear_regression_prediction &lt;- replicate(B, {
   dat &lt;- galton[sample(.N, N, replace = TRUE)]
   dat[, mean(son) + cor(father, son)*(72 - mean(father))/sd(son)*sd(father)]
 })
-        </input>
+        </code>
       </program>
 
       <p>
         Although the expected values from both methods are nearly the same:
       </p>
 
-      <console>
-        <input>
+      <program language = "r">
+        <code>
 mean(conditional_avg, na.rm = TRUE)
 mean(linear_regression_prediction)
-        </input>
-        <output>
-[1] 70.47253
-[1] 70.43207
-        </output>
-      </console>
+        </code>
+        </program><pre>
+[1] 70.5
+[1] 70.6
+        </pre>
+      
 
       <p>
         the standard error for the linear regression prediction is much smaller:
       </p>
 
-      <console>
-        <input>
+      <program language = "r">
+        <code>
 sd(conditional_avg, na.rm = TRUE)
 sd(linear_regression_prediction)
-        </input>
-        <output>
-[1] 1.075993
-[1] 0.5344485
-        </output>
-      </console>
+        </code>
+        </program><pre>
+[1] 1.08
+[1] 0.519
+        </pre>
+      
 
       <p>
-        This means that the linear-regression-based prediction is far more stable across repeated samples. The reason is intuitive: the conditional average is based on a relatively small subset of data, the fathers whose heights are about 72 inches, so its estimate is more variable. In some samples, we may even have very few or no observations in that group, which is why we use <c>na.rm=TRUE</c>. The regression line, on the other hand, is estimated using information from the entire dataset, which makes its predictions much more precise.
+This means that the linear-regression-based prediction is far more stable across repeated samples. The reason is intuitive: the within-stratum sample mean is based on a relatively small subset of data, the fathers whose heights are about 72 inches, so its estimate is more variable. In some samples, we may even have very few or no observations in that group, which is why we use <c>na.rm=TRUE</c>. The regression line, on the other hand, is estimated using information from the entire dataset, which makes its predictions much more precise.
       </p>
 
       <p>
-        So why not always use the regression line for prediction? Because it is not always appropriate. For example, Anscombe provided cases for which the data does not have a linear relationship. So are we justified in using the regression line to predict? Galton answered this in the positive for height data. The next section provides a justification.
+So why not always use the regression line for prediction? Because it is not always appropriate. For example, Anscombe provided cases for which the data do not have a linear relationship. So are we justified in using the regression line to predict? Galton answered this in the positive for height data. The next section provides a justification.
       </p>
     </subsection>
 
@@ -537,8 +564,15 @@ sd(linear_regression_prediction)
       </p>
 
       <p>
-        If we think the height data is well approximated by the bivariate normal distribution, then we should see the normal approximation hold for each strata. Here we stratify the son heights by the standardized father heights and see that the assumption appears to hold:
+If we think the height data is well approximated by the bivariate normal distribution, then we should see the normal approximation hold for each stratum. Here we stratify the son heights by the standardized father heights and see that the assumption appears to hold:
       </p>
+
+<program language="r"><code>
+galton[,.(son, z=round((father-mean(father))/sd(father)))][z %in% -2:2] |&gt;
+  ggplot() +  
+  stat_qq(aes(sample = son)) +
+  facet_wrap( ~ z) 
+</code></program>
 
       <figure xml:id="qqnorm-of-strata">
         <caption>QQ plots of son heights by father height strata</caption>
@@ -564,8 +598,9 @@ sd(linear_regression_prediction)
       </me>
 
       <p>
-        This implies that, if our data is approximately bivariate, the regression line gives the conditional probability. Therefore, we can obtain a much more stable estimate of the conditional expectation by finding the regression line and using it to predict.
-      </p>
+This implies that, if our data is approximately bivariate normal, the regression line gives the conditional expectation of 
+<m>Y</m> given <m>X</m>. Therefore, we can obtain a much more stable estimate of the conditional expectation by fitting the regression line and using it for prediction.
+</p>
 
       <p>
         In summary, if our data is approximately bivariate, then the conditional expectation, the best prediction of <m>Y</m> given we know the value of <m>X</m>, is given by the regression line.
@@ -584,11 +619,11 @@ sd(linear_regression_prediction)
       </me>
 
       <p>
-        To see why this is intuitive, notice that without conditioning we are looking at the variability of all the sons: <m>\mathrm{SD}(Y) = \sigma_Y</m>. But once we condition, we are only looking at the variability of the sons with a tall, 72 inch father. This group will all tend to be somewhat tall so the standard deviation is reduced.
-      </p>
+        To see why this is intuitive, notice that without conditioning we are looking at the variability of all the sons: <m>\mathrm{SD}(Y) = \sigma_Y</m>. But once we condition, we are only looking at the variability of the sons with a tall, 72-inch father. Because the variables are positively correlated, this group will all tend to be somewhat tall, so the standard deviation is reduced.
+</p>
 
       <p>
-        Specifically, it is reduced to <m>\sqrt{1-\rho^2} = \sqrt{1 - 0.25}</m> = 0.87 of what it was originally. We could say that father heights "explain" 13% of the variability observed in son heights.
+        Specifically, it is reduced to <m>\sqrt{1-\rho^2} = \sqrt{1 - 0.25}</m> = 0.9 of what it was originally. We could say that father heights "explain" 10% of the variability observed in son heights.
       </p>
 
       <p>
@@ -608,10 +643,10 @@ sd(linear_regression_prediction)
       </p>
 
       <program language="r">
-        <input>
+        <code>
 m_1 &lt;- with(params, r*s_y/s_x)
 b_1 &lt;- with(params, mu_y - m_1*mu_x)
-        </input>
+        </code>
       </program>
 
       <p>
@@ -627,10 +662,10 @@ b_1 &lt;- with(params, mu_y - m_1*mu_x)
       </p>
 
       <program language="r">
-        <input>
+        <code>
 m_2 &lt;- with(params, r*s_x/s_y)
 b_2 &lt;- with(params, mu_x - m_2*mu_y)
-        </input>
+        </code>
       </program>
 
       <p>
@@ -659,7 +694,7 @@ b_2 &lt;- with(params, mu_x - m_2*mu_y)
 
     <blockquote>
       <p>
-        A sophomore slump or sophomore jinx or sophomore jitters refers to an instance in which a second, or sophomore, effort fails to live up to the standards of the first effort. It is commonly used to refer to the apathy of students (second year of high school, college or university), the performance of athletes (second season of play), singers/bands (second album), television shows (second seasons) and movies (sequels/prequels).
+A sophomore slump, or sophomore jinx, or sophomore jitters, refers to an instance in which a second, or sophomore, effort fails to live up to the standards of the first effort. It is commonly used to refer to the apathy of students (second year of high school, college, or university), the performance of athletes (second season of play), singers/bands (second album), television shows (second seasons), and movies (sequels/prequels).
       </p>
     </blockquote>
 
@@ -671,108 +706,166 @@ b_2 &lt;- with(params, mu_x - m_2*mu_y)
       Does the data confirm the existence of a sophomore slump? Let's take a look. Examining the data for a widely used measure of success, the batting average, we see that this observation holds true for the top performing ROYs:
     </p>
 
-    <program language="r">
-      <input>
-library(Lahman)
+<table xml:id="tab-rookie-batting-average">
+  <title>Selected Players' Rookie and Sophomore Batting Averages</title>
+  <tabular>
+    <col left="minor" halign="left"/>
+    <col halign="left"/>
+    <col halign="center"/>
+    <col halign="center"/>
+    <col right="minor" halign="center"/>
 
-## Convert to data.table
-Fielding &lt;- as.data.table(Fielding)
-People   &lt;- as.data.table(People)
-Batting  &lt;- as.data.table(Batting)
-AwardsPlayers &lt;- as.data.table(AwardsPlayers)
+    <row>
+      <cell><em>First Name</em></cell>
+      <cell><em>Last Name</em></cell>
+      <cell><em>Rookie Year</em></cell>
+      <cell><em>Rookie Average</em></cell>
+      <cell><em>Sophomore Average</em></cell>
+    </row>
 
-setorder(Fielding, playerID, -G)
-playerInfo &lt;- Fielding[, .SD[1], by = playerID][, .(playerID, POS)][
-  People[, .(playerID, nameFirst, nameLast)], on = .(playerID)
-]
-
-ROY &lt;- AwardsPlayers[awardID == "Rookie of the Year",
-                     .(playerID, rookie_year = yearID)]
-ROY &lt;- merge(ROY, playerInfo, all.x = TRUE)
-ROY &lt;- merge(ROY, Batting, all.x = TRUE)
-ROY[, AVG := H / AB]
-ROY &lt;- ROY[POS != "P"]
-
-## Keep rookie and sophomore seasons only, and only players with both seasons
-ROY &lt;- ROY[, .SD[yearID %in% c(unique(rookie_year), unique(rookie_year + 1))], by = playerID]
-ROY[ , rookie := fifelse(yearID == rookie_year, "rookie", "sophomore")]
-ROY &lt;- ROY[!is.na(AVG)]
-ROY &lt;- ROY[, if (.N == 2) .SD, by = playerID]
-ROY &lt;- ROY[, .(playerID, rookie_year, rookie, nameFirst, nameLast, AVG)]
-
-## Wide layout: one column for rookie and sophomore AVG
-ROY &lt;- dcast(ROY, playerID + nameFirst + nameLast + rookie_year ~ rookie, value.var = "AVG")
-
-## Order by rookie AVG (descending)
-setorder(ROY, -rookie)
-      </input>
-    </program>
-
-    <console>
-      <input>
-ROY[1:5, .(nameFirst, nameLast, rookie_year, rookie, sophomore)]
-      </input>
-      <output>
-   nameFirst nameLast rookie_year    rookie sophomore
-1:    Willie  McCovey        1959 0.3541667 0.2384615
-2:    Ichiro   Suzuki        2001 0.3497110 0.3214838
-3:        Al   Bumbry        1973 0.3370787 0.2333333
-4:      Fred     Lynn        1975 0.3314394 0.3136095
-5:    Albert   Pujols        2001 0.3288136 0.3135593
-      </output>
-    </console>
-
-    <p>
-      So is it "jitters" or a "jinx"? To answer this question, let's turn our attention to all the players that played the 2013 and 2014 seasons and batted more than 130 times (minimum to win Rookie of the Year).
-    </p>
-
-    <program language="r">
-      <input>
-two_years &lt;- Batting[yearID %in% 2013:2014]
-two_years &lt;- two_years[,.(H = sum(H, na.rm = TRUE), AB = sum(AB, na.rm = TRUE)),
-                     by = .(playerID, yearID)]
-two_years &lt;- two_years[AB &gt;= 130, .(playerID, yearID, AVG = H/AB)]
-two_years &lt;- dcast(two_years, playerID ~ yearID, value.var = "AVG")
-two_years &lt;- two_years[!is.na(`2013`) &amp; !is.na(`2014`)]
-two_years &lt;- merge(two_years, playerInfo, all.x = TRUE)[POS != "P"][, .(nameFirst, nameLast, `2013`, `2014`)][order(-`2013`)]
-      </input>
-    </program>
+    <row>
+      <cell>Willie</cell>
+      <cell>McCovey</cell>
+      <cell>1959</cell>
+      <cell>0.354</cell>
+      <cell>0.238</cell>
+    </row>
+    <row>
+      <cell>Ichiro</cell>
+      <cell>Suzuki</cell>
+      <cell>2001</cell>
+      <cell>0.350</cell>
+      <cell>0.321</cell>
+    </row>
+    <row>
+      <cell>Al</cell>
+      <cell>Bumbry</cell>
+      <cell>1973</cell>
+      <cell>0.337</cell>
+      <cell>0.233</cell>
+    </row>
+    <row>
+      <cell>Fred</cell>
+      <cell>Lynn</cell>
+      <cell>1975</cell>
+      <cell>0.331</cell>
+      <cell>0.314</cell>
+    </row>
+    <row>
+      <cell>Albert</cell>
+      <cell>Pujols</cell>
+      <cell>2001</cell>
+      <cell>0.329</cell>
+      <cell>0.314</cell>
+    </row>
+  </tabular>
+</table>
 
     <p>
-      The same pattern arises when we look at the top performers: batting averages go down for most of the top performers.
+So is it “jitters” or a “jinx”? To answer this question, let’s turn our attention to all the players who played the 2013 and 2014 seasons and batted more than 130 times (minimum to win Rookie of the Year).
     </p>
-
-    <console>
-      <input>
-two_years[1:5]
-      </input>
-      <output>
-   nameFirst nameLast      2013      2014
-1:    Miguel  Cabrera 0.3477477 0.3126023
-2:    Hanley  Ramirez 0.3453947 0.2828508
-3:   Michael  Cuddyer 0.3312883 0.3315789
-4:   Scooter  Gennett 0.3239437 0.2886364
-5:       Joe    Mauer 0.3235955 0.2769231
-      </output>
-    </console>
 
     <p>
-      But these are not rookies! Also, look at what happens to the worst performers of 2013:
+The same pattern arises when we look at the top performers: batting averages go down for most of the top performers.
+    </p>
+<table xml:id="tab-batting-average-2013-2014">
+  <title>Selected Players' Batting Averages in 2013 and 2014</title>
+  <tabular>
+    <col left="minor" halign="left"/>
+    <col halign="left"/>
+    <col halign="center"/>
+    <col right="minor" halign="center"/>
+
+    <row>
+      <cell><em>First Name</em></cell>
+      <cell><em>Last Name</em></cell>
+      <cell><em>2013</em></cell>
+      <cell><em>2014</em></cell>
+    </row>
+
+    <row>
+      <cell>Miguel</cell>
+      <cell>Cabrera</cell>
+      <cell>0.348</cell>
+      <cell>0.313</cell>
+    </row>
+    <row>
+      <cell>Hanley</cell>
+      <cell>Ramirez</cell>
+      <cell>0.345</cell>
+      <cell>0.283</cell>
+    </row>
+    <row>
+      <cell>Michael</cell>
+      <cell>Cuddyer</cell>
+      <cell>0.331</cell>
+      <cell>0.332</cell>
+    </row>
+    <row>
+      <cell>Scooter</cell>
+      <cell>Gennett</cell>
+      <cell>0.324</cell>
+      <cell>0.289</cell>
+    </row>
+    <row>
+      <cell>Joe</cell>
+      <cell>Mauer</cell>
+      <cell>0.324</cell>
+      <cell>0.277</cell>
+    </row>
+  </tabular>
+</table>
+    <p>
+But these are not rookies! Also, look at what happens to the worst performers of 2013:
     </p>
 
-    <console>
-      <input>
-two_years[order(`2013`)][1:5]
-      </input>
-      <output>
-   nameFirst nameLast      2013      2014
-1:     Danny Espinosa 0.1582278 0.2192192
-2:       Dan    Uggla 0.1785714 0.1489362
-3:      Jeff   Mathis 0.1810345 0.2000000
-4:     B. J.    Upton 0.1841432 0.2080925
-5:      Adam  Rosales 0.1904762 0.2621951
-      </output>
-    </console>
+<table xml:id="tab-batting-average-2013-2014-low">
+  <title>Selected Players with Lower Batting Averages in 2013 and 2014</title>
+  <tabular>
+    <col left="minor" halign="left"/>
+    <col halign="left"/>
+    <col halign="center"/>
+    <col right="minor" halign="center"/>
+
+    <row>
+      <cell><em>First Name</em></cell>
+      <cell><em>Last Name</em></cell>
+      <cell><em>2013</em></cell>
+      <cell><em>2014</em></cell>
+    </row>
+
+    <row>
+      <cell>Danny</cell>
+      <cell>Espinosa</cell>
+      <cell>0.158</cell>
+      <cell>0.219</cell>
+    </row>
+    <row>
+      <cell>Dan</cell>
+      <cell>Uggla</cell>
+      <cell>0.179</cell>
+      <cell>0.149</cell>
+    </row>
+    <row>
+      <cell>Jeff</cell>
+      <cell>Mathis</cell>
+      <cell>0.181</cell>
+      <cell>0.200</cell>
+    </row>
+    <row>
+      <cell>B. J.</cell>
+      <cell>Upton</cell>
+      <cell>0.184</cell>
+      <cell>0.208</cell>
+    </row>
+    <row>
+      <cell>Adam</cell>
+      <cell>Rosales</cell>
+      <cell>0.190</cell>
+      <cell>0.262</cell>
+    </row>
+  </tabular>
+</table>
 
     <p>
       Their batting averages mostly go up! Is this some sort of reverse sophomore slump? It is not. There is no such thing as a sophomore slump. This is all explained with a simple statistical fact: the correlation for performance in two separate years is high, but not perfect:
@@ -786,7 +879,7 @@ two_years[order(`2013`)][1:5]
     </figure>
 
     <p>
-      The correlation is approximately 0.46 and the data look very much like a bivariate normal distribution, which means we predict a 2014 batting average <m>\hat{y}</m> for any given player that had a 2013 batting average <m>x</m> with:
+      The correlation is 0.46 and the data look very much like a bivariate normal distribution, which means we predict a 2014 batting average <m>\hat{y}</m> for any given player that had a 2013 batting average <m>x</m> with:
     </p>
 
     <me>
@@ -823,17 +916,13 @@ two_years[order(`2013`)][1:5]
           We performed a Monte Carlo simulation and found that with <m>N=25</m> and the CLT was not a great approximation for the distribution of the sample correlation. Generate correlated data using the <c>mvrnorm</c> function from the <c>MASS</c> package:
         </p>
 
-        <console>
-          <input>
+        <program language = "r">
+          <code>
 library(MASS)
 N &lt;- 25
 dat &lt;- mvrnorm(N, c(0, 0), matrix(c(1, 0.9, 0.9, 1), 2, 2))
 cor(dat[,1], dat[,2])
-          </input>
-          <output>
-[1] 0.9437435
-          </output>
-        </console>
+        </code></program>
 
         <p>
           Perform 10,000 Monte Carlo simulations for <c>N &lt;- c(25, 50, 100, 250, 500, 1000)</c> to determine when the CLT starts becoming a useful approximation.
