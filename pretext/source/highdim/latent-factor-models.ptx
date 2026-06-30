@@ -696,7 +696,7 @@ pca$rotation[,2]
             <p>
                 Even with the orthogonality constraint, the PCA solution is not
                 completely unique.
-                As pointed out in <xref ref="sec-dimension-reduction"/>, there
+                As pointed out in <xref ref="dimension-reduction"/>, there
                 remains a <em>sign indeterminacy</em>: we can flip the sign of
                 any column in <m>\mathbf{P}</m> and the corresponding column in
                 <m>\mathbf{Q}</m> (multiply one by <m>-1</m> and the other by
