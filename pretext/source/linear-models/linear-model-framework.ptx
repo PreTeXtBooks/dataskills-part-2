@@ -12,7 +12,7 @@
     </p>
 
     <p>
-      We end the chapter presenting one example in which the linear model was historically motivated: <em>measurement error models</em>. This example is different from the height data we studied earlier, but the same linear model framework, the same least squares mathematics, and even the same R functions can be used to fit it. Later chapters will introduce additional examples in which linear models play a central role.
+      We end the chapter by presenting one example in which the linear model was historically motivated: <em>measurement error models</em>. This example is different from the height data we studied earlier, but the same linear model framework, the same least squares mathematics, and even the same R functions can be used to fit it. Later chapters will introduce additional examples in which linear models play a central role.
     </p>
   </introduction>
 
@@ -42,7 +42,7 @@
     </note>
 
     <p>
-      If we were to specify a linear model for Galton's data, we would denote the <m>N</m> observed father heights with <m>x_1, \dots, x_n</m>, then we model the <m>N</m> son heights we are trying to predict with:
+      If we were to specify a linear model for Galton's data that was introduced in the previous chapter, we would denote the <m>N</m> observed father heights with <m>x_1, \dots, x_n</m>, then we model the <m>N</m> son heights we are trying to predict with:
     </p>
 
     <me>
@@ -70,7 +70,7 @@
     </p>
 
     <p>
-      Given how we wrote the model above, the intercept <m>\beta_0</m> is not very interpretable, as it is the predicted height of a son of a father with no height. To make the slope parameter more interpretable, we can rewrite the model slightly as:
+      Given how we wrote the model above, the intercept <m>\beta_0</m> is not very interpretable, as it is the predicted height of a son of a father with no height. To make the slope parameter more interpretable, we focus on a slightly different model:
     </p>
 
     <me>
@@ -78,7 +78,7 @@
     </me>
 
     <p>
-      with <m>\bar{x} = 1/N \sum_{i=1}^N x_i</m> the average of the <m>x</m>. In this case, <m>\beta_0</m> represents the height when <m>x_i = \bar{x}</m>, which is the height of the son of an average father.
+      with <m>\bar{x} = \sum_{i=1}^N x_i / N</m> the average of <m>x</m>. The slope <m>\beta_1</m> is unchanged, but <m>\beta_0</m> now represents the height when <m>x_i = \bar{x}</m>, which is the height of the son of an average father.
     </p>
 
     <p>
@@ -317,7 +317,7 @@ father 0.112   1.14
       </console>
 
       <p>
-        Although we do not show examples in this book, hypothesis testing with regression models is commonly used in epidemiology and economics to make statements such as "the effect of A on B was statistically significant after adjusting for X, Y, and Z". However, several assumptions have to hold for these statements to be true.
+        Although we do not show examples in this book, hypothesis testing with regression models is commonly used in epidemiology and economics to make statements such as "the effect of A on B was statistically significant after adjusting for X, Y, and Z". However, several assumptions have to hold for these statements to be useful.
       </p>
     </subsection>
 
@@ -337,7 +337,26 @@ father 0.112   1.14
       </p>
 
       <p>
-        Keep in mind that the prediction <m>\hat{y}</m> is also a random variable and mathematical theory tells us what the standard errors are. If we assume the errors are normal, or have a large enough sample size, we can use theory to construct confidence intervals as well. In fact, the <c>ggplot2</c> layer <c>geom_smooth(method = "lm")</c> surrounds the regession line using these confidence intervals:
+        Keep in mind that the prediction <m>\hat{y}</m> is also a random variable, and mathematical theory tells us what the standard errors are. If we assume the errors are normal, or have a large enough sample size, we can use theory to construct confidence intervals as well.
+      </p>
+
+      <p>
+        The R function <c>predict</c> takes an <c>lm</c> object as input and returns the prediction. If requested, the standard errors and other information from which we can construct confidence intervals are provided:
+      </p>
+
+      <console>
+        <input>
+fit &lt;- lm(son ~ father, data = galton)
+y_hat &lt;- predict(fit, se.fit = TRUE)
+names(y_hat)
+        </input>
+        <output>
+[1] "fit"            "se.fit"         "df"             "residual.scale"
+        </output>
+      </console>
+
+      <p>
+        In fact, the <c>ggplot2</c> layer <c>geom_smooth(method = "lm")</c> surrounds the regression line using these confidence intervals:
       </p>
 
       <program language="r">
@@ -349,24 +368,9 @@ galton |&gt; ggplot(aes(son, father)) + geom_point() + geom_smooth(method = "lm"
       <figure xml:id="fig-linear-model-framework-father-son-regression">
         <caption>Regression line and confidence band for father and son heights</caption>
         <image source="images/linear-model-framework-father-son-regression.png" width="70%">
-          <description>A scatterplot of son height versus father height with a fitted linear regression line and a shaded confidence band.</description>
+          <description><p>A scatterplot of son height versus father height with a fitted linear regression line and a shaded confidence band.</p></description>
         </image>
       </figure>
-
-      <p>
-        The R function <c>predict</c> takes an <c>lm</c> object as input and returns the prediction. If requested, the standard errors and other information from which we can construct confidence intervals is provided:
-      </p>
-
-      <console>
-        <input>
-fit &lt;- lm(son ~ father, data = galton) 
-y_hat &lt;- predict(fit, se.fit = TRUE)
-names(y_hat)
-        </input>
-        <output>
-[1] "fit"            "se.fit"         "df"             "residual.scale"
-        </output>
-      </console>
     </subsection>
   </section>
 
@@ -386,7 +390,7 @@ names(y_hat)
     </p>
 
     <me>
-      r = y - \hat{y} = y- \left(\hat{\beta}_0 + \hat{\beta}_1 x_i\right),
+      r_i = y_i - \hat{y}_i = y_i - \left(\hat{\beta}_0 + \hat{\beta}_1 x_i\right), \mbox{ for } i=1,\dots,N,
     </me>
 
     <p>
@@ -601,7 +605,7 @@ plot(fit, which=1:2)
       </me>
 
       <p>
-        with <m>h_0</m> and <m>v_0</m> the starting height and velocity, respectively. The data we simulated above followed this equation, adding measurement error to simulate <m>n</m> observations for dropping the ball (<m>v_0=0</m>) from the tower of Pisa (<m>h_0=55.86</m>).
+        with <m>t</m> as time in seconds and <m>h_0</m> and <m>v_0</m> the starting height and velocity, respectively. The data we simulated above followed this equation, adding measurement error to simulate <m>n</m> observations for dropping the ball (<m>v_0=0</m>) from the tower of Pisa (<m>h_0=55.86</m>).
       </p>
 
       <p>
@@ -688,7 +692,59 @@ time_sq     -5.51  -4.35
     <exercise>
       <statement>
         <p>
-          Fit a regression model to each of the datasets in the Anscombe quartet and examine the diagnostic plots.
+          Fit a regression model to each of the datasets in the Anscombe quartet introduced in the previous chapter (<c>anscombe</c> dataset) and examine the diagnostic plots.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          In a previous chapter, we computed the correlation between heights of mothers and daughters, mothers and sons, fathers and daughters, and fathers and sons. We can compute these correlations using:
+        </p>
+        <program language="r">
+          <input>
+library(HistData)
+set.seed(1)
+galton &lt;- GaltonFamilies |&gt;
+  group_by(family, gender) |&gt;
+  sample_n(1) |&gt;
+  ungroup()
+
+cors &lt;- galton |&gt;
+  pivot_longer(father:mother) |&gt;
+  mutate(child = ifelse(gender == "female", "daughter", "son")) |&gt;
+  unite(pair, c("name", "child")) |&gt;
+  group_by(pair) |&gt;
+  summarize(cor = cor(value, childHeight))
+          </input>
+        </program>
+        <p>
+          We noticed differences. Are these differences statistically significant? To answer this, we will compute the slopes of the regression lines along with their standard errors. Start by using <c>lm</c> to compute the LSE of the slopes and the standard errors.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Repeat the previous exercise, but compute a confidence interval as well.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          Plot the confidence intervals and notice that they overlap, which implies that the data are consistent with the inheritance of height being independent of sex.
+        </p>
+      </statement>
+    </exercise>
+
+    <exercise>
+      <statement>
+        <p>
+          In the code above, we used <c>sample_n(1)</c> to randomly select a child of each sex from each family. Because this step introduces randomness, the correlations we compute will vary if we rerun this code chunk. Repeat the computation of correlations 100 times, taking a different sample each time. Examine how much the resulting correlations vary across these repetitions. Hint: Use an approach similar to what we have done for simulations.
         </p>
       </statement>
     </exercise>
