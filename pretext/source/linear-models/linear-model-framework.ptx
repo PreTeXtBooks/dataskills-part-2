@@ -228,7 +228,7 @@ F-statistic: 40.2 on 1 and 177 DF,  p-value: 1.82e-09
       <title>LSE are random variables</title>
 
       <p>
-        The LSE is derived from the data <m>y_1,\dots,y_N</m>, which are a realization of random variables <m>Y_1, \dots, Y_N</m>. This implies that our estimates are random variables. To see this, we can run a Monte Carlo simulation in which we assume the son and father height data defines a population, take a random sample of size <m>N=50</m>, and compute the regression slope coefficient for each one:
+        The LSE is derived from the data <m>y_1,\dots,y_N</m>, which are a realization of random variables <m>Y_1, \dots, Y_N</m>. This implies that our estimates are random variables. To see this, we can run a Monte Carlo simulation in which we assume the son and father height data defines a population, take a random sample of size <m>N=25</m>, and compute the regression slope coefficient for each one:
       </p>
 
       <program language="r">

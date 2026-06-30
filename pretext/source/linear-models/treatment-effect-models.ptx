@@ -5,10 +5,6 @@
   <introduction>
     <program language="r">
       <input>
-#| message: FALSE
-#| echo: FALSE
-#| cache: false
-
 library(tidyverse)
 library(broom)
 library(dslabs)
@@ -58,7 +54,7 @@ with(mice_weights, boxplot(body_weight ~ diet))
 
     <figure xml:id="weight-by-diet-boxplots">
       <caption>Weight by diet</caption>
-      <image source="linear-models/treatment-effect-models-weight-by-diet-boxplots.png" width="50%">
+      <image source="images/treatment-effect-models-weight-by-diet-boxplots.png" width="50%">
         <description>Boxplot showing mouse body weight by diet type</description>
       </image>
     </figure>
@@ -148,8 +144,6 @@ t_stat
 
     <program language="r">
       <input>
-#| eval: false
-
 with(mice_weights, t.test(body_weight[diet == "hf"], body_weight[diet == "chow"]))
       </input>
     </program>
@@ -319,7 +313,7 @@ boxplot(fit$residuals ~ mice_weights$sex)
 
     <figure xml:id="lm-residual-boxplots">
       <caption>Residual boxplots by sex</caption>
-      <image source="linear-models/treatment-effect-models-lm-residual-boxplots.png" width="50%">
+      <image source="images/treatment-effect-models-lm-residual-boxplots.png" width="50%">
         <description>Boxplot showing residuals by sex</description>
       </image>
     </figure>
@@ -340,7 +334,7 @@ mice_weights |&gt; ggplot(aes(diet, log2(body_weight), fill = sex)) + geom_boxpl
 
     <figure xml:id="weight-by-sex-diet-boxplots">
       <caption>Weight by sex and diet</caption>
-      <image source="linear-models/treatment-effect-models-weight-by-sex-diet-boxplots.png" width="70%">
+      <image source="images/treatment-effect-models-weight-by-sex-diet-boxplots.png" width="70%">
         <description>Boxplot showing body weight by diet and sex</description>
       </image>
     </figure>
@@ -479,7 +473,7 @@ abline(h = 0, lty = 2)
 
     <figure xml:id="lm-diagnostic-plot">
       <caption>Diagnostic plot showing residual bias</caption>
-      <image source="linear-models/treatment-effect-models-lm-diagnostic-plot.png" width="60%">
+      <image source="images/treatment-effect-models-lm-diagnostic-plot.png" width="60%">
         <description>Boxplot showing residuals by diet and sex combination</description>
       </image>
     </figure>
@@ -630,7 +624,7 @@ table(mice_weights$gen)
     </me>
 
     <p>
-      with <m>x_{ij}</m> indicator variables: <m>x_{ij}=1</m> if mouse <m>i</m> is in level <m>j</m> and 0 otherwise, <m>J</m> representing the number of levels, in our example <c>r length(unique(mice_weights$gen))</c> generations, and the level effects constrained with
+      with <m>x_{ij}</m> indicator variables: <m>x_{ij}=1</m> if mouse <m>i</m> is in level <m>j</m> and 0 otherwise, <m>J</m> representing the number of levels, in our example 5 generations, and the level effects constrained with
     </p>
 
     <me>
@@ -703,7 +697,6 @@ Residuals   775  50479   65.13
 
     <program language="r">
       <input>
-#| eval: false
 summary(aov(body_weight ~ gen, data = mice_weights))
       </input>
     </program>

@@ -442,7 +442,7 @@ mean(galton[round(father) == 72]$son)
       </p>
 
       <p>
-        Our goal is to estimate the expected value and the standard error of the predictions obtained with each method. We want the expected value to very close to the true population average and the standard error to be samll. To do this, we use a Monte Carlo simulation. Specifically, we repeatedly draw random samples of size <m>N = 50</m> families from the population, compute both types of predictions for each sample, and then examine the distribution of these repeated estimates. The mean of this distribution provides an estimate of the expected value of each method, and its standard deviation provides an estimate of the standard error, which reflects how variable the prediction is across random samples.
+        Our goal is to estimate the expected value and the standard error of the predictions obtained with each method. We want the expected value to be very close to the true population average and the standard error to be small. To do this, we use a Monte Carlo simulation. Specifically, we repeatedly draw random samples of size <m>N = 50</m> families from the population, compute both types of predictions for each sample, and then examine the distribution of these repeated estimates. The mean of this distribution provides an estimate of the expected value of each method, and its standard deviation provides an estimate of the standard error, which reflects how variable the prediction is across random samples.
       </p>
 
       <program language="r">

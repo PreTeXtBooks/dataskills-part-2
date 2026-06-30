@@ -55,7 +55,7 @@ divorce_margarine |&gt;
 
     <figure xml:id="divorce-versus-margarine">
       <caption>Correlation between divorce rates and margarine consumption</caption>
-      <image source="linear-models/association-not-causation-divorce-versus-margarine.png" width="50%">
+      <image source="images/association-not-causation-divorce-versus-margarine.png" width="50%">
         <description>Scatterplot showing the strong correlation between margarine consumption per capita and divorce rate in Maine</description>
       </image>
     </figure>
@@ -120,7 +120,7 @@ sim_data[group == res[which.max(r), group]] |&gt;
 
     <figure xml:id="dredging">
       <caption>Example of data dredging showing spurious correlation</caption>
-      <image source="linear-models/association-not-causation-dredging.png" width="50%">
+      <image source="images/association-not-causation-dredging.png" width="50%">
         <description>Scatterplot from the group with maximum correlation showing an apparent but spurious relationship</description>
       </image>
     </figure>
@@ -137,7 +137,7 @@ res |&gt; ggplot(aes(x = r)) + geom_histogram(binwidth = 0.1, color = "black")
 
     <figure xml:id="null-corr-hist">
       <caption>Distribution of correlations from Monte Carlo simulation</caption>
-      <image source="linear-models/association-not-causation-null-corr-hist.png" width="50%">
+      <image source="images/association-not-causation-null-corr-hist.png" width="50%">
         <description>Histogram showing the distribution of correlations from the simulation</description>
       </image>
     </figure>
@@ -198,7 +198,7 @@ plot(x, y)
 
     <figure xml:id="outlier">
       <caption>Scatterplot with outlier</caption>
-      <image source="linear-models/association-not-causation-outlier.png" width="50%">
+      <image source="images/association-not-causation-outlier.png" width="50%">
         <description>Scatterplot showing data with one outlier</description>
       </image>
     </figure>
@@ -242,7 +242,7 @@ plot(rank(x), rank(y))
 
     <figure xml:id="scatter-plot-of-ranks">
       <caption>Scatterplot of ranks</caption>
-      <image source="linear-models/association-not-causation-scatter-plot-of-ranks.png" width="50%">
+      <image source="images/association-not-causation-scatter-plot-of-ranks.png" width="50%">
         <description>Scatterplot of ranked values showing reduced influence of outlier</description>
       </image>
     </figure>
@@ -441,7 +441,7 @@ admissions |&gt;
 
       <figure xml:id="applicants-vs-selectivity">
         <caption>Applicants versus selectivity by gender</caption>
-        <image source="linear-models/association-not-causation-applicants-vs-selectivity.png" width="50%">
+        <image source="images/association-not-causation-applicants-vs-selectivity.png" width="50%">
           <description>Scatterplot showing how applicants relate to major selectivity, faceted by gender</description>
         </image>
       </figure>
@@ -471,7 +471,7 @@ admissions |&gt; ggplot(aes(major, admitted, col = gender, size = applicants)) +
 
       <figure xml:id="admission-by-major">
         <caption>Admission rates by major and gender</caption>
-        <image source="linear-models/association-not-causation-admission-by-major.png" width="50%">
+        <image source="images/association-not-causation-admission-by-major.png" width="50%">
           <description>Plot showing admission rates by major, colored by gender, with point size representing number of applicants</description>
         </image>
       </figure>
@@ -515,7 +515,7 @@ dat |&gt; ggplot(aes(x, y)) + geom_point(alpha = 0.5) +
 
       <figure xml:id="simpsons-paradox-figure">
         <caption>Simpson's paradox illustration</caption>
-        <image source="linear-models/association-not-causation-simpsons-paradox.png" width="50%">
+        <image source="images/association-not-causation-simpsons-paradox.png" width="50%">
           <description>Scatterplot showing negative overall correlation between X and Y</description>
         </image>
       </figure>
@@ -541,7 +541,7 @@ dat |&gt; ggplot(aes(x, y, color = z)) +
 
       <figure xml:id="simpsons-paradox-explained">
         <caption>Simpson's paradox explained by stratification</caption>
-        <image source="linear-models/association-not-causation-simpsons-paradox-explained.png" width="50%">
+        <image source="images/association-not-causation-simpsons-paradox-explained.png" width="50%">
           <description>Scatterplot stratified by Z showing positive correlation within each stratum</description>
         </image>
       </figure>
