@@ -110,14 +110,14 @@
     </p>
 
     <program language="r">
-      <input>
+      <code>
 library(data.table)
 library(HistData)
 
 set.seed(1983)
 galton &lt;- as.data.table(GaltonFamilies)[gender == "male", .SD[sample(.N, 1)], by = family]
 galton &lt;- galton[, .(father, son = childHeight)]
-      </input>
+      </code>
     </program>
 
     <p>
@@ -125,12 +125,12 @@ galton &lt;- galton[, .(father, son = childHeight)]
     </p>
 
     <program language="r">
-      <input>
+      <code>
 rss &lt;- function(beta0, beta1, data){
   resid &lt;- galton$son - (beta0 + beta1*galton$father)
   return(sum(resid^2))
 }
-      </input>
+      </code>
     </program>
 
     <p>
@@ -138,12 +138,12 @@ rss &lt;- function(beta0, beta1, data){
     </p>
 
     <program language="r">
-      <input>
+      <code>
 beta1 &lt;- seq(0, 1, length = nrow(galton))
 results &lt;- data.frame(beta1 = beta1, rss = sapply(beta1, rss, beta0 = 25))
 results |&gt; ggplot(aes(beta1, rss)) + geom_line() + 
   geom_line(aes(beta1, rss))
-      </input>
+      </code>
     </program>
 
     <figure xml:id="fig-linear-model-framework-rss-versus-estimate">
@@ -178,9 +178,9 @@ results |&gt; ggplot(aes(beta1, rss)) + geom_line() +
     </p>
 
     <program language="r">
-      <input>
+      <code>
 fit &lt;- lm(son ~ father, data = galton)
-      </input>
+      </code>
     </program>
 
     <p>
@@ -191,11 +191,11 @@ fit &lt;- lm(son ~ father, data = galton)
       The object <c>fit</c> includes information about the fit. We can use the function <c>summary</c> to extract a summary of this information:
     </p>
 
-    <console>
-      <input>
+    <program language="r">
+      <code>
 summary(fit)
-      </input>
-      <output>
+      </code>
+      </program><pre>
 Call:
 lm(formula = son ~ father, data = galton)
 
@@ -213,8 +213,8 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’
 Residual standard error: 2.46 on 177 degrees of freedom
 Multiple R-squared:  0.185,  Adjusted R-squared:  0.181
 F-statistic: 40.2 on 1 and 177 DF,  p-value: 1.82e-09
-      </output>
-    </console>
+      </pre>
+    
 
     <p>
       To understand some of the terms included in this summary, we need to remember that the LSE are random variables. Mathematical statistics gives us some ideas of the distribution of these random variables.
@@ -232,13 +232,13 @@ F-statistic: 40.2 on 1 and 177 DF,  p-value: 1.82e-09
       </p>
 
       <program language="r">
-        <input>
+        <code>
 N &lt;- 25
 lse &lt;- replicate(10000, {
   smpl &lt;-  galton[sample(.N, N, replace = TRUE)]
   coef(lm(son ~ father, data = smpl))
 })
-        </input>
+        </code>
       </program>
 
       <p>
@@ -246,7 +246,7 @@ lse &lt;- replicate(10000, {
       </p>
 
       <program language="r">
-        <input>
+        <code>
 library(gridExtra)
 lse &lt;- data.frame(beta_0 = lse[1,], beta_1 = lse[2,]) 
 p1 &lt;- lse |&gt; ggplot(aes(beta_0)) + 
@@ -254,7 +254,7 @@ p1 &lt;- lse |&gt; ggplot(aes(beta_0)) +
 p2 &lt;- lse |&gt; ggplot(aes(beta_1)) + 
   geom_histogram(binwidth = 0.1, color = "black") 
 grid.arrange(p1, p2, ncol = 2)
-        </input>
+        </code>
       </program>
 
       <figure xml:id="fig-linear-model-framework-lse-distributions">
@@ -272,31 +272,31 @@ grid.arrange(p1, p2, ncol = 2)
         The standard errors are a bit complicated to compute, but mathematical theory does allow us to compute them and they are included in the summary provided by the <c>lm</c> function. The function <c>summary</c> shows us the standard error estimates:
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 fit &lt;- lm(son ~ father, data = galton[sample(.N, N, replace = TRUE)])
 summary(fit)$coef
-        </input>
-        <output>
+        </code>
+        </program><pre>
             Estimate Std. Error t value Pr(&gt;|t|)
 (Intercept)   26.574     17.383    1.53   0.1400
 father         0.627      0.249    2.52   0.0193
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         You can see that the standard errors estimates reported above are close to the standard errors from the simulation:
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 with(lse, c(se_0 = sd(beta_0), se_1 = sd(beta_1)))
-        </input>
-        <output>
+        </code>
+        </program><pre>
   se_0   se_1
 13.012  0.188
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         The <c>summary</c> function also reports t-statistics (<c>t value</c>) and p-values (<c>Pr(&gt;|t|)</c>). The t-statistic is not actually based on the central limit theorem, but rather on the assumption that the <m>\varepsilon</m>s follow a normal distribution. Under this assumption, mathematical theory tells us that the LSE divided by their standard error, <m>\hat{\beta}_0 / \widehat{\mathrm{SE}}[\hat{\beta}_0]</m> and <m>\hat{\beta}_1 / \widehat{\mathrm{SE}}[\hat{\beta}_1]</m>, follow a t-distribution with <m>N-p</m> degrees of freedom, with <m>p</m> the number of parameters in our model. In our example  <m>p=2</m>, and the two p-values are obtained from testing the null hypothesis that <m>\beta_0 = 0</m> and <m>\beta_1=0</m>, respectively.
@@ -306,15 +306,15 @@ with(lse, c(se_0 = sd(beta_0), se_1 = sd(beta_1)))
         Remember that, as we described in the section on t-distribution, for large enough <m>N</m>, the CLT works and the t-distribution becomes almost the same as the normal distribution. Also, notice that we can construct confidence intervals using the <c>confint</c> function:
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 confint(fit, "father", level = 0.95)
-        </input>
-        <output>
+        </code>
+        </program><pre>
        2.5 % 97.5 %
 father 0.112   1.14
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         Although we do not show examples in this book, hypothesis testing with regression models is commonly used in epidemiology and economics to make statements such as "the effect of A on B was statistically significant after adjusting for X, Y, and Z". However, several assumptions have to hold for these statements to be useful.
@@ -344,25 +344,25 @@ father 0.112   1.14
         The R function <c>predict</c> takes an <c>lm</c> object as input and returns the prediction. If requested, the standard errors and other information from which we can construct confidence intervals are provided:
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 fit &lt;- lm(son ~ father, data = galton)
 y_hat &lt;- predict(fit, se.fit = TRUE)
 names(y_hat)
-        </input>
-        <output>
+        </code>
+        </program><pre>
 [1] "fit"            "se.fit"         "df"             "residual.scale"
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         In fact, the <c>ggplot2</c> layer <c>geom_smooth(method = "lm")</c> surrounds the regression line using these confidence intervals:
       </p>
 
       <program language="r">
-        <input>
+        <code>
 galton |&gt; ggplot(aes(son, father)) + geom_point() + geom_smooth(method = "lm")
-        </input>
+        </code>
       </program>
 
       <figure xml:id="fig-linear-model-framework-father-son-regression">
@@ -432,10 +432,10 @@ galton |&gt; ggplot(aes(son, father)) + geom_point() + geom_smooth(method = "lm"
     </p>
 
     <program language="r">
-      <input>
+      <code>
 rafalib::mypar(1,3)
 plot(fit, which = 1:3)
-      </input>
+      </code>
     </program>
 
     <figure xml:id="fig-linear-model-framework-diagnostic-plots">
@@ -446,7 +446,7 @@ plot(fit, which = 1:3)
     </figure>
 
     <p>
-      This function can produce six different plots, and the argument <c>which</c> let's you specify which you want to see. You can learn more by reading the <c>plot.lm</c> help file. However, some of the plots are based on more advanced concepts beyond the scope of this book. To learn more, we recommend an advanced book on regression analysis included in the Recommended Reading section.
+      This function can produce six different plots, and the argument <c>which</c> lets you specify which you want to see. You can learn more by reading the <c>plot.lm</c> help file. However, some of the plots are based on more advanced concepts beyond the scope of this book. To learn more, we recommend an advanced book on regression analysis included in the Recommended Reading section.
     </p>
 
     <p>
@@ -473,26 +473,16 @@ plot(fit, which = 1:3)
       </p>
 
       <program language="r">
-        <input>
+        <code>
 library(tidyverse)
 library(dslabs)
 falling_object &lt;- rfalling_object()
-        </input>
+        </code>
       </program>
 
       <p>
         The assistants hand the data to Galileo, and this is what he sees:
       </p>
-
-      <program language="r">
-        <input>
-falling_object |&gt; 
-  ggplot(aes(time, observed_distance)) + 
-  geom_point() +
-  ylab("Distance in meters") + 
-  xlab("Time in seconds")
-        </input>
-      </program>
 
       <figure xml:id="fig-linear-model-framework-gravity">
         <caption>Simulated observations for a falling object</caption>
@@ -543,32 +533,32 @@ falling_object |&gt;
         LSE calculations do not require the errors to be approximately normal. The <c>lm</c> function will find the <m>\beta</m>s that will minimize the residual sum of squares:
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 fit &lt;- falling_object |&gt; 
   mutate(time_sq = time^2) |&gt; 
   lm(observed_distance~time+time_sq, data = _)
 summary(fit)$coefficients
-        </input>
-        <output>
+        </code>
+        </program><pre>
             Estimate Std. Error t value Pr(&gt;|t|)
 (Intercept)   54.753      0.625  87.589 5.36e-17
 time           0.575      0.893   0.644 5.33e-01
 time_sq       -4.929      0.265 -18.603 1.16e-09
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         Let's check if the estimated parabola fits the data. The <c>broom</c> function <c>augment</c> allows us to do this easily:
       </p>
 
       <program language="r">
-        <input>
+        <code>
 broom::augment(fit) |&gt; 
   ggplot() +
   geom_point(aes(time, observed_distance)) + 
   geom_line(aes(time, .fitted), col = "blue")
-        </input>
+        </code>
       </program>
 
       <figure xml:id="fig-linear-model-framework-falling-object-fit">
@@ -583,10 +573,10 @@ broom::augment(fit) |&gt;
       </p>
 
       <program language="r">
-        <input>
+        <code>
 rafalib::mypar(1,2)
 plot(fit, which=1:2)
-        </input>
+        </code>
       </program>
 
       <figure xml:id="fig-linear-model-framework-falling-object-resids">
@@ -612,17 +602,17 @@ plot(fit, which=1:2)
         These are consistent with the parameter estimates:
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 confint(fit)
-        </input>
-        <output>
+        </code>
+        </program><pre>
             2.5 % 97.5 %
 (Intercept) 53.38  56.13
 time        -1.39   2.54
 time_sq     -5.51  -4.35
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         The Tower of Pisa height is within the confidence interval for <m>\beta_0</m>, the initial velocity 0 is in the confidence interval for <m>\beta_1</m> (note the p-value is larger than 0.05), and the acceleration constant is in a confidence interval for <m>-2 \times \beta_2</m>.
@@ -630,7 +620,7 @@ time_sq     -5.51  -4.35
     </subsection>
   </section>
 
-  <section xml:id="exercises">
+  <exercises xml:id="exercises">
     <title>Exercises</title>
 
     <exercise>
@@ -703,7 +693,7 @@ time_sq     -5.51  -4.35
           In a previous chapter, we computed the correlation between heights of mothers and daughters, mothers and sons, fathers and daughters, and fathers and sons. We can compute these correlations using:
         </p>
         <program language="r">
-          <input>
+          <code>
 library(HistData)
 set.seed(1)
 galton &lt;- GaltonFamilies |&gt;
@@ -717,7 +707,7 @@ cors &lt;- galton |&gt;
   unite(pair, c("name", "child")) |&gt;
   group_by(pair) |&gt;
   summarize(cor = cor(value, childHeight))
-          </input>
+          </code>
         </program>
         <p>
           We noticed differences. Are these differences statistically significant? To answer this, we will compute the slopes of the regression lines along with their standard errors. Start by using <c>lm</c> to compute the LSE of the slopes and the standard errors.
@@ -748,6 +738,6 @@ cors &lt;- galton |&gt;
         </p>
       </statement>
     </exercise>
-  </section>
+  </exercises>
 
 </chapter>

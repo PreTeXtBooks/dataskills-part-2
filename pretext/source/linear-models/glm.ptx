@@ -3,28 +3,20 @@
   <title>Generalized Linear Models</title>
   
   <introduction>
-    <program language="r">
-      <input>
-library(tidyverse)
-library(broom)
-library(dslabs)
-      </input>
-    </program>
-
     <p>
-      The statistical models we have used so far assume that the outcome of interest is continuous. However, in many real applications the outcomes are binary, categorical, or counts. In these settings, we are often interested in how the outcome changes with one or more explanatory variables.
+The statistical models we have used so far assume that the outcome of interest is continuous. However, in many real applications, the outcomes are binary, categorical, or counts. In these settings, we are often interested in how the outcome changes with one or more explanatory variables.
     </p>
 
     <p>
-      For example, we may want to study how the probability of developing coronary heart disease varies with age, systolic blood pressure, or other clinical measurements; how the chance of surviving the sinking of the Titanic depends on passenger characteristics; or how different insecticides influence the number of insects observed in agricultural field plots.
+For example, we may want to study how the probability of developing coronary heart disease varies with age, systolic blood pressure, or other clinical measurements; how the chance of surviving the sinking of the Titanic depends on passenger characteristics; or how different insecticides influence the number of insects observed in agricultural field plots.
     </p>
 
     <p>
-      Although these outcomes are no longer continuous, many of the ideas introduced in the linear model framework continue to apply. With a small adaptation, we can extend the mathematical approach used for linear models so that it can be applied in all of these situations, while also continuing to use the same modeling tools in R.
+Although these outcomes are no longer continuous, many of the ideas introduced in the linear model framework continue to apply. With a small adaptation, we can extend the mathematical approach used for linear models so that it can be applied in all of these situations, while also continuing to use the same modeling tools in R.
     </p>
 
     <p>
-      These extended models are known as <em>generalized</em> linear models. To motivate them, we begin this chapter with association tests for two categorical variables. We then show how these tests arise naturally from logistic regression, our first example of a generalized linear model for binary outcomes. We conclude with examples that illustrate how the same framework can be applied across a range of contexts, including outcomes that are binary, or counts.
+These extended models are known as <em>generalized</em> linear models. To motivate them, we begin this chapter with association tests for two categorical variables. We then show how these tests arise naturally from logistic regression, our first example of a generalized linear model for binary outcomes. We conclude with examples that illustrate how the same framework can be applied across a range of contexts, including outcomes that are binary or counts.
     </p>
   </introduction>
 
@@ -32,7 +24,7 @@ library(dslabs)
     <title>Association Tests</title>
 
     <p>
-      We start with the simplest case: assessing whether two categorical variables are associated. These methods were developed before GLMs, but they can be understood as special cases of logistic regression. Once we establish this connection, the general GLM framework will follow naturally.
+We start with the simplest case: assessing whether two categorical variables are associated. These methods were developed before GLMs, but they can be understood as special cases of logistic regression. Once we establish this connection, the general GLM framework will follow naturally.
     </p>
 
     <subsection xml:id="case-study-funding-success-rates">
@@ -44,7 +36,7 @@ library(dslabs)
 
       <blockquote>
         <p>
-          results reveal gender bias favoring male applicants over female applicants in the prioritization of their "quality of researcher" (but not "quality of proposal") evaluations and success rates, as well as in the language use in instructional and evaluation materials.
+results reveal gender bias favoring male applicants over female applicants in the prioritization of their “quality of researcher” (but not “quality of proposal”) evaluations and success rates, as well as in the language use in instructional and evaluation materials.
         </p>
       </blockquote>
 
@@ -52,8 +44,8 @@ library(dslabs)
         The main evidence supporting this conclusion is based on a comparison of the percentages which we can compute using the data presented in the paper:
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 library(tidyverse)
 library(dslabs)
 totals &lt;- research_funding_rates |&gt; select(-discipline) |&gt; 
@@ -65,13 +57,12 @@ totals &lt;- research_funding_rates |&gt; select(-discipline) |&gt;
 
 totals |&gt; summarize(percent_men = yes_men/(yes_men + no_men),
                     percent_women = yes_women/(yes_women + no_women))
-        </input>
-        <output>
+        </code>
+        </program><pre>
   percent_men percent_women
 1     0.17737     0.1489899
-        </output>
-      </console>
-
+        </pre>
+      
       <p>
         But could this be due just to random variability? Here we learn how to perform inference for this type of data.
       </p>
@@ -85,41 +76,39 @@ totals |&gt; summarize(percent_men = yes_men/(yes_men + no_men),
       <title>The Lady Tasting Tea</title>
 
       <p>
-        The classic motivating example for association tests is the <em>Lady Tasting Tea</em> experiment designed by R. A. Fisher. A colleague at the Rothamsted Experimental Station claimed she could tell whether milk was poured into a cup before or after the tea. Fisher proposed a randomized test and derived the probability of each possible result under the assumption that she was simply guessing. This led to what is now known as <em>Fisher's exact test</em>, based on the hypergeometric distribution.
+        The classic motivating example for association tests is the <em>Lady Tasting Tea</em> experiment designed by R. A. Fisher. A colleague at the Rothamsted Experimental Station claimed she could tell whether milk was poured into a cup before or after the tea. Fisher proposed a randomized test and derived the probability of each possible result under the assumption that she was simply guessing. This led to what is now known as <em>Fisher's exact test</em>.
       </p>
 
       <p>
         As an example, suppose she correctly identified 3 out of 4 cups:
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 tab &lt;- table(guess =  c("m", "t", "m", "t", "t", "m", "t", "m"),
              actual = c("m", "t", "m", "t", "t", "t", "m", "m"))
 tab
-        </input>
-        <output>
+        </code>
+        </program><pre>
      actual
 guess m t
     m 3 1
     t 1 3
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         To evaluate whether this provides evidence of real ability, we consider the <em>null hypothesis</em> that she is guessing. Because she knows there are four of each type, guessing corresponds to randomly drawing 4 cups from an urn containing 4 <em>milk-first</em> and 4 <em>tea-first</em> cups.
-      </p>
-
-      <p>
-        The probability of correctly guessing <m>k</m> cups is given by the hypergeometric formula:
-      </p>
+      Using basic combinatorics, covered in most discrete probability textbooks, we can compute the probability of correctly identifying 
+<m>k</m> cups out of 4 by chance. Under random guessing, this probability is
+</p>
 
       <me>
         \frac{\binom{4}{k}\binom{4}{4-k}}{\binom{8}{4}}.
       </me>
 
       <p>
-        The probability of getting 3 or more correct by chance is therefore:
+To assess how surprising the result is, we compute the probability of getting <alert>3 or more correct</alert> by chance:
       </p>
 
       <me>
@@ -134,14 +123,14 @@ guess m t
         This calculation is what <em>Fisher's exact test</em> performs. In R we can type:
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 fisher.test(tab, alternative = "greater")$p.value
-        </input>
-        <output>
+        </code>
+        </program><pre>
 [1] 0.2428571
-        </output>
-      </console>
+        </pre>
+      
 
       <note>
         <p>
@@ -154,19 +143,20 @@ fisher.test(tab, alternative = "greater")$p.value
       <title>Two-by-two tables and the Chi-square test</title>
 
       <p>
-        Notice that our funding example is analogous to the Lady Tasting Tea: under the null hypothesis, funding is assigned at random regardless of gender, just as in Fisher's example cups are guessed at random regardless of when the milk was poured.
+Notice that our funding example is analogous to the Lady Tasting Tea: under the null hypothesis, funding is assigned at random regardless of gender, just as in Fisher’s example, cups are guessed at random regardless of when the milk was poured.
       </p>
 
       <p>
-        However, in the Lady Tasting Tea example, we were able to use the hypergeometric distribution because the design <em>fixed</em> both the number of cups of each type and the number of selections for each category. In other words, the row totals and the column totals of <c>tab</c> were predetermined by the experiment.
+However, in the Lady Tasting Tea example, we were able to use the hypergeometric distribution because the design <em>fixed</em> both the number of cups of each type and the number of selections for each category. In other words, the row totals and the column totals of <c>tab</c> were predetermined by the experiment.
       </p>
 
       <p>
-        In the funding example, and in most real-world data, this is not the case. Neither the number of funded applications nor the number of male and female applicants is fixed in advance; these totals arise from the data we observe. Because the row and column totals are not fixed, the hypergeometric model is no longer appropriate and rarely used in practice.
+In the funding example, and in most real-world data, this is not the case. Neither the number of funded applications nor the number of male and female applicants is fixed in advance; these totals arise from the data we observe. Because the row and column totals are not fixed, the hypergeometric model is no longer appropriate and rarely used in practice.
       </p>
 
       <p>
-        In such settings, we instead use the <em>Chi-squared test</em>, which provides a way to test for association between two categorical variables without requiring fixed margins. Let's apply it to the funding rates example.
+        In such settings, we instead use the <em>Chi-squared test</em>, 
+ which provides a way to test for association between two categorical variables without requiring fixed margins. Let’s apply it to the funding rates example.
       </p>
 
       <p>
@@ -174,21 +164,21 @@ fisher.test(tab, alternative = "greater")$p.value
       </p>
 
       <program language="r">
-        <input>
+        <code>
 o &lt;- with(totals, data.frame(men = c(no_men, yes_men), 
                              women = c(no_women, yes_women),
                              row.names = c("no", "yes")))
-        </input>
+        </code>
       </program>
 
       <p>
-        We then estimate the overall funding rate which we will use to determine what we expect to see if successful funding was assigned independent of gender:
+We then estimate the overall funding rate, which we will use to determine what we expect to see if successful funding was assigned independent of gender:
       </p>
 
       <program language="r">
-        <input>
+        <code>
 rate &lt;- with(totals, (yes_men + yes_women))/sum(totals)
-        </input>
+        </code>
       </program>
 
       <p>
@@ -196,27 +186,27 @@ rate &lt;- with(totals, (yes_men + yes_women))/sum(totals)
       </p>
 
       <program language="r">
-        <input>
+        <code>
 e &lt;- with(totals, data.frame(men = (no_men + yes_men)*c(1 - rate, rate),
                              women = (no_women + yes_women)*c(1 - rate, rate),
                              row.names = c("no", "yes")))
-        </input>
+        </code>
       </program>
 
       <p>
         We can see that more men than expected and fewer women than expected received funding:
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 cbind(o, e)
-        </input>
-        <output>
+        </code>
+        </program><pre>
      men women       men    women
 no  1345  1011 1364.5271 991.4729
 yes  290   177  270.4729 196.5271
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         However, under the null hypothesis these observations are random variables. The Chi-square statistic quantifies how much the observed table deviates from the expected by:
@@ -229,14 +219,14 @@ yes  290   177  270.4729 196.5271
         <li><p>Summing all these values together to get the final statistic.</p></li>
       </ol>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 sum((o - e)^2/e)
-        </input>
-        <output>
+        </code>
+        </program><pre>
 [1] 4.01404
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         We use this summary statistic because its sampling distribution can be approximated by a known parametric distribution: the Chi-square distribution.
@@ -247,51 +237,51 @@ sum((o - e)^2/e)
       </p>
 
       <program language="r">
-        <input>
+        <code>
 chisq_test &lt;- chisq.test(o, correct = FALSE)
-        </input>
+        </code>
       </program>
 
       <p>
         We see that the p-value is 0.045:
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 chisq_test$p.value
-        </input>
-        <output>
+        </code>
+        </program><pre>
 [1] 0.0451229
-        </output>
-      </console>
+        </pre>
+      
 
       <note>
         <p>
           By default, the <c>chisq.test</c> function applies a <em>continuity correction</em>. This correction subtracts 0.5 from the absolute deviation between observed and expected counts:
         </p>
 
-        <console>
-          <input>
+        <program language="r">
+          <code>
 sum((abs(o - e) - 0.5)^2 / e)
-          </input>
-          <output>
+          </code>
+          </program><pre>
 [1] 3.811109
-          </output>
-        </console>
+          </pre>
+        
 
         <p>
           and this matches the default behavior of:
         </p>
 
-        <console>
-          <input>
+        <program language="r">
+          <code>
 chisq.test(o)$statistic
-          </input>
-          <output>
+          </code>
+          </program><pre>
 X-squared 
  3.811109 
-          </output>
-        </console>
+          </pre>
+        
 
         <p>
           The reason for this adjustment is that the chi-square test is based on a <em>continuous</em> probability distribution, while the two-by-two table counts are <em>discrete</em>. When sample sizes are small, the difference between a continuous approximation and the discrete distribution can be noticeable. The continuity correction slightly reduces the test statistic to account for this mismatch, making the approximation more conservative (that is, less likely to produce small p-values by chance).
@@ -343,7 +333,7 @@ X-squared
       </me>
 
       <p>
-        However, differences in proportions are not directly comparable across baseline levels. For example, a change from 1% to 2% is just as large on the probability scale as a change from 49% to 50%, yet the practical interpretation is very different.
+However, differences in proportions are not directly comparable across baseline levels. For example, a change from 1% to 2% is just as large on the probability scale as a change from 49% to 50%, yet the practical interpretation is very different.
       </p>
 
       <p>
@@ -355,7 +345,7 @@ X-squared
       </me>
 
       <p>
-        This quantity compares the odds of being funded for women to the odds of being funded for men.
+This quantity compares the odds of being funded for women to the odds of being funded for men.
       </p>
 
       <p>
@@ -392,16 +382,16 @@ X-squared
         Here we compute the odds ratio for our funding data and construct a 95% confidence interval:
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 or &lt;- o[1,1]*o[2,2]/(o[2,1]*o[1,2])
 se &lt;- sqrt(sum(1/o))
 exp(log(or) + c(-1,1) * qnorm(0.975) * se)
-        </input>
-        <output>
+        </code>
+        </program><pre>
 [1] 0.6621581 0.9957060
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         This allows us to assess both the magnitude of the association and the uncertainty around it. The estimated odds ratio is less than 1, indicating that women have lower odds of being funded than men in this dataset. The 95% confidence interval does not include 1, which implies the p-value is less than 0.05.
@@ -490,15 +480,16 @@ exp(log(or) + c(-1,1) * qnorm(0.975) * se)
       <title>Estimation</title>
 
       <p>
-        Unlike linear regression, least squares is not optimal here because the variance of the outcome depends on its mean and the model for the expected value is nonlinear. Instead, the parameters are estimated using <em>maximum likelihood estimation</em> (MLE). The basic idea of MLE is to choose the parameter values that make the observed data most probable according to the assumed statistical model. For logistic regression, this means finding the values of <m>\beta_0</m> and <m>\beta_1</m> that maximize the probability of observing the particular pattern of zeros and ones in the data.
+Unlike linear regression, least squares is not optimal here because the variance of the outcome depends on its mean, and the model for the expected value is nonlinear. Instead, the parameters are estimated using maximum likelihood estimation (MLE). The basic idea of MLE is to choose the parameter values that make the observed data most probable according to the assumed statistical model. For logistic regression, this means finding the values of 
+<m>\beta_0</m> and
+<m>\beta_1</m> that maximize the probability of observing the particular pattern of zeros and ones in the data.      </p>
+
+      <p>
+Our example, analyzing a two-by-two table, is a special case in which the estimates can be written directly as functions of the observed proportions. But in general, for logistic regression models, the estimates cannot be written in a simple closed-form expression. Instead, numerical optimization algorithms are used to find the values that maximize the likelihood. Under standard conditions, a version of the central limit theorem applies to these estimates. This implies that for large sample sizes, the estimates are approximately normally distributed and that their standard errors can be computed from the curvature of the likelihood function near the maximum. This, in turn, permits the construction of confidence intervals and hypothesis tests.
       </p>
 
       <p>
-        Our example analyzing a two-by-two table is a special case in which the estimates can be written directly as functions of the observed proportions. But in general, for logistic regression models, the estimates cannot be written in a simple closed-form expression. Instead, numerical optimization algorithms are used to find the values that maximize the likelihood. Under standard  conditions, a version of the central limit theorem applies to these estimates. This implies that for large sample sizes the estimates are approximately normally distributed and that their standard errors can be computed from the curvature of the likelihood function near the maximum. This, in turn, permits the construction of confidence intervals and hypothesis tests.
-      </p>
-
-      <p>
-        Readers interested in a deeper and more general treatment of MLE and logistic regression can consult the Recommended Reading section, where we point to textbooks that develop the likelihood framework, the asymptotic results, and the numerical algorithms in more detail.
+Readers interested in a deeper and more general treatment of MLE and logistic regression can consult the Recommended Reading section, where we point to textbooks that develop the likelihood framework, the asymptotic results, and the numerical algorithms in more detail.
       </p>
     </subsection>
 
@@ -530,11 +521,11 @@ exp(log(or) + c(-1,1) * qnorm(0.975) * se)
       </p>
 
       <program language="r">
-        <input>
+        <code>
 success &lt;- with(totals, c(yes_men, yes_women))
 failure &lt;- with(totals, c(no_men, no_women))
 y &lt;- cbind(success, failure)
-        </input>
+        </code>
       </program>
 
       <p>
@@ -542,40 +533,40 @@ y &lt;- cbind(success, failure)
       </p>
 
       <program language="r">
-        <input>
+        <code>
 x &lt;- factor(c("men", "women"))
-        </input>
+        </code>
       </program>
 
       <p>
         We then fit the model with <c>glm</c>:
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 fit &lt;- glm(y ~ x, family = binomial)
 coefficients(summary(fit))
-        </input>
-        <output>
+        </code>
+        </program><pre>
               Estimate Std. Error    z value      Pr(&gt;|z|)
 (Intercept) -1.5342684 0.06474387 -23.697508 3.825454e-124
 xwomen      -0.2082771 0.10407015  -2.001315  4.535850e-02
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         To obtain the estimated odds ratio, we exponentiate the coefficient:
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 exp(fit$coef[2])
-        </input>
-        <output>
+        </code>
+        </program><pre>
   xwomen 
 0.811982 
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         This value represents the multiplicative change in the odds of being funded for women compared to men.
@@ -585,16 +576,16 @@ exp(fit$coef[2])
         A 95% confidence interval for this odds ratio is obtained by exponentiating the corresponding confidence interval for <m>\beta_1</m>:
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 exp(confint(fit, 2))
-        </input>
-        <output>
+        </code>
+        </program><pre>
 Waiting for profiling to be done...
     2.5 %    97.5 % 
 0.6613153 0.9946601 
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         This interval provides both an effect size and a measure of uncertainty.
@@ -608,35 +599,35 @@ Waiting for profiling to be done...
         We can confirm that logistic regression yields the same odds ratio estimate as the simple two-by-two table calculation (saved in <c>o</c> and in <c>or</c> and <c>se</c>):
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 or &lt;- o[1,1]*o[2,2]/(o[2,1]*o[1,2])
 se &lt;- sqrt(sum(1/o))
 c(log(or),se)
 
 c(tidy(fit)$estimate[2], tidy(fit)$std.error[2])
-        </input>
-        <output>
+        </code>
+        </program><pre>
 [1] -0.2082771  0.1040702
 [1] -0.2082771  0.1040702
-        </output>
-      </console>
+        </pre>
+      
 
       <warning>
         <p>
           The p-values obtained from <c>chisq.test</c> and from logistic regression
         </p>
 
-        <console>
-          <input>
+        <program language="r">
+          <code>
 chisq.test(o, correct = FALSE)$p.value
 tidy(fit)$p.value[2]
-          </input>
-          <output>
+          </code>
+          </program><pre>
 [1] 0.0451229
 [1] 0.0453585
-          </output>
-        </console>
+          </pre>
+        
 
         <p>
           differ slightly because they are based on different approximations.
@@ -680,9 +671,9 @@ tidy(fit)$p.value[2]
       </p>
 
       <program language="r">
-        <input>
+        <code>
 data("SAheart", package = "bestglm")
-        </input>
+        </code>
       </program>
 
       <p>
@@ -690,13 +681,13 @@ data("SAheart", package = "bestglm")
       </p>
 
       <program language="r">
-        <input>
+        <code>
 SAheart |&gt; 
   group_by(age) |&gt;
   summarize(chd = mean(chd)) |&gt;
   ggplot(aes(age, log(chd/(1 - chd)))) + 
   geom_point()
-        </input>
+        </code>
       </program>
 
       <figure xml:id="fig-glm-heart-study-eda">
@@ -707,8 +698,10 @@ SAheart |&gt;
       </figure>
 
       <p>
-        This suggests the logistic regression model:
-      </p>
+The points at the bottom of the plot correspond to ages where the observed proportion of heart disease is 0, which leads to log-odds of 
+<m>-\infty</m>. The function <c>ggplot</c> has the convention of showing these plots cut off at the bottom of the plot. When the proportion is 1, the log-odds would be 
+<m>\infty</m> and the points would be cut off at the top of the plot. The points in between suggest a roughly linear relationship between age and log-odds of heart disease, which motivates the logistic regression model:
+</p>
 
       <me>
         \log\left\{\frac{\Pr(Y_i=1)}{1 - \Pr(Y_i=1)}\right\} = \beta_0 + \beta_1 x_i
@@ -722,47 +715,47 @@ SAheart |&gt;
         We can fit the model using:
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 fit &lt;- glm(chd ~ age, family = binomial, data = SAheart)
 tidy(fit)[2,]
-        </input>
-        <output>
+        </code>
+        </program><pre>
 # A tibble: 1 × 5
   term  estimate std.error statistic  p.value
   &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
 1 age     0.0641   0.00853      7.51 5.76e-14
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         We can then use GLM theory to construct a 95% confidence interval for the odds ratio:
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 exp(confint(fit))[2, ]
-        </input>
-        <output>
+        </code>
+        </program><pre>
 Waiting for profiling to be done...
  2.5 % 97.5 % 
   1.05   1.08 
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         We can also use the fitted model to compute predicted probabilities for specific ages:
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 predict(fit, data.frame(age = seq(20, 80, 10)), type = "response")
-        </input>
-        <output>
+        </code>
+        </program><pre>
      1      2      3      4      5      6      7 
 0.0963 0.1682 0.2774 0.4216 0.5805 0.7243 0.8330
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         When <c>type = response</c> the <c>predict</c> function uses the inverse logistic transformation to convert <m>\hat{\beta}_0 + \hat{\beta}_1 x_i</m> to estimated probabilities.
@@ -781,9 +774,9 @@ predict(fit, data.frame(age = seq(20, 80, 10)), type = "response")
       </p>
 
       <program language="r">
-        <input>
+        <code>
 InsectSprays |&gt;  ggplot(aes(spray, count)) + geom_boxplot() + geom_jitter()
-        </input>
+        </code>
       </program>
 
       <figure xml:id="fig-glm-insect-spray-boxplot">
@@ -797,15 +790,15 @@ InsectSprays |&gt;  ggplot(aes(spray, count)) + geom_boxplot() + geom_jitter()
         Spray C appears most effective. We could compare mean insect counts across sprays:
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 with(InsectSprays, tapply(count, spray, mean))
-        </input>
-        <output>
+        </code>
+        </program><pre>
         A         B         C         D         E         F 
 14.500000 15.333333  2.083333  4.916667  3.500000 16.666667 
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         But how do we assess uncertainty? Can we construct confidence intervals? Note that counts are small (often under 10), and the sample size per group is only 12, so normal approximations may be unreliable.
@@ -815,13 +808,13 @@ with(InsectSprays, tapply(count, spray, mean))
         A Poisson regression provides an alternative. First we choose C as the reference group and then we fit the model:
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 InsectSprays$spray &lt;- relevel(InsectSprays$spray, ref = "C") 
 fit &lt;- glm(count ~ spray, family = poisson, data = InsectSprays)
 tidy(fit, conf.int = TRUE)
-        </input>
-        <output>
+        </code>
+        </program><pre>
 # A tibble: 6 × 7
   term        estimate std.error statistic  p.value conf.low conf.high
   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
@@ -831,20 +824,20 @@ tidy(fit, conf.int = TRUE)
 4 sprayD         0.859     0.239      3.60 3.20e- 4   0.404       1.34
 5 sprayE         0.519     0.253      2.05 4.00e- 2   0.0315      1.03
 6 sprayF         2.08      0.212      9.80 1.10e-22   1.68        2.52
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
-        Here the parameters measure the log of the multiplicative change in the expected count relative to Spray C. If a spray has the same effectiveness as Spray C, its corresponding parameter estimate would be 0. The estimated coefficients and their confidence intervals indicate that several sprays differ substantially from Spray C, and these differences are too large to be explained by Poisson sampling variability alone. In other words, Spray C's superior performance is unlikely to be due to chance.
+Here, the parameters measure the log of the multiplicative change in the expected count relative to Spray C. If a spray has the same effectiveness as Spray C, its corresponding parameter estimate would be 0. The estimated coefficients and their confidence intervals indicate that several sprays differ substantially from Spray C, and these differences are too large to be explained by Poisson sampling variability alone. In other words, Spray C’s superior performance is unlikely to be due to chance.
       </p>
 
       <p>
-        The inference relies on asymptotic approximations similar to the CLT but often performs better than applying the CLT directly to means when counts are small.
+The inference relies on asymptotic approximations similar to the CLT but often performs better than applying the CLT directly to means when counts are small.
       </p>
 
       <note>
         <p>
-          In this example, a simple comparison of group means would have also worked. The advantage of Poisson regression becomes more evident when the explanatory variable is continuous, e.g., modeling counts as a function of exposure time or concentration levels, where group-by-group averaging is not practical.
+In this example, a simple comparison of group means would have also worked. The advantage of Poisson regression becomes more evident when the explanatory variable is continuous, e.g., modeling counts as a function of exposure time or concentration levels, where group-by-group averaging is not practical.
         </p>
       </note>
     </subsection>
@@ -853,7 +846,7 @@ tidy(fit, conf.int = TRUE)
       <title>Beyond logistic and Poisson regression</title>
 
       <p>
-        Logistic and Poisson regression are the two most widely used GLMs because binary and count outcomes are common in scientific applications. However, the GLM framework is more general:
+Logistic and Poisson regression are the two most widely used GLMs because binary and count outcomes are common in scientific applications. However, the GLM framework is more general:
       </p>
 
       <ul>
@@ -880,21 +873,21 @@ tidy(fit, conf.int = TRUE)
     </p>
 
     <p>
-      Note that the relationship between odds ratio and p-value is not one-to-one; it depends on the sample size. Therefore, a very small p-value does not necessarily mean a very large odds ratio. Observe what happens to the p-value if we multiply our two-by-two table by 10, which does not change the odds ratio:
+Note that the relationship between the odds ratio and the p-value is not one-to-one; it depends on the sample size. Therefore, a very small p-value does not necessarily mean a very large odds ratio. Observe what happens to the p-value if we multiply our two-by-two table by 10, which does not change the odds ratio:
     </p>
 
-    <console>
-      <input>
+    <program language="r">
+      <code>
 ox10 &lt;- o |&gt; mutate(men = men*10, women = women*10) 
 c(chisq.test(o)$p.value, chisq.test(ox10)$p.value)
-      </input>
-      <output>
+      </code>
+      </program><pre>
 [1] 5.091372e-02 2.625423e-10
-      </output>
-    </console>
+      </pre>
+    
   </section>
 
-  <section xml:id="glm-exercises">
+  <exercises xml:id="glm-exercises">
     <title>Exercises</title>
 
     <exercise xml:id="exercise-glm-1">
@@ -914,7 +907,7 @@ c(chisq.test(o)$p.value, chisq.test(ox10)$p.value)
         <ol marker="a.">
           <li><p>It actually does not matter, since they give the exact same p-value.</p></li>
           <li><p>Fisher's exact and the Chi-square are different names for the same test.</p></li>
-          <li><p>Because the sum of the rows and columns of the two-by-two table are not fixed so the hypergeometric distribution is not an appropriate assumption for the null hypothesis. For this reason, Fisher's exact test is rarely applicable with observational data.</p></li>
+          <li><p>Because the sums of the rows and columns of the two-by-two table are not fixed, the hypergeometric distribution is not an appropriate assumption for the null hypothesis. For this reason, Fisher’s exact test is rarely applicable to observational data.</p></li>
           <li><p>Because the Chi-square test runs faster.</p></li>
         </ol>
       </statement>
@@ -967,11 +960,11 @@ c(chisq.test(o)$p.value, chisq.test(ox10)$p.value)
         </p>
 
         <program language="r">
-          <input>
+          <code>
 library(tidyverse)
 library(dslabs)
 sentiment_counts
-          </input>
+          </code>
         </program>
 
         <p>
@@ -1019,10 +1012,10 @@ sentiment_counts
         </p>
 
         <program language="r">
-          <input>
+          <code>
 library(titanic)
 titanic_train
-          </input>
+          </code>
         </program>
 
         <p>
@@ -1039,10 +1032,10 @@ titanic_train
         </p>
 
         <program language="r">
-          <input>
+          <code>
 fit_gender &lt;- glm(Survived ~ Sex, family = binomial, data = titanic_train)
 summary(fit_gender)
-          </input>
+          </code>
         </program>
 
         <ol marker="a.">
@@ -1060,11 +1053,11 @@ summary(fit_gender)
         </p>
 
         <program language="r">
-          <input>
+          <code>
 titanic_train$Pclass &lt;- factor(titanic_train$Pclass)
 fit_class &lt;- glm(Survived ~ Sex + Pclass, family = binomial, data = titanic_train)
 summary(fit_class)
-          </input>
+          </code>
         </program>
 
         <ol marker="a.">
@@ -1081,10 +1074,10 @@ summary(fit_class)
         </p>
 
         <program language="r">
-          <input>
+          <code>
 fit_interaction &lt;- glm(Survived ~ Sex * Pclass, family = binomial, data = titanic_train)
 summary(fit_interaction)
-          </input>
+          </code>
         </program>
 
         <ol marker="a.">
@@ -1104,12 +1097,12 @@ summary(fit_interaction)
           Recall the Poisson regression model:
         </p>
 
-        <console>
-          <input>
+        <program language="r">
+          <code>
 fit_glm &lt;- glm(count ~ spray, family = poisson, data = InsectSprays)
 summary(fit_glm)
-          </input>
-          <output>
+          </code>
+          </program><pre>
 
 Call:
 glm(formula = count ~ spray, family = poisson, data = InsectSprays)
@@ -1132,20 +1125,20 @@ Residual deviance:  98.329  on 66  degrees of freedom
 AIC: 376.59
 
 Number of Fisher Scoring iterations: 5
-          </output>
-        </console>
+          </pre>
+        
 
         <p>
           Fit a linear regression model to the log-transformed counts (we have to add 0.5 because some counts are 0):
         </p>
 
-        <console>
-          <input>
+        <program language="r">
+          <code>
 InsectSprays$log_count &lt;- log(InsectSprays$count + 0.5)
 fit_lm &lt;- lm(log_count ~ spray, data = InsectSprays)
 summary(fit_lm)
-          </input>
-          <output>
+          </code>
+          </program><pre>
 
 Call:
 lm(formula = log_count ~ spray, data = InsectSprays)
@@ -1168,8 +1161,8 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’
 Residual standard error: 0.4835 on 66 degrees of freedom
 Multiple R-squared:  0.756,  Adjusted R-squared:  0.7375 
 F-statistic: 40.89 on 5 and 66 DF,  p-value: &lt; 2.2e-16
-          </output>
-        </console>
+          </pre>
+        
 
         <ol marker="a.">
           <li><p>Compare the estimated spray effects from <c>fit_glm</c> and <c>fit_lm</c>.</p></li>
@@ -1214,9 +1207,9 @@ F-statistic: 40.89 on 5 and 66 DF,  p-value: &lt; 2.2e-16
         </p>
 
         <program language="r">
-          <input>
+          <code>
 plot(fit_glm, which = 1)
-          </input>
+          </code>
         </program>
 
         <figure xml:id="fig-glm-poisson-residuals">
@@ -1231,9 +1224,9 @@ plot(fit_glm, which = 1)
         </p>
 
         <program language="r">
-          <input>
+          <code>
 plot(fit_lm, which = 1)
-          </input>
+          </code>
         </program>
 
         <figure xml:id="fig-glm-log-lm-residuals">
@@ -1263,6 +1256,5 @@ plot(fit_lm, which = 1)
         </ul>
       </statement>
     </exercise>
-  </section>
-
+  </exercises>
 </chapter>
