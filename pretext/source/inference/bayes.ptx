@@ -3,84 +3,12 @@
   <title>Bayesian Statistics</title>
   
   <introduction>
-    <program language="r">
-      <input>
-library(tidyverse)
-library(dslabs)
-polls &lt;- polls_us_election_2016 |> 
-  filter(state == "U.S." &amp; enddate >= "2016-11-02" &amp; population == "lv") |>
-  mutate(spread = rawpoll_clinton/100 - rawpoll_trump/100) 
-
-one_poll_per_pollster &lt;- polls |> group_by(pollster) |> 
-  filter(enddate == max(enddate)) |>
-  ungroup()
-      </input>
-    </program>
-
     <p>
       In 2016, FiveThirtyEight showed this chart depicting distributions for the percent of the popular vote for each candidate:
     </p>
 
-    <program language="r">
-      <input>
-my_dgamma &lt;- function(x, mean = 1, sd = 1){
-  shape = mean^2/sd^2
-  scale = sd^2 / mean
-  dgamma(x, shape = shape, scale = scale)
-}
-
-my_qgamma &lt;- function(mean = 1, sd = 1){
-  shape = mean^2/sd^2
-  scale = sd^2 / mean
-  qgamma(c(0.1,0.9), shape = shape, scale = scale)
-}
-
-tmp &lt;- tibble(candidate = c("Clinton", "Trump", "Johnson"), avg = c(48.5, 44.9, 5.0), avg_txt = c("48.5%", "44.9%", "5.0%"), sd = rep(2, 3), m = my_dgamma(avg, avg, sd)) |>
-  mutate(candidate = reorder(candidate, -avg))
-
-xx &lt;- seq(0, 75, len = 300)
-tmp_2 &lt;- map_df(1:3, function(i){
-  tibble(candidate = tmp$candidate[i],
-         avg = tmp$avg[i],
-         sd = tmp$sd[i],
-         x = xx,
-         y = my_dgamma(xx, tmp$avg[i], tmp$sd[i]))
-})
-
-tmp_3 &lt;- map_df(1:3, function(i){
-  qq &lt;- my_qgamma(tmp$avg[i], tmp$sd[i])
-  xx &lt;- seq(qq[1], qq[2], len = 200)
-  tibble(candidate = tmp$candidate[i],
-         avg = tmp$avg[i],
-         sd = tmp$sd[i],
-         x = xx,
-         y = my_dgamma(xx, tmp$avg[i], tmp$sd[i]))
-})
-         
-tmp_2 |> 
-  ggplot(aes(x, ymax = y, ymin = 0)) +
-  geom_ribbon(fill = "grey") + 
-  facet_grid(candidate ~ ., switch = "y") +
-  scale_x_continuous(breaks = seq(0, 75, 25), position = "top",
-                     labels = paste0(seq(0, 75, 25), "%")) +
-  geom_abline(intercept = 0, slope = 0) +
-  xlab("") + ylab("") + 
-  theme_minimal() + 
-  theme(panel.grid.major.y = element_blank(), 
-        panel.grid.minor.y = element_blank(),
-        axis.title.y = element_blank(),
-        axis.text.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        strip.text.y = element_text(angle = 180, size = 11, vjust = 0.2)) + 
-  geom_ribbon(data = tmp_3, mapping = aes(x = x, ymax = y, ymin = 0, fill = candidate), inherit.aes = FALSE, show.legend = FALSE) +
-  scale_fill_manual(values = c("#3cace4", "#fc5c34", "#fccc2c")) +
-  geom_point(data = tmp, mapping = aes(x = avg, y = m), inherit.aes = FALSE) + 
-  geom_text(data = tmp, mapping = aes(x = avg, y = m, label = avg_txt), inherit.aes = FALSE, hjust = 0, nudge_x = 1) 
-      </input>
-    </program>
-
     <figure xml:id="fig-bayes-election-forecast-distributions">
-      <caption>Forecast distributions for the 2016 popular vote</caption>
+      <caption>The colored areas represent values with an 80% chance of including the actual result, according to the FiveThirtyEight model.</caption>
       <image source="images/bayes-election-forecast-distributions.png" width="70%">
         <description>A faceted density-style plot showing forecast distributions for Clinton, Trump, and Johnson in the 2016 popular vote. Each panel highlights the central 80 percent region and marks the projected average vote share for the candidate.</description>
       </image>
@@ -162,62 +90,62 @@ tmp_2 |>
     </p>
 
     <program language="r">
-      <input>
+      <code>
 set.seed(3)
-      </input>
+      </code>
     </program>
 
     <program language="r">
-      <input>
+      <code>
 p &lt;- 0.00025
 N &lt;- 100000
 D &lt;- sample(c(1, 0), N, replace = TRUE, prob = c(p, 1 - p))
-      </input>
+      </code>
     </program>
 
     <p>
       Note that, as expected, there are very few people with the disease and many people without the disease,
     </p>
 
-    <console>
-      <input>
+    <program language="r">
+      <code>
 N_1 &lt;- sum(D == 1)
 N_0 &lt;- sum(D == 0)
 cat(N_1, "with disease, and", N_0, "without.")
-      </input>
-      <output>
+      </code>
+      </program><pre>
 23 with disease, and 99977 without.
-      </output>
-    </console>
+      </pre>
+    
 
     <p>
       This makes it more probable that we will see some false positives, given that the test is not perfect. Now, each person gets the test, which is correct 99% of the time:
     </p>
 
     <program language="r">
-      <input>
+      <code>
 acc &lt;- 0.99
 test &lt;- vector("character", N)
 test[D == 1] &lt;- sample(c("+", "-"), N_1, replace = TRUE, prob = c(acc, 1 - acc))
 test[D == 0] &lt;- sample(c("-", "+"), N_0, replace = TRUE, prob = c(acc, 1 - acc))
-      </input>
+      </code>
     </program>
 
     <p>
       Since the number of healthy individuals is much larger than the number of individuals with the disease, even a low false positive rate results in more healthy individuals testing positive than actual cases.
     </p>
 
-    <console>
-      <input>
+    <program language="r">
+      <code>
 table(D, test)
-      </input>
-      <output>
+      </code>
+      </program><pre>
    test
 D       -     +
   0 99012   965
   1     0    23
-      </output>
-    </console>
+      </pre>
+    
 
     <p>
       From this table, we see that the proportion of positive tests that have the disease is 23 out of 988. We can run this over and over again to see that, in fact, the probability converges to about 0.02.
@@ -304,42 +232,42 @@ D       -     +
     </p>
 
     <program language="r">
-      <input>
+      <code>
 theta_0 &lt;- 0
 tau &lt;- 0.05
-      </input>
+      </code>
     </program>
 
     <p>
       We can then compute the posterior distribution by applying the equations above to the <c>one_poll_per_pollster</c> data defined in <xref ref="sec-models"/>:
     </p>
 
-    <console>
-      <input>
+    <program language="r">
+      <code>
 res &lt;- one_poll_per_pollster |> 
   summarise(y_bar = mean(spread), sigma = sd(spread), n = n())
 B &lt;- with(res, sigma^2/n / (sigma^2/n + tau^2))
 posterior_mean &lt;- B*theta_0 + (1 - B)*res$y_bar
 posterior_se &lt;- with(res, sqrt(1/(n/sigma^2 + 1/tau^2)))
 posterior_mean + c(-1, 1)*qnorm(0.975)*posterior_se
-      </input>
-      <output>
+      </code>
+      </program><pre>
 [1] 0.02032131 0.03967773
-      </output>
-    </console>
+      </pre>
+    
 
     <p>
       Furthermore, we can now make the probabilistic statement that we could not make with the frequentist approach. Specifically, <m>\mathrm{Pr}(\theta>0 \mid \bar{Y})</m> can be computed as follows:
     </p>
 
-    <console>
-      <input>
+    <program language="r">
+      <code>
 1 - pnorm(0, posterior_mean, posterior_se)
-      </input>
-      <output>
+      </code>
+      </program><pre>
 [1] 1
-      </output>
-    </console>
+      </pre>
+    
 
     <p>
       According to the calculation above, we would be almost 100% certain that Clinton will win the popular vote, an estimate that feels overly confident. Moreover, it does not align with FiveThirtyEight's reported probability of 81.4%. What accounts for this difference? Our current model does not yet capture all sources of uncertainty. We will revisit this issue and address the missing variability in <xref ref="sec-election-forecasting"/>.
@@ -452,13 +380,13 @@ posterior_mean + c(-1, 1)*qnorm(0.975)*posterior_se
           Create the following table with the polls taken during the last two weeks:
         </p>
         <program language="r">
-          <input>
+          <code>
 library(tidyverse)
 library(dslabs)
 polls &lt;- polls_us_election_2016 |> 
   filter(state == "Florida" &amp; enddate >= "2016-11-04" ) |> 
   mutate(spread = rawpoll_clinton/100 - rawpoll_trump/100)
-          </input>
+          </code>
         </program>
         <p>
           Take the average spread of these polls. The CLT tells us this average is approximately normal. Provide an estimate of the standard error.
