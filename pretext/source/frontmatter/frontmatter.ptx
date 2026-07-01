@@ -9,15 +9,46 @@
     <date><today/></date>
   </titlepage>
 
+  <preface xml:id="preface-ptx-version">
+    <title>Note on This PreTeXt Edition</title>
+
+    <p>
+      This is a <url href="https://pretextbook.org/" visual="pretextbook.org">PreTeXt</url>
+      conversion of<em>Introduction to Data Science: Data Wrangling and Visualization with R</em>, originally written by
+     <url href = "https://rafalab.dfci.harvard.edu/">Rafael A. Irizarry</url>.
+      The original work is available online at
+        <url href="https://rafalab.github.io/dsbook-part-2/" visual="rafalab.github.io/dsbook-part-2">rafalab.github.io/dsbook-part-2</url>
+      and was published by CRC Press. The original GitHub repository for the book source is at
+      <url href="https://github.com/rafalab/dsbook-part-2">github.com/rafalab/dsbook-part-2</url>.
+    </p>
+
+    <p>
+        This PreTeXt edition was prepared by
+        <url href="https://github.com/PreTeXtBooks/dataskills-part-2"
+           visual="github.com/PreTeXtBooks/dataskills-part-2">the PreTeXtBooks project</url>
+to make the content available in the PreTeXt format, enabling accessible and structured
+      output in HTML, PDF, and other formats.   All prose, code examples, figures, and mathematical content are intended to be 
+  faithful reproductions of the original work, though occasional typographical errors 
+  may have been introduced in the conversion process. Report any issues to our
+        <url href="https://github.com/PreTeXtBooks/dataskills-part-1/issues">GitHub Issues Page</url>.
+      </p>
+
+    <p>
+      The original work by Rafael A. Irizarry is licensed under a
+      <url href="https://creativecommons.org/licenses/by-nc-sa/4.0">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International</url>.
+    </p>
+  </preface>
+
   <preface xml:id="preface">
     <title>Preface</title>
     <p>
-      This is the website for the <em>Statistics and Prediction Algorithms Through Case Studies</em>, 
+      This is a PreTeXt version of the <em>Statistics and Prediction Algorithms Through Case Studies</em>, 
       the second part of <em>Introduction to Data Science</em>.
     </p>
     <p>
       The website for the first part, <em>Data Wrangling and Visualization with R</em>, is 
-      <url href="http://rafalab.dfci.harvard.edu/dsbook-part-1/">here</url>.
+      <url href="http://rafalab.dfci.harvard.edu/dsbook-part-1/">here</url>, with the PreTeXt version 
+      for the first part <url href="https://pretextbooks.github.io/dataskills-part-1/">here</url>.
     </p>
     <p>
       This book started out as part of the class notes used in the HarvardX 
@@ -45,6 +76,74 @@
     </p>
   </preface>
 
+  <acknowledgement xml:id="acknowledgement">
+    <title>Acknowledgments</title>
+    <p>
+      A special thanks to Jenna Landy for her careful editing and helpful advice on this book; Amy Gill, Jorge Cornick, Barry MacLean, and Robert Gentleman for dozens of comments, edits, and suggestions. Also, many thanks to Stephanie Hicks who twice served as a co-instructor in my data science classes and Yihui Xie who patiently put up with my many questions about bookdown. Thanks also to Héctor Corrada-Bravo, for advice on how to best teach machine learning. Thanks to Alyssa Frazee for helping create the homework problem that became the Recommendation Systems case study. Also, many thanks to Hadley Wickham, Mine Çetinkaya-Rundel, and Garrett Grolemund for making the Quarto code for their R for Data Science book open. Finally, thanks to Alex Nones for proofreading the manuscript during its various stages.
+    </p>
+    <p>
+      This book was conceived during the teaching of several applied statistics courses, starting over fifteen years ago. The teaching assistants working with me throughout the years made important indirect contributions to this book. The latest iteration of this course is a HarvardX series coordinated by Heather Sternshein and Zofia Gajdos. We thank them for their contributions. We are also grateful to all the students whose questions and comments helped us improve the book. The courses were partially funded by NIH grant R25GM114818. We are very grateful to the National Institutes of Health for its support.
+    </p>
+    <p>
+  A special thanks goes to all those who edited the book via GitHub pull requests or 
+  made suggestions by creating an issue or sending an email: 
+  <c>hbmaclean</c> (Barry MacLean), 
+  <c>nickyfoto</c> (Huang Qiang), 
+  <c>desautm</c> (Marc-André Désautels), 
+  <c>michaschwab</c> (Michail Schwab), 
+  <c>alvarolarreategui</c> (Alvaro Larreategui), 
+  <c>jakevc</c> (Jake VanCampen), 
+  <c>omerta</c> (Guillermo Lengemann), 
+  <c>espinielli</c> (Enrico Spinielli), 
+  <c>asimumba</c> (Aaron Simumba), 
+  <c>braunschweig</c> (Maldewar), 
+  <c>gwierzchowski</c> (Grzegorz Wierzchowski), 
+  <c>technocrat</c> (Richard Careaga), 
+  <c>atzakas</c>, 
+  <c>defeit</c> (David Emerson Feit), 
+  <c>shiraamitchell</c> (Shira Mitchell), 
+  <c>Nathalie-S</c>, 
+  <c>andreashandel</c> (Andreas Handel), 
+  <c>berkowitze</c> (Elias Berkowitz), 
+  <c>Dean-Webb</c> (Dean Webber), 
+  <c>mohayusuf</c>, 
+  <c>jimrothstein</c>, 
+  <c>mPloenzke</c> (Matthew Ploenzke), 
+  <c>NicholasDowand</c> (Nicholas Dow), 
+  <c>kant</c> (Darío Hereñú), 
+  <c>debbieyuster</c> (Debbie Yuster), 
+  <c>tuanchauict</c> (Tuan Chau), 
+  <c>phzeller</c>, 
+  <c>BTJ01</c> (BradJ), 
+  <c>glsnow</c> (Greg Snow), 
+  <c>mberlanda</c> (Mauro Berlanda), 
+  <c>wfan9</c>, 
+  <c>larswestvang</c> (Lars Westvang), 
+  <c>jj999</c> (Jan Andrejkovic), 
+  <c>Kriegslustig</c> (Luca Nils Schmid), 
+  <c>odahhani</c>, 
+  <c>aidanhorn</c> (Aidan Horn), 
+  <c>atraxler</c> (Adrienne Traxler), 
+  <c>alvegorova</c>, 
+  <c>wycheong</c> (Won Young Cheong), 
+  <c>med-hat</c> (Medhat Khalil), 
+  <c>biscotty666</c> (Brian Carey), 
+  <c>kengustafson</c>, 
+  <c>Yowza63</c>, 
+  <c>ryan-heslin</c> (Ryan Heslin), 
+  <c>SydneyUni-Jim</c> (Jim Nicholls), 
+  <c>raffaem</c>, 
+  <c>BruciiZ</c> (Huiyuan (Bruce) Zhou), 
+  <c>tim8west</c>, 
+  <c>aosaf-e-c</c> (Aosaf Ershad Chowdhury), 
+  <c>annlia</c>, 
+  <c>jonkiparsky</c> (Jon Kiparsky), 
+  <c>ang101</c> (Angela), 
+  <c>Daniel-Yonkov</c> (Daniel Yonkov), 
+  David D. Kane, El Mustapha El Abbassi, Vadim Zipunnikov, Anna Quaglieri, Chris Dong, 
+  Rick Schoenberg, Isabella Grabski, Doug Snyder, and JT Harton.
+    </p>
+  </acknowledgement>
 
   <preface xml:id="preface-introduction">
       <title>Introduction</title>
@@ -114,50 +213,5 @@
       <fn><url href="https://github.com/rafalab/dsbook-part-2">https://github.com/rafalab/dsbook-part-2</url></fn>.
     </p>
   </preface>
-
-  <acknowledgement xml:id="acknowledgement">
-    <title>Acknowledgments</title>
-    <p>
-      A special thanks to Amy Gill, Jorge Cornick, Barry MacLean, and Robert Gentleman for dozens of 
-      comments, edits, and suggestions. Also, many thanks to Stephanie Hicks who twice served as a 
-      co-instructor in my data science classes and Yihui Xie who patiently put up with my many questions 
-      about bookdown. Thanks also to Héctor Corrada-Bravo, for advice on how to best teach machine learning. 
-      Thanks to Alyssa Frazee for helping create the homework problem that became the Recommendation Systems 
-      case study. Also, many thanks to Hadley Wickham, Mine Çetinkaya-Rundel, and Garrett Grolemund for 
-      making the Quarto code for their R for Data Science book open. Finally, thanks to Alex Nones for 
-      proofreading the manuscript during its various stages.
-    </p>
-    <p>
-      This book was conceived during the teaching of several applied statistics courses, starting over 
-      fifteen years ago. The teaching assistants working with me throughout the years made important indirect 
-      contributions to this book. The latest iteration of this course is a HarvardX series coordinated by 
-      Heather Sternshein and Zofia Gajdos. We thank them for their contributions. We are also grateful to 
-      all the students whose questions and comments helped us improve the book. The courses were partially 
-      funded by NIH grant R25GM114818. We are very grateful to the National Institutes of Health for its 
-      support.
-    </p>
-    <p>
-      A special thanks goes to all those who edited the book via GitHub pull requests or made suggestions 
-      by creating an <em>issue</em> or sending an email: <c>jcornickm</c> (Jorge Cornick), 
-      <c>hbmaclean</c> (Barry MacLean), <c>nickyfoto</c> (Huang Qiang), <c>desautm</c> (Marc-André Désautels), 
-      <c>michaschwab</c> (Michail Schwab), <c>alvarolarreategui</c> (Alvaro Larreategui), 
-      <c>jakevc</c> (Jake VanCampen), <c>omerta</c> (Guillermo Lengemann), <c>espinielli</c> (Enrico Spinielli), 
-      <c>asimumba</c> (Aaron Simumba), <c>braunschweig</c> (Maldewar), <c>gwierzchowski</c> (Grzegorz Wierzchowski), 
-      <c>technocrat</c> (Richard Careaga), <c>atzakas</c>, <c>defeit</c> (David Emerson Feit), 
-      <c>shiraamitchell</c> (Shira Mitchell), <c>Nathalie-S</c>, <c>andreashandel</c> (Andreas Handel), 
-      <c>berkowitze</c> (Elias Berkowitz), <c>Dean-Webb</c> (Dean Webber), <c>mohayusuf</c>, 
-      <c>jimrothstein</c>, <c>mPloenzke</c> (Matthew Ploenzke), <c>NicholasDowand</c> (Nicholas Dow), 
-      <c>kant</c> (Darío Hereñú), <c>debbieyuster</c> (Debbie Yuster), <c>tuanchauict</c> (Tuan Chau), 
-      <c>phzeller</c>, <c>BTJ01</c> (BradJ), <c>glsnow</c> (Greg Snow), <c>mberlanda</c> (Mauro Berlanda), 
-      <c>wfan9</c>, <c>larswestvang</c> (Lars Westvang), <c>jj999</c> (Jan Andrejkovic), 
-      <c>Kriegslustig</c> (Luca Nils Schmid), <c>odahhani</c>, <c>aidanhorn</c> (Aidan Horn), 
-      <c>atraxler</c> (Adrienne Traxler), <c>alvegorova</c>, <c>wycheong</c> (Won Young Cheong), 
-      <c>med-hat</c> (Medhat Khalil), <c>biscotty666</c> (Brian Carey), <c>kengustafson</c>, <c>Yowza63</c>, 
-      <c>ryan-heslin</c> (Ryan Heslin), <c>SydneyUni-Jim</c> (Jim Nicholls), <c>raffaem</c>, 
-      <c>BruciiZ</c> (Huiyuan (Bruce) Zhou), <c>tim8west</c>, <c>aosaf-e-c</c> (Aosaf Ershad Chowdhury), 
-      <c>annlia</c>, David D. Kane, El Mustapha El Abbassi, Vadim Zipunnikov, Anna Quaglieri, Chris Dong, 
-      Rick Schoenberg, Isabella Grabski, Doug Snyder, and JT Harton.
-    </p>
-  </acknowledgement>
 
 </frontmatter>
