@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="sec-election-forecasting">
   <title>Hierarchical Models</title>
+  <introduction>
     <p>
       Hierarchical models are useful for quantifying different levels of variability or uncertainty. One can use them using a Bayesian or frequentist framework. However, in the frequentist framework, hierarchical models often extend a model with fixed parameters by treating those parameters as random, leading to a formulation with two distributions that resemble a prior and a sampling distribution in the Bayesian framework. This makes the resulting summaries very similar or even equal to what is obtained with a Bayesian context. A key difference between the Bayesian and the frequentist hierarchical model approach is that, in the latter, we use data to construct priors rather than treat priors as a quantification of prior expert knowledge. In this section, we illustrate the use of hierarchical models by describing a simplified version of the approach used by FiveThirtyEight to forecast the 2016 election.
     </p>
