@@ -34,42 +34,155 @@
     <p>
       Real Clear Politics<fn>http://www.realclearpolitics.com</fn> is an example of a news aggregator that organizes and publishes poll results. For example, they present the following poll results, reporting estimates of the popular vote for the 2016 presidential election<fn>http://www.realclearpolitics.com/epolls/2016/president/us/general_election_trump_vs_clinton-5491.html</fn>:
     </p>
-    
-    <console>
-      <input>
-library(tidyverse)
-library(rvest)
-url &lt;- "https://web.archive.org/web/20161108012231/https://www.realclearpolitics.com/epolls/2016/president/us/general_election_trump_vs_clinton-5491.html"
-tab &lt;- read_html(url) |> html_node("table") |> html_table()
-tab &lt;- tab |> mutate(Poll = stringr::str_remove(Poll, "\\/.*")) |>
-  mutate(Poll = case_when(
-    Poll == "BloombergBloomberg" ~ "Bloomberg",
-    Poll == "FOX NewsFOX News" ~ "FOX News",
-    Poll == "MonmouthMonmouth"  ~ "Monmouth",  
-    Poll == "CBS NewsCBS News" ~ "CBS News",
-    TRUE ~ Poll))
-names(tab) &lt;- stringr::str_remove_all(names(tab), "\\s(.*)")
-tab
-      </input>
-      <output>
-         Poll          Date   Sample MoE Clinton Trump       Spread
-  RCP Average  10/31 - 11/7       --  --    47.2  44.3 Clinton +2.9
-    Bloomberg   11/4 - 11/6   799 LV 3.5    46.0  43.0   Clinton +3
-    Economist   11/4 - 11/7  3669 LV  --    49.0  45.0   Clinton +4
-          IBD   11/3 - 11/6  1026 LV 3.1    43.0  42.0   Clinton +1
-          ABC   11/3 - 11/6  2220 LV 2.5    49.0  46.0   Clinton +3
-     FOX News   11/3 - 11/6  1295 LV 2.5    48.0  44.0   Clinton +4
-     Monmouth   11/3 - 11/6   748 LV 3.6    50.0  44.0   Clinton +6
-     CBS News   11/2 - 11/6  1426 LV 3.0    47.0  43.0   Clinton +4
-     LA Times  10/31 - 11/6  2935 LV 4.5    43.0  48.0     Trump +5
-     NBC News   11/3 - 11/5  1282 LV 2.7    48.0  43.0   Clinton +5
-     NBC News  10/31 - 11/6 30145 LV 1.0    51.0  44.0   Clinton +7
-    McClatchy   11/1 - 11/3   940 LV 3.2    46.0  44.0   Clinton +2
-      Reuters  10/31 - 11/4  2244 LV 2.2    44.0  40.0   Clinton +4
- GravisGravis 10/31 - 10/31  5360 RV 1.3    50.0  50.0          Tie
-      </output>
-    </console>
-    
+
+<table xml:id="table-2016-poll-data">
+  <title>2016 Presidential Election Poll Data</title>
+  <tabular halign="center">
+    <col halign="left"/>
+    <col halign="left"/>
+    <col halign="left"/>
+    <col halign="right"/>
+    <col halign="right"/>
+    <col halign="right"/>
+    <col halign="left"/>
+    <row header="yes">
+      <cell>Poll</cell>
+      <cell>Date</cell>
+      <cell>Sample</cell>
+      <cell>MoE</cell>
+      <cell>Clinton</cell>
+      <cell>Trump</cell>
+      <cell>Spread</cell>
+    </row>
+    <row>
+      <cell>RCP Average</cell>
+      <cell>10/31 <ndash/> 11/7</cell>
+      <cell><ndash/><ndash/></cell>
+      <cell><ndash/><ndash/></cell>
+      <cell>47.2</cell>
+      <cell>44.3</cell>
+      <cell>Clinton +2.9</cell>
+    </row>
+    <row>
+      <cell>Bloomberg</cell>
+      <cell>11/4 <ndash/> 11/6</cell>
+      <cell>799 LV</cell>
+      <cell>3.5</cell>
+      <cell>46.0</cell>
+      <cell>43.0</cell>
+      <cell>Clinton +3</cell>
+    </row>
+    <row>
+      <cell>Economist</cell>
+      <cell>11/4 <ndash/> 11/7</cell>
+      <cell>3669 LV</cell>
+      <cell><ndash/><ndash/></cell>
+      <cell>49.0</cell>
+      <cell>45.0</cell>
+      <cell>Clinton +4</cell>
+    </row>
+    <row>
+      <cell>IBD</cell>
+      <cell>11/3 <ndash/> 11/6</cell>
+      <cell>1026 LV</cell>
+      <cell>3.1</cell>
+      <cell>43.0</cell>
+      <cell>42.0</cell>
+      <cell>Clinton +1</cell>
+    </row>
+    <row>
+      <cell>ABC</cell>
+      <cell>11/3 <ndash/> 11/6</cell>
+      <cell>2220 LV</cell>
+      <cell>2.5</cell>
+      <cell>49.0</cell>
+      <cell>46.0</cell>
+      <cell>Clinton +3</cell>
+    </row>
+    <row>
+      <cell>FOX News</cell>
+      <cell>11/3 <ndash/> 11/6</cell>
+      <cell>1295 LV</cell>
+      <cell>2.5</cell>
+      <cell>48.0</cell>
+      <cell>44.0</cell>
+      <cell>Clinton +4</cell>
+    </row>
+    <row>
+      <cell>Monmouth</cell>
+      <cell>11/3 <ndash/> 11/6</cell>
+      <cell>748 LV</cell>
+      <cell>3.6</cell>
+      <cell>50.0</cell>
+      <cell>44.0</cell>
+      <cell>Clinton +6</cell>
+    </row>
+    <row>
+      <cell>CBS News</cell>
+      <cell>11/2 <ndash/> 11/6</cell>
+      <cell>1426 LV</cell>
+      <cell>3.0</cell>
+      <cell>47.0</cell>
+      <cell>43.0</cell>
+      <cell>Clinton +4</cell>
+    </row>
+    <row>
+      <cell>LA Times</cell>
+      <cell>10/31 <ndash/> 11/6</cell>
+      <cell>2935 LV</cell>
+      <cell>4.5</cell>
+      <cell>43.0</cell>
+      <cell>48.0</cell>
+      <cell>Trump +5</cell>
+    </row>
+    <row>
+      <cell>NBC News</cell>
+      <cell>11/3 <ndash/> 11/5</cell>
+      <cell>1282 LV</cell>
+      <cell>2.7</cell>
+      <cell>48.0</cell>
+      <cell>43.0</cell>
+      <cell>Clinton +5</cell>
+    </row>
+    <row>
+      <cell>NBC News</cell>
+      <cell>10/31 <ndash/> 11/6</cell>
+      <cell>30145 LV</cell>
+      <cell>1.0</cell>
+      <cell>51.0</cell>
+      <cell>44.0</cell>
+      <cell>Clinton +7</cell>
+    </row>
+    <row>
+      <cell>McClatchy</cell>
+      <cell>11/1 <ndash/> 11/3</cell>
+      <cell>940 LV</cell>
+      <cell>3.2</cell>
+      <cell>46.0</cell>
+      <cell>44.0</cell>
+      <cell>Clinton +2</cell>
+    </row>
+    <row>
+      <cell>Reuters</cell>
+      <cell>10/31 <ndash/> 11/4</cell>
+      <cell>2244 LV</cell>
+      <cell>2.2</cell>
+      <cell>44.0</cell>
+      <cell>40.0</cell>
+      <cell>Clinton +4</cell>
+    </row>
+    <row>
+      <cell>Gravis</cell>
+      <cell>10/31 <ndash/> 10/31</cell>
+      <cell>5360 RV</cell>
+      <cell>1.3</cell>
+      <cell>50.0</cell>
+      <cell>50.0</cell>
+      <cell>Tie</cell>
+    </row>
+  </tabular>
+</table>
+
     <p>
       Let's make some observations about the table above. First, observe that different polls, all conducted days before the election, report different <em>spreads</em>: the estimated difference between support for the two candidates. Notice that the reported spreads hover around what eventually became the actual result: Clinton won the popular vote by 2.1%. Additionally, we see a column titled <term>MoE</term> which stands for <em>margin of error</em>. We will learn what this means.
     </p>
@@ -95,13 +208,12 @@ tab
       </p>
       
       <program language="r">
-        <input>
+        <code>
 set.seed(1)
 library(tidyverse)
 library(dslabs)
-rafalib::mypar()
 take_poll(25)
-        </input>
+        </code>
       </program>
       
       <figure xml:id="fig-estimates-ci-take-poll">
@@ -141,10 +253,10 @@ take_poll(25)
     </p>
     
     <program language="r">
-      <input>
+      <code>
 par(mfrow = c(2,2), mar = c(3, 1, 3, 0), mgp = c(1.5, 0.5, 0)) 
 take_poll(25); take_poll(25); take_poll(25); take_poll(25)
-      </input>
+      </code>
     </program>
     
     <figure xml:id="fig-estimates-ci-four-polls">
@@ -252,14 +364,6 @@ take_poll(25); take_poll(25); take_poll(25); take_poll(25)
       One problem is that we do not know <m>p</m>, so we can't actually compute the standard error. However, for illustrative purposes, let's assume that <m>p=0.51</m> and make a plot of the standard error versus the sample size <m>N</m>:
     </p>
     
-    <program language="r">
-      <input>
-p &lt;- 0.51
-N &lt;- 10^seq(1,5, len = 100)
-data.frame(N = N, SE = sqrt(p*(1 - p)/N)) |> ggplot(aes(N, SE)) + geom_line() + scale_x_continuous(breaks = c(10, 100, 1000, 10000), trans = "log10")
-      </input>
-    </program>
-    
     <figure xml:id="fig-estimates-ci-se-vs-n">
       <caption>Standard error as a function of sample size</caption>
       <image source="images/estimates-ci-se-vs-n.png" width="70%">
@@ -271,14 +375,13 @@ data.frame(N = N, SE = sqrt(p*(1 - p)/N)) |> ggplot(aes(N, SE)) + geom_line() + 
       The plot shows that we would need a poll of over 10,000 people to achieve a standard error that low. We rarely see polls of this size due in part to the associated costs. According to the Real Clear Politics table, sample sizes in opinion polls range from 500 to 3,500 people. For a sample size of 1,000 and <m>p=0.51</m>, the standard error is:
     </p>
     
-    <console>
-      <input>
+    <program language="r">
+      <code>
 sqrt(p*(1 - p))/sqrt(1000)
-      </input>
-      <output>
+      </code>
+      </program><pre>
 [1] 0.01580823
-      </output>
-    </console>
+      </pre>
     
     <p>
       or 1.5 percentage points. So even with large polls, for close elections, <m>\bar{X}</m> can lead us astray if we don't realize it is a random variable. Nonetheless, we can actually say more about how close we get to <m>p</m>, and we do that in <xref ref="sec-clt"/>.
@@ -377,29 +480,29 @@ sqrt(p*(1 - p))/sqrt(1000)
         Using our earlier poll with <m>\bar{X} = 0.48</m> and <m>N = 25</m>, we obtain:
       </p>
       
-      <console>
-        <input>
+      <program language="r">
+        <code>
 x_hat &lt;- 0.48
 se &lt;- sqrt(x_hat*(1 - x_hat)/25)
 se
-        </input>
-        <output>
+        </code>
+        </program><pre>
 [1] 0.09991997
-        </output>
-      </console>
+        </pre>
+      
       
       <p>
         Now we can compute the probability that our estimate is within 2% of the true value:
       </p>
       
-      <console>
-        <input>
+      <program language="r">
+        <code>
 pnorm(0.02/se) - pnorm(-0.02/se)
-        </input>
-        <output>
+        </code>
+        </program><pre>
 [1] 0.1586447
-        </output>
-      </console>
+        </pre>
+      
       
       <p>
         There is only a small chance of being this close when <m>N = 25</m>.
@@ -445,19 +548,19 @@ pnorm(0.02/se) - pnorm(-0.02/se)
         The endpoints of this interval are not fixed numbers—they depend on the data. Each time we take a new sample, we obtain a new <m>\bar{X}</m> and therefore a new confidence interval. To see this, we can repeat the sampling process using the same parameters as before:
       </p>
       
-      <console>
-        <input>
+      <program language="r">
+        <code>
 p &lt;- 0.45
 N &lt;- 1000
 x &lt;- sample(c(0, 1), size = N, replace = TRUE, prob = c(1 - p, p))
 x_hat &lt;- mean(x)
 se_hat &lt;- sqrt(x_hat*(1 - x_hat)/N)
 c(x_hat - 1.96*se_hat, x_hat + 1.96*se_hat)
-        </input>
-        <output>
+        </code>
+        </program><pre>
 [1] 0.4012976 0.4627024
-        </output>
-      </console>
+        </pre>
+      
       
       <p>
         If you run this code several times, you'll see that the interval changes from run to run due to random sampling variation.
@@ -494,10 +597,10 @@ c(x_hat - 1.96*se_hat, x_hat + 1.96*se_hat)
       </p>
       
       <program language="r">
-        <input>
+        <code>
 alpha &lt;- 0.01
 z &lt;- qnorm(1 - alpha/2)
-        </input>
+        </code>
       </program>
       
       <p>
@@ -512,8 +615,8 @@ z &lt;- qnorm(1 - alpha/2)
         We can verify that the intervals we construct have the desired probability of including <m>p</m> using a Monte Carlo simulation. By repeatedly drawing samples and constructing confidence intervals, we can check how often the intervals actually contain the true value of <m>p</m>.
       </p>
       
-      <console>
-        <input>
+      <program language="r">
+        <code>
 set.seed(1)
 N &lt;- 1000
 B &lt;- 10000
@@ -525,11 +628,11 @@ inside &lt;- replicate(B, {
   p >= x_hat - 1.96*se_hat &amp; p &lt;= x_hat + 1.96*se_hat
 })
 mean(inside)
-        </input>
-        <output>
+        </code>
+        </program><pre>
 [1] 0.9482
-        </output>
-      </console>
+        </pre>
+      
       
       <p>
         As expected, the interval covers <m>p</m> about 95% of the time.
@@ -538,29 +641,6 @@ mean(inside)
       <p>
         The plot below shows the first 100 simulated confidence intervals. Each horizontal line represents one interval, and the black vertical line marks the true proportion <m>p</m>. Roughly 95% of the intervals overlap the line, while about 5% miss it, exactly as predicted.
       </p>
-      
-      <program language="r">
-        <input>
-library(ggplot2)
-set.seed(1)
-tab &lt;- replicate(100, {
-  x &lt;- sample(c(0,1), size = N, replace = TRUE, prob = c(1 - p, p))
-  x_hat &lt;- mean(x)
-  se_hat &lt;- sqrt(x_hat*(1 - x_hat)/N)
-  hit &lt;-  p >= x_hat - 1.96*se_hat &amp; p &lt;= x_hat + 1.96*se_hat
-  c(x_hat, x_hat - 1.96*se_hat, x_hat + 1.96*se_hat, hit)
-})
-
-tab &lt;- data.frame(poll = 1:ncol(tab), t(tab))
-names(tab) &lt;- c("poll", "estimate", "low", "high", "hit")
-tab$p_inside &lt;- ifelse(tab$hit, "Yes", "No")
-ggplot(tab, aes(poll, estimate, ymin = low, ymax = high, col = p_inside)) + 
-  geom_point() +
-  geom_errorbar() + 
-  coord_flip() + 
-  geom_hline(yintercept = p)
-        </input>
-      </program>
       
       <figure xml:id="fig-estimates-ci-monte-carlo-intervals">
         <caption>First 100 simulated confidence intervals</caption>
@@ -745,19 +825,19 @@ ggplot(tab, aes(poll, estimate, ymin = low, ymax = high, col = p_inside)) +
           The vector <c>errors</c> contains, for each simulated sample, the difference between our estimate <m>\bar{X}</m> and the actual <m>p</m>. We refer to this difference as the <em>error</em>. Compute the average and make a histogram of the errors generated in the Monte Carlo simulation,
         </p>
         
-        <console>
-          <input>
+        <program language="r">
+          <code>
 mean(errors)
-          </input>
-          <output>
+          </code>
+          </program><pre>
 [1] 4.9e-05
-          </output>
-        </console>
+          </pre>
+        
         
         <program language="r">
-          <input>
+          <code>
 hist(errors)
-          </input>
+          </code>
         </program>
         
         <figure xml:id="fig-estimates-ci-errors-histogram">
@@ -950,12 +1030,12 @@ hist(errors)
     </p>
     
     <program language="r">
-      <input>
+      <code>
 library(dslabs)
 library(tidyverse)
 polls &lt;- polls_us_election_2016 |> 
   filter(enddate >= "2016-10-31" &amp; state == "U.S.") 
-      </input>
+      </code>
     </program>
     
     <exercise>
@@ -965,10 +1045,10 @@ polls &lt;- polls_us_election_2016 |>
         </p>
         
         <program language="r">
-          <input>
+          <code>
 N &lt;- polls$samplesize[1]
 x_hat &lt;- polls$rawpoll_clinton[1]/100
-          </input>
+          </code>
         </program>
         
         <p>
@@ -1016,11 +1096,11 @@ x_hat &lt;- polls$rawpoll_clinton[1]/100
         </p>
         
         <program language="r">
-          <input>
+          <code>
 polls &lt;- polls_us_election_2016 |> 
   filter(enddate >= "2016-10-31" &amp; state == "U.S.")  |>
   mutate(theta_hat = rawpoll_clinton/100 - rawpoll_trump/100)
-          </input>
+          </code>
         </program>
       </statement>
     </exercise>
