@@ -250,7 +250,7 @@ mean(s &lt;= 40)
             We see that the distribution is approximately normal.
             A qqplot will confirm that the normal approximation provides an
             excellent fit.
-            In the next chapter ( <xref ref="sec-clt-prob"/> ), we will learn
+            In the next chapter (<xref ref="sec-clt-prob"/>), we will learn
             the theory that explains why this approximation works so well.
             In fact, normal approximations extend far beyond coin flips <mdash/>
             they apply broadly to averages and sums of many kinds of random

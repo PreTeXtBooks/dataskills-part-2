@@ -226,9 +226,9 @@ ggplot(train_knn, highlight = TRUE)
   </p>
 
   <program language="r">
-    <input>
-      cv20_ctrl &lt;- trainControl(method = "cv", number = 20)
-    </input>
+    <code>
+cv20_ctrl &lt;- trainControl(method = "cv", number = 20)
+    </code>
   </program>
 
   <p>
@@ -498,7 +498,7 @@ centered_subsetted_x_test &lt;- predict(pp, newdata = x_test)
       </program>    
 
 <p>
-      Additionally, the <c>train</c> function in <term>caret</term> includes a <c>preProcess</c> argument that allows users to specify which preprocessing steps to apply automatically during model training. Here is an example of how to use it to remove near-zero variance predictors. Because this is an illustrative example, we consider only one <m>k</m> and use five-fold cross-validation to estimate the MSE to reduce runtime. As we see in <xref ref="sec-knn-in-practice"/>, in practice you would want to optimize <m>k</m> and use more thorough resampling.
+      Additionally, the <c>train</c> function in <term>caret</term> includes a <c>preProcess</c> argument that allows users to specify which preprocessing steps to apply automatically during model training. Here is an example of how to use it to remove near-zero variance predictors. Because this is an illustrative example, we consider only one <m>k</m> and use five-fold cross-validation to estimate the MSE to reduce runtime. As we see in <xref ref="sec-knn-in-practice"/>, in practice you would want to optimize <m>k</m> and use more thorough resampling:
     </p>
 
     <program language="r">
@@ -823,6 +823,10 @@ rf &lt;- train(x, y, method = "rf", preProcess = "nzv",
       </code>
     </program>
 
+    <p>
+      Now that we have optimized our algorithm, we are ready to predict outcomes with our final model:
+    </p>
+
     <program language="r">
       <code>
 y_hat_rf &lt;- predict(rf, x_test, type = "raw")
@@ -865,9 +869,6 @@ stopImplicitCluster()
 
     <p>
       The black box nature of many machine learning algorithms can make it difficult to understand how they are making predictions. However, there are tools available to help us interpret these models and gain insights into their behavior. For example, with random forests we can examine whether variable importance, described in <xref ref="sec-variable-importance"/>, is consistent with our expectations given the context.
-    </p>
-
-    <p>
       The following function computes the importance of each feature:
     </p>
 

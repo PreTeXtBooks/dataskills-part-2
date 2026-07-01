@@ -159,8 +159,9 @@ F &lt;- function(a) mean(x &lt;= a)
         </figure>
 
         <p>
-            The probability of the outcome falling within an interval, for
-            example, <m>x \in [0.5, 1.5]</m>, can be approximated by adding the
+            The probability of the outcome falling within an interval, such as
+            the shaded range <m>x \in [0.5, 1.5]</m>, can be approximated by
+            adding the
             heights of the bars within that range and dividing by the total
             height of all bars.
             As the measurement becomes more precise and the bar widths become
