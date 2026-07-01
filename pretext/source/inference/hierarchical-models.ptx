@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <chapter xmlns:xi="http://www.w3.org/2001/XInclude" xml:id="sec-election-forecasting">
   <title>Hierarchical Models</title>
-
-  <introduction>
-    <program language="r">
-      <input>
-library(tidyverse)
-library(dslabs)
-      </input>
-    </program>
-
     <p>
       Hierarchical models are useful for quantifying different levels of variability or uncertainty. One can use them using a Bayesian or frequentist framework. However, in the frequentist framework, hierarchical models often extend a model with fixed parameters by treating those parameters as random, leading to a formulation with two distributions that resemble a prior and a sampling distribution in the Bayesian framework. This makes the resulting summaries very similar or even equal to what is obtained with a Bayesian context. A key difference between the Bayesian and the frequentist hierarchical model approach is that, in the latter, we use data to construct priors rather than treat priors as a quantification of prior expert knowledge. In this section, we illustrate the use of hierarchical models by describing a simplified version of the approach used by FiveThirtyEight to forecast the 2016 election.
     </p>
@@ -94,14 +85,14 @@ library(dslabs)
     </p>
 
     <program language="r">
-      <input>
+      <code>
 set.seed(2012)
 J &lt;- 6
 N &lt;- 3000
 theta &lt;- .021
 p &lt;- (theta + 1)/2
 y &lt;- rnorm(J, theta, 2*sqrt(p*(1 - p)/N))
-      </input>
+      </code>
     </program>
 
     <p>
@@ -109,39 +100,15 @@ y &lt;- rnorm(J, theta, 2*sqrt(p*(1 - p)/N))
     </p>
 
     <program language="r">
-      <input>
+      <code>
 I &lt;- 5
 y &lt;- sapply(1:I, function(i) rnorm(J, theta, 2*sqrt(p*(1 - p)/N)))
-      </input>
+      </code>
     </program>
 
     <p>
       As expected, the simulated data does not really seem to capture the features of the actual data because it does not account for pollster-to-pollster variability:
     </p>
-
-    <program language="r">
-      <input>
-polls &lt;- polls_us_election_2016 |&gt;
-  filter(state == "U.S." &amp; enddate &gt;= "2016-11-02" &amp; population == "lv") |&gt;
-  mutate(spread = rawpoll_clinton/100 - rawpoll_trump/100)
-
-tmp &lt;- polls |&gt; group_by(pollster) |&gt;
-  filter(n() &gt;= 5) |&gt;
-  ungroup() |&gt;
-  select(pollster, spread) |&gt;
-  mutate(type = "Observed data", pollster = as.character(pollster)) |&gt;
-  bind_rows(tibble(spread = as.vector(y) ,
-                      pollster = rep(as.character(1:I), each = J),
-                      type = "Simulated data"))
-tmp |&gt;
-  mutate(type = factor(type, levels = c("Simulated data", "Observed data"))) |&gt;
-  ggplot(aes(pollster, spread)) +
-  geom_point() +
-  coord_flip() +
-  facet_wrap( ~ type, scales = "free_y") +
-  ylim(-.09,.09)
-      </input>
-    </program>
 
     <figure xml:id="fig-hierarchical-simulated-data-without-bias">
 <caption>Simulated and observed poll spreads without house effects</caption>
@@ -164,25 +131,15 @@ tmp |&gt;
     </p>
 
     <program language="r">
-      <input>
+      <code>
 h &lt;- rnorm(I, 0, 0.025)
 y &lt;- sapply(1:I, function(i) theta + h[i] + rnorm(J, 0, 2*sqrt(p*(1 - p)/N)))
-      </input>
+      </code>
     </program>
 
     <p>
       The simulated data now looks more like the observed data:
     </p>
-
-    <program language="r">
-      <input>
-data.frame(Spread = as.vector(y) , Pollster = as.factor(rep(1:I, each = J))) |&gt;
-  ggplot(aes(Pollster, Spread)) +
-  geom_point() +
-  coord_flip() +
-  ylim(-.09,.09)
-      </input>
-    </program>
 
     <figure xml:id="fig-hierarchical-simulated-pollster-data">
       <caption>Simulated poll spreads after adding house effects</caption>
@@ -200,7 +157,7 @@ data.frame(Spread = as.vector(y) , Pollster = as.factor(rep(1:I, each = J))) |&g
     </p>
 
     <p>
-      We can't observe this bias with just the 2016 data, but if we collect historical data, we see that the average of polls misses the actual result by more than what is predicted by models like the one above. We don't show the data here, but if we took the average of polls for each past election and compare it to the actual election night result, we would observe difference with a standard deviation of between 2% and 4%.
+      We can't observe this bias before election day, but if we collect historical data, we see that the average of polls misses the actual result by more than what is predicted by models like the one above. We don’t show the data here, but if we took the average of polls for each past election and compared it to the actual election night result, we would observe a difference with a standard deviation of between 2% and 4%.
     </p>
 
     <p>
@@ -238,11 +195,11 @@ data.frame(Spread = as.vector(y) , Pollster = as.factor(rep(1:I, each = J))) |&g
     </p>
 
     <program language="r">
-      <input>
+      <code>
 one_poll_per_pollster &lt;- polls |&gt; group_by(pollster) |&gt;
   filter(enddate == max(enddate)) |&gt;
   ungroup()
-      </input>
+      </code>
     </program>
 
     <p>
@@ -250,9 +207,9 @@ one_poll_per_pollster &lt;- polls |&gt; group_by(pollster) |&gt;
     </p>
 
     <program language="r">
-      <input>
+      <code>
 y_bar &lt;- mean(one_poll_per_pollster$spread)
-      </input>
+      </code>
     </program>
 
     <p>
@@ -264,11 +221,11 @@ y_bar &lt;- mean(one_poll_per_pollster$spread)
     </p>
 
     <program language="r">
-      <input>
+      <code>
 sigma_b &lt;- 0.03
 s2 &lt;- with(one_poll_per_pollster, sd(spread)^2/length(spread))
 se &lt;- sqrt(s2 + sigma_b^2)
-      </input>
+      </code>
     </program>
 
     <p>
@@ -279,19 +236,19 @@ se &lt;- sqrt(s2 + sigma_b^2)
       We can now redo the Bayesian calculation to account for this additional variability. This adjustment yields a result that closely aligns with FiveThirtyEight's estimates:
     </p>
 
-    <console>
-      <input>
+    <program language="r">
+      <code>
 theta_0 &lt;- 0
 tau &lt;- 0.05
 B &lt;- se^2/(se^2 + tau^2)
 posterior_mean &lt;- B*theta_0 + (1 - B)*y_bar
 posterior_se &lt;- sqrt(1/(1/se^2 + 1/tau^2))
 1 - pnorm(0, posterior_mean, posterior_se)
-      </input>
-      <output>
+      </code>
+      </program><pre>
 [1] 0.803
-      </output>
-    </console>
+      </pre>
+    
   </section>
 
   <section xml:id="sec-predicting-electoral-college">
@@ -323,9 +280,9 @@ posterior_se &lt;- sqrt(1/(1/se^2 + 1/tau^2))
       </p>
 
       <program language="r">
-        <input>
+        <code>
 results &lt;- results_us_election_2016 |&gt; select(state, electoral_votes)
-        </input>
+        </code>
       </program>
 
       <p>
@@ -333,11 +290,11 @@ results &lt;- results_us_election_2016 |&gt; select(state, electoral_votes)
       </p>
 
       <program language="r">
-        <input>
+        <code>
 polls &lt;- polls_us_election_2016 |&gt;
   filter(state != "U.S." &amp; enddate &gt;= "2016-11-02" &amp;  population != "a") |&gt;
   mutate(spread = (rawpoll_clinton - rawpoll_trump)/100)
-        </input>
+        </code>
       </program>
 
       <p>
@@ -345,13 +302,13 @@ polls &lt;- polls_us_election_2016 |&gt;
       </p>
 
       <program language="r">
-        <input>
+        <code>
 polls &lt;- polls |&gt;
   arrange(population, desc(enddate)) |&gt;
   group_by(state, pollster) |&gt;
   slice(1) |&gt;
   ungroup()
-        </input>
+        </code>
       </program>
     </subsection>
 
@@ -363,10 +320,10 @@ polls &lt;- polls |&gt;
       </p>
 
       <program language="r">
-        <input>
+        <code>
 weights &lt;- data.frame(grade = unique(sort(polls$grade))) |&gt;
   mutate(weight = seq(0.3, 1, length = length(grade)))
-        </input>
+        </code>
       </program>
 
       <note>
@@ -416,7 +373,7 @@ weights &lt;- data.frame(grade = unique(sort(polls$grade))) |&gt;
       </p>
 
       <program language="r">
-        <input>
+        <code>
 polls &lt;- polls |&gt;
   filter(!is.na(grade)) |&gt;
   left_join(weights, by = "grade") |&gt;
@@ -425,7 +382,7 @@ polls &lt;- polls |&gt;
             avg = sum(weight*spread)/sum(weight),
             sd = sqrt(sum(weight*(spread - avg)^2)/((n - 1)/n*sum(weight))),
             n_eff = sum(weight)^2/sum(weight^2))
-        </input>
+        </code>
       </program>
 
       <p>
@@ -433,9 +390,9 @@ polls &lt;- polls |&gt;
       </p>
 
       <program language="r">
-        <input>
+        <code>
 polls$sd &lt;- with(polls, median(sd[n_eff &gt;= 5], na.rm = TRUE))
-        </input>
+        </code>
       </program>
 
       <note>
@@ -449,9 +406,9 @@ polls$sd &lt;- with(polls, median(sd[n_eff &gt;= 5], na.rm = TRUE))
       </p>
 
       <program language="r">
-        <input>
+        <code>
 results &lt;- left_join(results, polls, by = "state")
-        </input>
+        </code>
       </program>
     </subsection>
 
@@ -463,12 +420,12 @@ results &lt;- left_join(results, polls, by = "state")
       </p>
 
       <program language="r">
-        <input>
+        <code>
 results &lt;- results_us_election_2012 |&gt;
   mutate(theta_0 = (obama - romney)/100) |&gt;
   select(state, theta_0) |&gt;
   right_join(results, by = "state")
-        </input>
+        </code>
       </program>
 
       <p>
@@ -476,9 +433,9 @@ results &lt;- results_us_election_2012 |&gt;
       </p>
 
       <program language="r">
-        <input>
+        <code>
 results$tau &lt;- 0.05
-        </input>
+        </code>
       </program>
     </subsection>
 
@@ -490,12 +447,12 @@ results$tau &lt;- 0.05
       </p>
 
       <program language="r">
-        <input>
+        <code>
 results &lt;- results |&gt;
   mutate(B = sd^2/n_eff/((sd^2/n_eff) + tau^2),
          posterior_mean = if_else(is.na(avg), theta, B*theta_0 + (1 - B)*avg),
          posterior_se = if_else(is.na(avg), tau, sqrt(1/(n_eff/sd^2 + 1/tau^2))))
-        </input>
+        </code>
       </program>
     </subsection>
 
@@ -506,8 +463,8 @@ results &lt;- results |&gt;
         We then use Monte Carlo to generate 50,000 election day results <m>\theta</m> for each state. For each iteration, we examine <m>\theta</m>. If <m>\theta&lt;0</m> Trump receives all the electoral votes for that state in that iteration. We assume that the poll results from each state are independent.
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 set.seed(1983)
 B &lt;- 50000
 n_states &lt;- nrow(results)
@@ -516,11 +473,11 @@ trump_ev &lt;- replicate(B,{
   sum(results$electoral_votes[theta &lt; 0])
 })
 mean(trump_ev &gt; 269)
-        </input>
-        <output>
+        </code>
+        </program><pre>
 [1] 0.00322
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         This model gives Trump less than a 1% chance of winning, similar to the prediction made by the Princeton Election Consortium. We now know it was quite off. What happened?
@@ -530,8 +487,8 @@ mean(trump_ev &gt; 269)
         The model above ignores the possibility of a systematic polling error and, incorrectly, assumes the results from different states are independent. To correct this, we assume that the systematic error term has a standard deviation of 3%. For each iteration, we generate systematic error at random and add it to the result for all states.
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 sigma_b &lt;- 0.03
 trump_ev_2 &lt;- replicate(B, {
   bias &lt;- rnorm(1, 0, sigma_b)
@@ -540,11 +497,11 @@ trump_ev_2 &lt;- replicate(B, {
   sum(results$electoral_votes[mu &lt; 0])
 })
 mean(trump_ev_2 &gt; 269)
-        </input>
-        <output>
+        </code>
+        </program><pre>
 [1] 0.243
-        </output>
-      </console>
+        </pre>
+      
 
       <p>
         This gives Trump almost a 25% change of winning, which turned out to be a much more sensible estimate, and closer to the prediction made by FiveThirtyEight of 29%.
@@ -558,25 +515,6 @@ mean(trump_ev_2 &gt; 269)
         Polling faced significant criticism after the 2016 election for "getting it wrong". However, the polling average actually predicted the final result with notable accuracy, as is typically the case.
       </p>
 
-      <program language="r">
-        <input>
-state_map &lt;- setNames(c("DC", "ME", "NE"), c("District of Columbia", "Maine","Nebraska"))
-tmp &lt;- left_join(results, results_us_election_2016, by = "state") |&gt;
-  mutate(abb = state.abb[match(state, state.name)]) |&gt;
-  mutate(abb = ifelse(is.na(abb), str_replace_all(state, state_map), abb)) |&gt;
-  mutate(spread = clinton - trump, avg = avg*100)
-
-tmp |&gt;
-  filter(n &gt;= 3 &amp; abb != "DC") |&gt;
-  ggplot(aes(avg, spread)) +
-  geom_point(aes(size = n)) +
-  geom_abline() +
-  ggrepel::geom_text_repel(aes(label = abb), size = 2) +
-  scale_size_continuous(range = c(0, 3)) +
-  labs(x = "Polling average", y = "Actual result", caption = "Includes states with three or more polls taken during the last week.", title = "Difference between Clinton and Trump", size = "Number of polls")
-        </input>
-      </program>
-
       <figure xml:id="fig-hierarchical-poll-accuracy">
         <caption>Polling averages versus actual state results</caption>
         <image source="images/hierarchical-models-poll-accuracy.png" width="70%">
@@ -588,57 +526,25 @@ tmp |&gt;
         In fact, the polling average got the sign of the difference wrong in only five out of the 50 states.
       </p>
 
-      <console>
-        <input>
+      <program language="r">
+        <code>
 tmp |&gt; filter(sign(spread) != sign(avg)) |&gt;
   select(state, avg, spread) |&gt;
   mutate(across(-state, ~round(.,1))) |&gt;
   setNames(c("State", "Polling average", "Actual result"))
-        </input>
-        <output>
+        </code>
+        </program><pre>
            State Polling average Actual result
 1        Florida             0.1          -1.2
 2   Pennsylvania             2.0          -0.7
 3       Michigan             3.3          -0.2
 4 North Carolina             0.9          -3.7
 5      Wisconsin             5.6          -0.8
-        </output>
-      </console>
-
+        </pre>
+      
       <p>
         Notice that the errors were all in the same direction, suggesting a systematic polling error. However, the scatter plot reveals several points both above and below the identity line, indicating deviations from the assumption of uniform bias across all states. A closer inspection shows that the bias varies by geographical region, with some areas experiencing stronger effects than others. This pattern is further confirmed by plotting the differences across regions directly:
       </p>
-
-      <program language="r">
-        <input>
-regions &lt;- select(results, state) |&gt;
-  mutate(abb = state.abb[match(state, state.name)]) |&gt;
-  mutate(region = state.division[match(state, state.name)]) |&gt;
-  mutate(region = case_when(
-    abb %in% c("PA", "OH", "MI", "IN", "WI", "WV") ~ "Rust Belt",
-    abb %in% c("IL", "IN", "IA", "KS", "MN", "MO", "NE", "ND", "SD") ~ "Midwest",
-    abb %in% c("AL", "AR", "FL", "GA", "KY", "LA", "MS", "MO", "NC", "SC",
-               "TN", "WV") ~ "South",
-    abb %in% c("AZ", "NM", "TX", "OK", "NV") ~ "Southwest",
-    abb %in% c("VA", "DE", "MD", "DC") ~ "Middle Atlantic",
-    state == "District of Columbia" ~ "Middle Atlantic",
-    str_detect(state, "Maine") ~ "New England",
-    str_detect(state, "Nebraska") ~ "Midwest",
-    TRUE ~ region)) |&gt; select(-abb)
-
-tmp |&gt; left_join(regions, by = "state") |&gt;
-  filter(n &gt;= 3 &amp; abb != "DC") |&gt;
-  mutate(bias = avg - spread,
-         region = reorder(region, bias, median, na.rm = TRUE)) |&gt;
-  ggplot(aes(region, bias)) +
-  geom_hline(yintercept = 0, lty = 2) +
-  geom_boxplot(outlier.shape = NA, width = 0.5) +
-  geom_point(aes(color = region), show.legend = FALSE) +
-  ggrepel::geom_text_repel(aes(label = abb), size = 2) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(x = "Region", y = "Polling average - actual result")
-        </input>
-      </program>
 
       <figure xml:id="fig-hierarchical-region-bias-boxplot">
         <caption>Regional variation in polling bias</caption>
@@ -660,34 +566,8 @@ tmp |&gt; left_join(regions, by = "state") |&gt;
       </p>
 
       <p>
-        By incorporating these adjustments---regional errors, and heavy-tailed distributions---our model produces a probability for Trump similar to FiveThirtyEight's reported 29%. Simulations reveal that factoring in regional polling errors and correlations increases the overall variability in the results.
+        By incorporating these adjustments—regional errors, and heavy-tailed distributions—our model produces a probability for Trump similar to FiveThirtyEight's reported 29%. Simulations reveal that factoring in regional polling errors and correlations increases the overall variability in the results.
       </p>
-
-      <program language="r">
-        <input>
-results &lt;- left_join(results, regions, by = "state")
-sigma_g &lt;- 0.02
-the_regions &lt;- unique(regions$region)
-n_r &lt;- length(the_regions)
-sigma_r &lt;- sqrt(sigma_b^2 - sigma_g^2)
-trump_ev_3 &lt;- replicate(B, {
-  bias_g &lt;- rnorm(1, 0, sigma_b)
-  bias_r &lt;- data.frame(region = the_regions, error = rt(n_r, 3)*sigma_r)
-  bias_r &lt;- left_join(results, bias_r, by = "region") |&gt; pull(error)
-  theta &lt;- with(results, posterior_mean + rt(n_states, 3)*posterior_se)
-  theta &lt;- theta + bias_g + bias_r
-  sum(results$electoral_votes[theta &lt; 0])
-})
-
-tibble(rows = seq_along(trump_ev), Naive = trump_ev, `538` = trump_ev_3) |&gt;
-  pivot_longer(-rows) |&gt;
-  mutate(name = factor(name, levels = c("Naive", "538"))) |&gt;
-  ggplot(aes(value)) +
-  geom_histogram(binwidth = 1) +
-  geom_vline(xintercept = 269) +
-  facet_grid(name ~ ., scales = "free")
-        </input>
-      </program>
 
       <figure xml:id="fig-hierarchical-election-forecast-distributions">
         <caption>Electoral vote simulations for naive and FiveThirtyEight-style models</caption>
@@ -710,38 +590,31 @@ tibble(rows = seq_along(trump_ev), Naive = trump_ev, `538` = trump_ev_3) |&gt;
     </p>
 
     <program language="r">
-      <input>
+      <code>
 one_pollster &lt;- polls_us_election_2016 |&gt;
   filter(pollster == "Ipsos" &amp; state == "U.S.") |&gt;
   mutate(spread = rawpoll_clinton/100 - rawpoll_trump/100)
-      </input>
+      </code>
     </program>
 
     <p>
       Since there is no pollster effect, perhaps the theoretical standard error matches the data-derived standard deviation. But the empirical standard deviation is higher than the highest possible theoretical estimate:
     </p>
 
-    <console>
-      <input>
+    <program language="r">
+      <code>
 one_pollster |&gt; mutate(p_hat = (spread + 1)/2, N = samplesize) |&gt;
   summarize(empirical = sd(spread),
             theoretical = median(2*sqrt(p_hat*(1 - p_hat)/N)))
-      </input>
-      <output>
+      </code>
+      </program><pre>
   empirical theoretical
 1    0.0403      0.0277
-      </output>
-    </console>
-
+      </pre>
+    
     <p>
       Furthermore, the distribution of the spread does not look normal, as the theory would predict:
     </p>
-
-    <program language="r">
-      <input>
-one_pollster |&gt; ggplot(aes(spread)) + geom_histogram(binwidth = 0.01,  color = I("black"))
-      </input>
-    </program>
 
     <figure xml:id="fig-hierarchical-time-trend-variability">
       <caption>Histogram of Ipsos poll spreads</caption>
@@ -753,14 +626,6 @@ one_pollster |&gt; ggplot(aes(spread)) + geom_histogram(binwidth = 0.01,  color 
     <p>
       The models we have described include pollster-to-pollster variability and sampling error. But this plot is for one pollster, and the variability we see is certainly not explained by sampling error. Where is the extra variability coming from? The following plots make a strong case that it comes from time fluctuations not accounted for by the theory that assumes <m>p</m> is fixed:
     </p>
-
-    <program language="r">
-      <input>
-one_pollster |&gt; ggplot(aes(enddate, spread)) +
-  geom_point() +
-  geom_smooth(formula = y ~ x, method = "loess", span = 0.1)
-      </input>
-    </program>
 
     <figure xml:id="fig-hierarchical-time-trend-estimate">
       <caption>Ipsos poll spreads over time</caption>
@@ -789,13 +654,13 @@ one_pollster |&gt; ggplot(aes(enddate, spread)) +
           </p>
 
           <program language="r">
-            <input>
+            <code>
 library(tidyverse)
 library(dslabs)
 polls &lt;- polls_us_election_2016 |&gt;
   filter(state != "U.S." &amp; enddate &gt;= "2016-10-31") |&gt;
   mutate(spread = rawpoll_clinton/100 - rawpoll_trump/100)
-            </input>
+            </code>
           </program>
 
           <p>
@@ -809,14 +674,14 @@ polls &lt;- polls_us_election_2016 |&gt;
           </p>
 
           <program language="r">
-            <input>
+            <code>
 add &lt;- results_us_election_2016 |&gt;
   mutate(actual_spread = clinton/100 - trump/100) |&gt;
   select(state, actual_spread)
 cis &lt;- cis |&gt;
   mutate(state = as.character(state)) |&gt;
   left_join(add, by = "state")
-            </input>
+            </code>
           </program>
 
           <p>
@@ -878,7 +743,7 @@ cis &lt;- cis |&gt;
           </p>
 
           <program language="r">
-            <input>
+            <code>
 library(tidyverse)
 library(Lahman)
 filter(Batting, yearID %in% 2010:2012) |&gt;
@@ -887,7 +752,7 @@ filter(Batting, yearID %in% 2010:2012) |&gt;
   ggplot(aes(AVG)) +
   geom_histogram(color = "black", binwidth = .01) +
   facet_wrap( ~ yearID)
-            </input>
+            </code>
           </program>
 
           <figure xml:id="fig-hierarchical-batting-averages">
