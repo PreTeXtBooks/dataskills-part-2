@@ -16,12 +16,12 @@
     </p>
     
     <program language="r">
-      <input>
+      <code>
 set.seed(1995)
 n &lt;- 10^6
 income &lt;- 10^(rnorm(n, log10(45000), log10(3)))
 hist(income/10^3, nclass = 1000)
-      </input>
+      </code>
     </program>
     
     <figure xml:id="fig-bootstrap-income-population-histogram">
@@ -35,29 +35,29 @@ hist(income/10^3, nclass = 1000)
       The population median is:
     </p>
     
-    <console>
-      <input>
+    <program language="r">
+      <code>
 median(income)
-      </input>
-      <output>
+      </code>
+      </program><pre>
 [1] 44938.54
-      </output>
-    </console>
+      </pre>
+    
     
     <p>
       Suppose we don't have access to the entire population but want to estimate the population median, denoted by <m>m</m>. We take a random sample of 100 observations and use the sample median, <m>M</m>, as our estimate of <m>m</m>:
     </p>
     
-    <console>
-      <input>
+    <program language="r">
+      <code>
 N &lt;- 100
 x &lt;- sample(income, N)
 median(x)
-      </input>
-      <output>
+      </code>
+      </program><pre>
 [1] 38461.33
-      </output>
-    </console>
+      </pre>
+    
     
     <p>
       The question now becomes: how can we assess the uncertainty in this estimate? In other words, how do we compute a standard error and construct a confidence interval for <m>m</m> based on our sample?
@@ -80,7 +80,7 @@ median(x)
     </p>
     
     <program language="r">
-      <input>
+      <code>
 m &lt;- replicate(10^4, {
   x &lt;- sample(income, N)
   median(x)
@@ -88,7 +88,7 @@ m &lt;- replicate(10^4, {
 par(mfrow = c(1, 2))
 hist(m, nclass = 30)
 qqnorm(scale(m)); abline(0,1)
-      </input>
+      </code>
     </program>
     
     <figure xml:id="fig-bootstrap-median-sampling-distribution">
@@ -102,28 +102,28 @@ qqnorm(scale(m)); abline(0,1)
       If we know this distribution, we can construct a confidence interval. The problem here is that, as we have already described, in practice, we do not have access to the distribution. In previous sections, we have used CLT, but what we learned applies to averages, and here we are interested in the median. We can see that the 95% confidence interval based on CLT
     </p>
     
-    <console>
-      <input>
+    <program language="r">
+      <code>
 median(x) + 1.96*sd(x)/sqrt(N)*c(-1, 1)
-      </input>
-      <output>
+      </code>
+      </program><pre>
 [1] 21017.93 55904.72
-      </output>
-    </console>
+      </pre>
+    
     
     <p>
       is quite different from the confidence interval we would generate if we knew the actual distribution of <m>M</m>:
     </p>
     
-    <console>
-      <input>
+    <program language="r">
+      <code>
 quantile(m, c(0.025, 0.975))
-      </input>
-      <output>
+      </code>
+      </program><pre>
     2.5%    97.5% 
 34437.72 59049.59
-      </output>
-    </console>
+      </pre>
+    
     
     <p>
       The bootstrap allows us to approximate a Monte Carlo simulation even when we do not have access to the full population distribution. The idea is straightforward: we treat the observed sample as if it were the population. From this sample, we draw new datasets of the same size, with replacement, and compute the statistic of interest, in this case, the median, for each resampled dataset. These resampled datasets are called bootstrap samples.
@@ -138,27 +138,27 @@ quantile(m, c(0.025, 0.975))
     </p>
     
     <program language="r">
-      <input>
+      <code>
 m_star &lt;- replicate(10^4, {
   x_star &lt;- sample(x, N, replace = TRUE)
   median(x_star)
 })
-      </input>
+      </code>
     </program>
     
     <p>
       Note that a confidence interval constructed with the bootstrap is much closer to one constructed with the theoretical distribution:
     </p>
     
-    <console>
-      <input>
+    <program language="r">
+      <code>
 quantile(m_star, c(0.025, 0.975))
-      </input>
-      <output>
+      </code>
+      </program><pre>
     2.5%    97.5% 
 30252.82 56908.62
-      </output>
-    </console>
+      </pre>
+    
   </section>
 
   <exercises xml:id="exercises-bootstrap">
@@ -171,38 +171,38 @@ quantile(m_star, c(0.025, 0.975))
         </p>
         
         <program language="r">
-          <input>
+          <code>
 set.seed(1)
 y &lt;- rnorm(100, 0, 1)
-          </input>
+          </code>
         </program>
         
         <p>
           Estimate the 75th quantile, which we know is:
         </p>
         
-        <console>
-          <input>
+        <program language="r">
+          <code>
 qnorm(0.75)
-          </input>
-          <output>
+          </code>
+          </program><pre>
 [1] 0.6744898
-          </output>
-        </console>
+          </pre>
+        
         
         <p>
           with the sample quantile:
         </p>
         
-        <console>
-          <input>
+        <program language="r">
+          <code>
 quantile(y, 0.75)
-          </input>
-          <output>
+          </code>
+          </program><pre>
       75% 
 0.6915454
-          </output>
-        </console>
+          </pre>
+        
         
         <p>
           Run a Monte Carlo simulation to learn the expected value and standard error of this random variable.
