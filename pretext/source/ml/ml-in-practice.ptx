@@ -634,6 +634,10 @@ mean(y_hat_knn_pca == y_test)
 system.time(predict(knn3(x[, -nzv], y), newdata = x_test[, -nzv]))
       </code>
     </program>
+<pre>
+    user  system elapsed 
+   2.831   0.047   2.906
+</pre>
 
     <p>
       On a typical laptop, this takes a few seconds, suggesting the full process could take over an hour.
@@ -654,7 +658,7 @@ system.time(predict(knn3(x[, -nzv], y), newdata = x_test[, -nzv]))
     <title>Model tuning and diagnostics</title>
     
     <p>
-      In Sections <xref ref="sec-knn-cv-intro"/> and <xref ref="sec-random-forests"/>, we introduced the k-nearest neighbors (kNN) and random forest algorithms, along with their intuition and formulation. In this section, we use these two methods as working examples to illustrate the process of model selection and tuning. Specifically, we demonstrate how to train and evaluate models in R, choose appropriate hyperparameters, such as <m>k</m> for kNN and tree-related parameters for random forests, and assess performance using cross-validation.
+      In <xref ref="sec-knn-cv-intro"/> and <xref ref="sec-random-forests"/>, we introduced the k-nearest neighbors (kNN) and random forest algorithms, along with their intuition and formulation. In this section, we use these two methods as working examples to illustrate the process of model selection and tuning. Specifically, we demonstrate how to train and evaluate models in R, choose appropriate hyperparameters, such as <m>k</m> for kNN and tree-related parameters for random forests, and assess performance using cross-validation.
     </p>
 
     <subsection xml:id="subsec-optimizing-k">
@@ -691,6 +695,11 @@ plot(knn, highlight = TRUE)
         </code>
       </program>
 
+    <figure xml:id="fig-mnist-knn-fit-1">
+      <image source="images/ml-in-practice-random-forest-error-rate.png" width="70%">
+      </image>
+    </figure>
+
       <p>
         Based on these results, we can infer that the best <m>k</m> is between 1 and 5. We now refine the search with a finer grid and 20-fold cross-validation:
       </p>
@@ -705,6 +714,11 @@ knn &lt;- train(x, y, method = "knn", preProcess = c("nzv", "pca"),
 knn$bestTune
         </code>
       </program>
+
+<pre>
+   k
+ 2 3
+</pre>
 
       <p>
         to choose <m>k</m> = <c>knn$bestTune$k</c>. Now that we have optimized our algorithm, the <c>predict</c> function defaults to using the best-performing model fit with the entire training data:
@@ -725,6 +739,9 @@ y_hat_knn &lt;- predict(knn, x_test, type = "raw")
 mean(y_hat_knn == y_test)
         </code>
       </program>
+<pre>
+[1] 0.959
+</pre>
 
       <p>
         Once done with parallelization, it is good practice to stop the cluster:
@@ -776,7 +793,7 @@ plot(rf)
 
     <figure xml:id="fig-ml-in-practice-random-forest-error-rate">
       <caption>Random forest error rate versus number of trees</caption>
-      <image source="images/ml-in-practice-random-forest-error-rate.png" width="70%">
+      <image source="images/accuracy-versus-ntree-1.png" width="70%">
         <description><p>A random forest diagnostic plot showing how the out-of-bag error rate changes as the number of trees increases and stabilizes after roughly 200 trees.</p></description>
       </image>
     </figure>
@@ -797,6 +814,10 @@ rf &lt;- train(x, y, method = "rf", ntree = 250, preProcess = "nzv",
 ggplot(rf, highlight = TRUE)
       </code>
     </program>
+
+    <figure xml:id="fig-rf-coarse-1">
+      <image source="images/rf-coarse-1.png" width="70%"/>
+    </figure>
 
     <p>
       We see that the optimal <c>mtry</c> is between 5 and 20.
@@ -842,6 +863,9 @@ y_hat_rf &lt;- predict(rf, x_test, type = "raw")
 mean(y_hat_rf == y_test)
       </code>
     </program>
+<pre>
+[1] 0.953
+</pre>
 
     <p>
       Note that by optimizing some of the other algorithm parameters, we could achieve even higher accuracy.
